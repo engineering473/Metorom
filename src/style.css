@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.stage {
+  background: radial-gradient(ellipse at 50% 40%, #16160f 0%, #0a0a0a 100%);
+  cursor: pointer;
+}
+
+.labels-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.labels-row button {
+  color: #9a9a95;
+}
+.labels-row button:hover {
+  color: #FF5A2E;
+}
+
+.annotation-label {
+  position: absolute;
+  transform: translate(0, -50%);
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+  padding-left: 14px;
+  max-width: 160px;
+  line-height: 1.3;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
