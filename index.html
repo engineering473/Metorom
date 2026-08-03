@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metorom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/Metorom/assets/index-qGCKaLtR.js"></script>
+  <link rel="stylesheet" crossorigin href="/Metorom/assets/index-e_ucWKEm.css">
+</head>
+<body class="bg-ink text-white font-body">
+
+  <!-- ============ NAV ============ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-6 mix-blend-difference">
+    <span class="font-heading font-bold tracking-tight text-sm uppercase" data-en="Metorom" data-ja="メトロム">Metorom</span>
+    <div class="flex items-center gap-6 md:gap-8">
+      <div class="hidden md:flex items-center gap-8 text-xs uppercase tracking-widest text-white/70">
+        <a href="#project" class="hover:text-white transition" data-en="Project" data-ja="プロジェクト">Project</a>
+        <a href="#studio" class="hover:text-white transition" data-en="Studio" data-ja="スタジオ">Studio</a>
+        <a href="#contact" class="hover:text-white transition" data-en="Contact" data-ja="お問い合わせ">Contact</a>
+      </div>
+      <button id="lang-toggle" class="text-xs uppercase tracking-widest text-white/70 hover:text-white transition border border-white/20 rounded-full px-3 py-1.5">
+        日本語
+      </button>
+      <!-- Drop your logo at public/images/logo.png — shows here automatically once the file exists. -->
+      <img src="/images/logo.png" alt="Logo" class="h-7 w-auto" onerror="this.style.display='none'" />
+    </div>
+  </nav>
+
+  <!-- ============ ABOUT US (full-bleed hero) ============ -->
+  <section class="relative min-h-screen flex flex-col justify-end px-6 md:px-10 pb-20 overflow-hidden">
+    <!-- Product video placeholder — fills the hero as a background layer.
+         Drop your render at public/videos/product.mp4 and swap the div
+         below for the <video> tag underneath it. -->
+    <div class="absolute inset-0 bg-surface flex items-center justify-center text-muted text-sm">
+      Product video background goes here — public/videos/product.mp4
+    </div>
+    <!--
+    <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline>
+      <source src="/videos/product.mp4" type="video/mp4" />
+    </video>
+    -->
+    <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/10"></div>
+
+    <div class="relative max-w-2xl">
+      <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="About us" data-ja="私たちについて">About us</p>
+      <h1 class="font-heading font-bold uppercase text-5xl md:text-7xl leading-[0.95] tracking-tight">
+        <span data-en="We build sound" data-ja="音を、つくる">We build<br />sound</span><span class="text-accent">.</span>
+      </h1>
+      <p class="mt-6 max-w-md text-white/60 text-lg" data-en="A small team obsessed with getting the physics of loudspeakers right — from cone geometry to crossover design." data-ja="コーンの形状からクロスオーバー設計まで、スピーカーの物理特性に徹底的にこだわる小さなチームです。">
+        A small team obsessed with getting the physics of loudspeakers
+        right — from cone geometry to crossover design.
+      </p>
+      <a href="#project"
+        class="mt-8 inline-flex items-center gap-2 bg-accent text-white font-heading font-bold text-xs uppercase tracking-widest px-6 py-4 rounded-full hover:opacity-90 transition">
+        <span data-en="↳ See the build" data-ja="↳ 詳しく見る">↳ See the build</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ CALM / TATAMI ============ -->
+  <section class="min-h-screen flex flex-col md:flex-row items-center justify-center gap-16 px-6 md:px-20 py-24 bg-surface">
+    <div class="max-w-md text-center md:text-left">
+      <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4">Designed to calm</p>
+      <h2 class="font-heading font-bold uppercase text-4xl md:text-5xl leading-[1.05] tracking-tight">
+        When you sit down,<br />everything slows<span class="text-accent">.</span>
+      </h2>
+      <p class="mt-6 text-muted text-lg">
+        This speaker was designed for the tatami room — a space built
+        around stillness. That constraint shaped everything: the way the
+        cabinet sits low, the way the sound settles instead of demanding
+        attention. Sitting down should feel like the room exhales.
+      </p>
+    </div>
+    <img src="/Metorom/images/calm-render.png" alt="Product resting on the floor" class="w-full max-w-2xl" />
+  </section>
+
+  <!-- ============ 3D SPEAKER EXPERIENCE ============ -->
+  <div id="speaker-section" class="scroll-space" style="height: 400vh;">
+    <div id="project" class="stage sticky top-0 w-full h-screen overflow-hidden">
+      <canvas id="canvas" class="block"></canvas>
+
+      <div class="overlay absolute inset-0 pointer-events-none">
+        <div class="absolute top-8 left-8 right-8 flex justify-between items-baseline text-[11px] tracking-wide text-white/50">
+          <span class="text-white font-medium">Three-Way Monitor</span>
+          <span id="readout">Front</span>
+        </div>
+
+        <div id="annotations" class="pointer-events-none absolute inset-0"></div>
+
+        <div id="intro" class="absolute left-1/2 bottom-16 -translate-x-1/2 flex flex-col items-center gap-2 text-xs tracking-wide text-white/50 transition-opacity duration-300 text-center">
+          <span>Move your mouse to tilt · scroll to rotate</span>
+        </div>
+
+        <div class="absolute bottom-8 left-8 flex items-center gap-4 pointer-events-auto">
+          <div class="w-32 h-px bg-white/20">
+            <div id="fill" class="h-full bg-accent" style="width:0%"></div>
+          </div>
+          <button id="skip-btn" class="text-[11px] tracking-wide text-white/50 hover:text-accent transition underline">
+            Skip
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT THE PROJECT ============ -->
+  <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 py-24 relative overflow-hidden">
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="About the project" data-ja="プロジェクトについて">About the project</p>
+    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-3xl" data-en="A three-way monitor, designed from the driver up." data-ja="ドライバーから設計した、3ウェイ・モニタースピーカー。">
+      A three-way monitor,<br />designed from the driver up<span class="text-accent">.</span>
+    </h2>
+    <p class="mt-6 max-w-lg text-muted text-lg">
+      Dual midranges split by a passive crossover to kill comb filtering, a
+      horn-loaded compression tweeter, and a 12" driver handling the low
+      end — all tuned in REW and stitched together with active DSP.
+    </p>
+    <div class="mt-10 grid grid-cols-3 gap-8 text-left max-w-lg">
+      <div>
+        <p class="font-heading font-bold text-2xl text-accent">3</p>
+        <p class="text-muted text-sm mt-1">drivers per side</p>
+      </div>
+      <div>
+        <p class="font-heading font-bold text-2xl text-accent">608mm</p>
+        <p class="text-muted text-sm mt-1">midrange spacing</p>
+      </div>
+      <div>
+        <p class="font-heading font-bold text-2xl text-accent">510µs</p>
+        <p class="text-muted text-sm mt-1">DSP latency</p>
+      </div>
+    </div>
+
+    <!-- Measured data -->
+    <div class="mt-16 grid md:grid-cols-2 gap-6 max-w-4xl w-full text-left">
+      <figure class="border border-white/10 rounded-xl overflow-hidden bg-surface">
+        <img src="/Metorom/images/spl.png" alt="On-axis SPL and per-driver magnitude response" class="w-full" />
+        <figcaption class="px-4 py-3 text-xs text-muted">On-axis SPL, measured in REW — each driver's contribution stays within about ±2dB of flat through its passband.</figcaption>
+      </figure>
+      <figure class="border border-white/10 rounded-xl overflow-hidden bg-surface">
+        <img src="/Metorom/images/directivity.png" alt="Horizontal directivity plot" class="w-full" />
+        <figcaption class="px-4 py-3 text-xs text-muted">Horizontal directivity — controlled dispersion narrows gradually with frequency instead of beaming.</figcaption>
+      </figure>
+    </div>
+
+    <!-- Modularity / adjustability -->
+    <div class="mt-16 max-w-2xl">
+      <h3 class="font-heading font-bold uppercase text-2xl md:text-3xl tracking-tight" data-en="Built to be taken apart." data-ja="分解できるように、つくった。">
+        Built to be taken apart<span class="text-accent">.</span>
+      </h3>
+      <p class="mt-4 text-muted text-lg" data-en="Every driver mounts independently, the crossover is swappable, and the DSP profile is field-tunable — modularity and adjustability aren't afterthoughts here, they're the design brief." data-ja="各ドライバーは独立してマウントされ、クロスオーバーは交換可能、DSPプロファイルは現場で調整できます。モジュール性と調整可能性は後付けではなく、設計の出発点です。">
+        Every driver mounts independently, the crossover is swappable, and
+        the DSP profile is field-tunable — modularity and adjustability
+        aren't afterthoughts here, they're the design brief.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ SILK ROAD ============ -->
+  <section class="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center bg-surface">
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4">Where the road ends</p>
+    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-3xl">
+      We draw from the Silk Road<span class="text-accent">.</span>
+    </h2>
+    <p class="mt-6 max-w-xl text-muted text-lg">
+      Its overland routes are usually mapped as ending in Chang'an — but
+      the goods kept moving. Carried onward by Japanese missions to Tang
+      China, Persian glassware and Central Asian textiles reached the
+      imperial storehouses of Nara. The Shōsōin repository still holds
+      them today — proof that this corner of Japan was, over a thousand
+      years ago, already connected to the other end of the continent.
+    </p>
+    <svg viewBox="0 0 640 200" class="w-full max-w-3xl mt-14" fill="none">
+      <path d="M 40 120 Q 200 40 320 100 T 600 90" stroke="#FF5A2E" stroke-width="1.5" stroke-dasharray="4 5" />
+      <g font-family="Jost, sans-serif" font-size="11" fill="#9a9a95">
+        <circle cx="40" cy="120" r="4" fill="#ffffff" fill-opacity="0.6" /><text x="40" y="145" text-anchor="middle">Constantinople</text>
+        <circle cx="180" cy="62" r="4" fill="#ffffff" fill-opacity="0.6" /><text x="180" y="45" text-anchor="middle">Persia</text>
+        <circle cx="320" cy="100" r="4" fill="#ffffff" fill-opacity="0.6" /><text x="320" y="125" text-anchor="middle">Samarkand</text>
+        <circle cx="460" cy="78" r="4" fill="#ffffff" fill-opacity="0.6" /><text x="460" y="60" text-anchor="middle">Chang'an</text>
+        <circle cx="600" cy="90" r="5" fill="#FF5A2E" /><text x="600" y="115" text-anchor="middle" fill="#ffffff" font-weight="600">Nara</text>
+      </g>
+    </svg>
+  </section>
+
+  <!-- ============ PHILOSOPHY ============ -->
+  <section id="studio" class="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center">
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-6">How we work</p>
+    <h2 class="font-heading font-bold uppercase text-3xl md:text-5xl leading-[1.15] tracking-tight max-w-2xl">
+      A human-centered design studio<span class="text-accent">,</span><br />
+      symbiotic with nature<span class="text-accent">.</span>
+    </h2>
+    <p class="mt-6 max-w-lg text-muted text-lg">
+      Flexibility and adaptability aren't features we add — they're the
+      starting point.
+    </p>
+    <div class="mt-16 grid gap-10 md:grid-cols-2 max-w-3xl text-left">
+      <blockquote class="border-l-2 border-accent pl-6">
+        <p class="font-heading font-bold text-xl md:text-2xl leading-snug">
+          "Humans are analog, living in a digital world."
+        </p>
+      </blockquote>
+      <blockquote class="border-l-2 border-accent pl-6">
+        <p class="font-heading font-bold text-xl md:text-2xl leading-snug">
+          "Resonant ideation: an idea — or a product — that vibrates, and
+          evokes feeling through that vibration."
+        </p>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" class="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-surface">
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="Contact" data-ja="お問い合わせ">Contact</p>
+    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-2xl" data-en="Let's talk sound." data-ja="音について、話しましょう。">
+      Let's talk sound<span class="text-accent">.</span>
+    </h2>
+    <p class="mt-6 max-w-md text-muted text-lg">
+      Questions about the build, or want to work together? Reach out.
+    </p>
+    <a href="mailto:hello@example.com"
+      class="mt-10 inline-flex items-center gap-2 bg-accent text-white font-heading font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full hover:opacity-90 transition">
+      hello@example.com
+    </a>
+
+    <div class="mt-20 flex flex-col items-center">
+      <svg viewBox="0 0 300 480" class="w-48 md:w-56" fill="none">
+        <path d="M200.665,168.221L201.347,168.659L204.572,167.503L203.952,171.009L203.642,174.545L203.89,180.408L204.138,183.055L204.696,185.618L206.061,187.43L207.86,188.728L210.465,192.851L211.892,197.901L212.884,200.362L213.567,202.935L213.815,204.103L213.815,205.271L213.629,206.865L213.877,208.147L213.567,212.218L212.388,216.897L212.264,219.289L211.272,219.751L210.651,220.868L210.093,221.369L209.535,221.754L208.666,221.869L208.108,222.293L207.86,223.562L207.488,224.753L206.743,225.828L206.185,227.018L205.689,229.892L205.503,232.838L204.821,234.901L203.084,235.435L201.099,235.397L198.618,236.35L198.059,236.922L196.074,240.502L195.516,242.63L195.516,244.87L196.074,247.637L196.819,250.361L197.377,255.381L196.757,263.013L196.198,265.449L194.958,267.097L193.965,267.845L193.159,268.779L192.105,271.245L190.306,276.164L190.182,277.429L190.182,278.692L189.685,280.363L189.375,281.996L189.685,283.886L190.244,285.663L192.601,290.208L193.531,291.536L194.586,292.789L190.554,294.115L189.809,294.741L187.39,297.315L186.646,299.775L186.708,302.451L186.274,303.44L185.654,304.282L184.909,304.831L182.242,306.075L180.505,307.281L178.83,309.179L178.148,310.201L176.845,309.872L176.039,308.997L176.783,307.865L176.597,306.586L176.969,303.184L176.535,301.829L177.9,300.802L178.52,299.151L180.009,297.866L181.001,296.69L181.187,295.734L180.257,294.704L179.327,293.968L177.962,293.968L176.659,294.188L175.853,295.182L175.543,296.506L175.605,297.094L175.481,297.645L173.496,299.445L173.744,301.352L174.364,302.305L175.109,302.781L174.86,303.404L173.93,304.941L173.248,305.087L172.007,302.964L170.456,301.792L168.533,301.792L166.611,302.232L165.06,303.66L164.564,304.831L164.253,306.038L164.377,308.997L163.757,311.477L162.579,313.625L161.958,314.426L160.532,315.881L159.477,316.062L158.733,315.408L158.175,314.39L158.919,310.711L158.857,308.632L160.594,307.573L159.167,306.075L157.43,305.489L155.011,306.257L154.329,307.171L153.833,308.376L152.53,309.872L151.041,311.294L149.428,313.698L148.312,316.571L144.714,315.626L142.729,315.408L140.744,315.481L137.209,315.154L133.301,315.735L128.897,316.826L129.145,316.026L132.805,314.317L132.929,313.807L132.556,312.861L131.688,312.825L129.517,313.152L128.401,313.007L127.904,311.987L127.16,311.55L126.726,311.987L126.85,313.953L126.292,314.208L125.609,313.698L125.857,312.169L125.361,309.945L125.299,308.522L126.043,307.354L125.299,306.842L124.431,307.025L123.376,307.609L122.508,308.413L120.523,312.497L119.778,314.826L121.205,316.717L125.113,319.331L125.733,319.947L125.795,321.071L125.299,322.231L124.245,322.774L119.965,323.643L116.305,325.307L115.188,327.005L111.839,333.603L109.171,338.095L105.326,339.638L101.17,338.239L100.177,336.695L99.309,334.754L97.758,333.027L96.393,331.118L95.587,328.846L95.711,325.198L95.091,322.991L95.649,322.412L97.944,321.071L98.689,320.31L99.991,318.569L100.487,317.588L100.549,316.099L99.495,315.335L96.766,315.372L94.098,315.844L92.175,315.19L89.632,313.407L88.888,313.007L86.221,312.897L84.298,313.225L82.375,313.88L80.39,314.099L79.708,314.426L77.412,316.608L75.614,317.988L74.001,318.678L70.589,318.859L68.852,319.294L67.054,320.02L66.557,319.984L64.696,320.962L62.525,321.832L61.347,322.701L59.238,322.122L55.02,323.679L52.973,323.86L50.864,323.027L48.941,321.651L47.08,322.231L45.778,324.258L45.157,328.341L44.413,330.145L44.165,332.343L43.234,331.983L37.59,328.052L37.218,327.908L32.627,328.594L31.449,328.918L30.022,329.712L28.471,330.073L27.045,329.496L25.68,328.558L24.377,328.846L23.013,329.496L22.517,323.534L22.765,322.774L23.633,321.723L24.502,320.817L26.735,320.491L28.968,320.817L30.518,320.382L31.883,319.222L33.31,317.516L34.922,316.172L37.093,315.081L39.202,313.844L41.063,312.096L42.8,310.201L44.413,308.778L46.15,307.609L48.817,304.795L52.353,301.609L53.717,299.261L54.524,298.6L57.563,297.315L61.595,296.286L63.518,296.359L65.379,298.417L66.433,298.123L67.426,297.609L69.535,297.315L71.644,297.645L73.753,297.645L75.8,297.388L79.832,296.69L81.941,295.881L83.988,294.814L91.307,294.078L96.393,292.31L97.138,292.42L97.944,292.826L98.006,294.152L97.386,295.587L98.006,296.469L98.999,296.984L103.713,297.168L105.078,297.462L107.062,296.506L108.923,295.292L110.846,293.673L112.211,291.868L110.97,289.617L110.722,287.142L111.777,284.441L113.265,282.144L115.126,280.772L116.801,279.212L120.151,274.712L122.632,271.058L123.5,266.535L123.004,261.212L125.113,257.226L127.16,256.549L131.254,254.702L133.363,254.174L133.673,254.966L133.611,256.021L130.447,259.371L128.587,260.723L127.532,261.174L126.54,261.775L126.105,262.938L127.718,264.925L128.152,266.348L128.028,267.733L128.09,269.004L129.951,270.349L132.06,270.797L132.929,270.797L133.735,270.423L136.154,267.097L136.65,266.535L143.536,264.1L146.947,262.225L148.808,261.737L150.545,260.761L154.515,257L155.942,255.268L157.244,253.344L158.361,251.117L159.167,248.696L160.284,247.182L166.549,243.58L168.533,241.604L169.216,240.654L169.96,237.875L170.518,235.015L171.263,232.762L172.255,230.62L173.62,228.437L175.171,226.442L176.101,224.369L177.404,219.443L178.024,216.665L178.458,215.699L179.14,214.849L179.699,213.805L180.133,212.605L180.319,211.443L180.629,207.836L180.443,205.037L179.451,202.662L178.582,202L177.652,201.961L176.225,202.156L175.047,201.22L175.295,200.362L176.535,200.206L177.342,199.737L177.9,198.917L179.016,196.337L179.699,193.557L179.761,192.341L178.892,190.064L178.21,187.351L178.21,185.894L178.954,184.199L180.009,182.858L181.001,182.502L182.056,182.423L182.986,181.91L183.855,181.12L184.351,180.29L185.157,177.955L185.405,176.647L184.971,173.076L185.467,172.122L186.15,171.526L187.142,171.963L188.073,172.043L189.251,171.923L190.306,172.281L190.554,173.195L191.236,179.182L191.608,180.013L192.415,180.645L193.283,180.527L194.089,179.617L194.586,178.351L195.64,178.113L198.804,179.459L199.92,178.509L200.603,177.044L201.285,174.426L200.975,172.043L200.168,171.207L199.424,171.367L198.742,172.003L197.935,172.361L193.283,173.592L193.345,170.969L194.338,167.025L194.896,165.788L195.64,165.189L197.625,165.867L198.556,166.306Z M245.388,103.809L247.559,103.934L248.551,103.851L250.164,104.184L256.739,107.845L258.724,108.302L260.771,108.343L262.198,108.053L263.438,107.055L267.408,102.642L271.564,98.591L272.06,98.759L272.06,99.887L271.75,101.098L269.889,104.809L267.842,109.755L267.408,112.242L268.09,114.684L269.331,116.708L270.385,119.431L271.564,123.258L273.177,123.71L274.045,123.793L275.72,122.642L277.271,121.202L278.635,121.037L280,121.284L278.139,122.272L276.402,123.505L274.914,125.845L274.355,126.256L272.619,126.133L271.626,126.215L269.641,127.199L267.842,128.305L266.167,129.656L264.307,130.351L262.322,130.515L259.282,131.619L257.297,131.7L253.638,130.76L251.839,131.006L247.931,133.171L244.333,136.311L241.232,139.809L238.626,144.029L237.572,146.216L236.952,148.641L236.828,150.256L236.58,151.788L236.021,152.876L235.277,153.762L233.106,153.238L229.57,151.022L222.747,147.752L215.49,142.773L211.396,140.256L203.766,141.028L196.509,145.811L195.826,145.406L193.097,142.124L191.732,140.825L190.12,140.459L188.941,140.5L187.763,140.744L186.15,142.408L185.529,143.624L185.095,145.001L184.971,145.973L185.157,146.944L186.708,149.085L188.631,150.699L189.437,151.022L191.298,150.901L192.167,151.062L195.206,154.285L198.618,157.259L199.362,158.263L198.121,159.306L196.757,159.827L195.144,159.707L193.593,159.306L190.864,158.022L189.747,159.105L187.949,161.349L186.956,163.75L186.15,164.869L184.165,166.306L182.056,167.065L181.001,166.825L180.133,165.907L179.699,164.829L179.451,163.55L179.885,160.789L180.939,158.303L181.374,155.773L180.505,152.191L179.947,151.466L177.714,149.327L176.659,147.307L176.411,144.758L176.535,143.34L177.093,140.216L177.652,138.63L178.644,138.102L179.761,137.776L181.498,136.677L183.358,135.21L185.157,133.538L186.956,131.455L187.887,129.206L186.336,126.42L186.026,124.778L186.274,123.217L187.887,122.395L189.561,123.012L192.973,125.312L193.655,125.517L195.95,125.64L199.114,126.133L200.975,126.009L201.843,125.681L203.208,123.793L203.828,121.366L203.58,118.276L203.58,115.18L204.448,112.656L207.116,108.551L207.86,106.182L208.108,100.305L209.101,97.713L209.845,95.032L210.217,89.361L209.163,83.921L208.046,81.213L206.805,78.671L206.992,76.208L207.984,73.955L207.984,73.273L208.232,72.677L210.155,72.208L211.023,71.74L211.892,70.631L212.884,69.991L213.629,70.631L214.249,71.74L216.916,74.508L221.134,79.434L226.097,86.875L229.198,90.497L232.486,93.774L236.145,97.085L240.053,99.971L242.472,101.307L244.271,103.476Z M27.479,337.234L29.774,337.844L30.767,337.88L31.635,337.629L33.062,336.803L34.488,336.192L35.543,336.515L36.411,337.234L36.907,338.239L36.659,339.315L35.047,341.574L33.682,344.008L36.783,344.473L39.885,344.438L39.14,345.939L39.078,347.225L40.009,347.868L40.815,348.689L40.567,349.438L40.133,350.187L41.808,351.328L41.684,352.076L41.249,352.859L37.031,358.014L35.791,360.604L34.984,363.474L34.178,365.561L33.62,367.717L33.124,370.046L32.379,372.443L32.627,374.59L32.379,376.771L30.27,382.14L28.72,382.035L26.859,381.404L25.68,381.509L25.06,382.701L26.114,385.152L22.765,388.054L19.043,390.009L18.981,389.102L19.353,388.403L19.911,387.844L20.284,387.18L20.842,384.872L20.532,382.596L19.415,379.686L19.353,378.668L20.097,378.246L20.656,378.106L20.904,377.719L20.966,376.771L20.594,376.033L19.539,375.822L18.485,375.786L17.802,376.876L16.81,378.949L16.314,381.019L16.5,382.175L16.934,383.191L18.299,384.907L17.926,385.922L17.368,386.691L12.592,384.942L11.537,384.802L10.669,384.417L9.739,382.07L11.724,381.509L12.282,381.229L12.468,380.457L12.778,378.176L11.848,376.244L11.103,375.575L10.421,374.766L10.855,373.147L10.607,371.104L10.545,368.246L10.917,367.752L12.716,367.187L14.019,365.632L15.197,363.898L16.872,360.817L18.237,357.482L16.934,357.304L15.817,356.7L16.996,355.101L16.624,353.109L14.825,350.651L13.77,347.761L12.158,346.475L11.289,346.011L10.235,346.69L9.366,347.511L10.173,349.403L10.111,351.043L10.235,352.717L11.041,352.788L12.034,352.396L12.84,352.681L13.274,353.536L13.398,354.674L13.088,355.776L12.344,356.31L11.413,356.274L10.545,355.67L9.801,354.816L8.126,354.354L6.389,355.35L4.652,357.411L3.226,358.44L3.908,356.949L4.218,355.279L3.536,354.141L1.861,352.218L1.489,351.114L1.365,349.759L1.675,348.439L3.412,349.973L4.28,351.862L5.521,352.681L7.071,352.717L5.893,349.902L5.459,349.189L3.722,347.94L1.427,345.832L0,344.795L0.496,342.577L1.365,342.147L2.109,342.254L4.528,343.042L4.776,341.932L4.404,341.359L4.218,340.642L5.831,339.71L8.436,338.921L8.994,338.526L9.49,337.736L10.111,337.341L11.972,337.341L13.522,336.587L14.763,334.502L15.073,333.387L15.569,332.415L18.733,330.758L19.539,330.505L21.648,330.722L23.633,331.658L24.626,333.639L25.432,335.797Z M82.313,323.643L84.67,324.511L87.089,324.294L87.089,328.088L87.399,329.351L88.082,330.505L87.771,332.163L88.888,332.739L85.6,334.61L82.623,337.126L81.382,338.813L80.328,340.606L79.646,342.505L79.273,344.581L78.281,343.758L75.428,340.427L73.629,339.495L70.713,339.028L69.783,339.136L63.828,342.254L63.022,344.509L61.409,347.94L60.665,349.082L59.796,349.403L59.176,349.973L58.494,352.895L56.633,354.71L55.516,354.745L53.593,354.247L52.725,354.532L53.903,351.648L52.043,351.328L50.182,351.363L50.182,349.51L49.065,348.439L49.872,347.047L49.872,345.939L50.368,345.296L50.554,344.402L50.492,343.615L49.375,343.4L48.631,342.827L48.755,340.785L48.135,340.714L46.522,341.072L43.172,342.648L42.242,342.648L43.669,341.538L46.646,339.997L47.949,339.1L50.926,336.623L52.725,335.437L53.717,333.351L54.027,332.055L54.648,330.938L55.206,329.171L56.136,328.558L57.811,327.005L58.742,327.149L59.796,329.063L61.223,330.505L62.215,330.397L64.076,329.64L64.945,329.46L67.054,329.568L68.914,328.63L69.721,327.547L69.969,326.21L69.287,323.932L70.217,324.149L71.086,324.041L73.132,322.593L75.241,321.76L77.412,321.542L79.894,322.339Z"
+          stroke="#ffffff" stroke-opacity="0.3" stroke-width="1" fill="none" />
+        <circle cx="116.6" cy="317.8" r="4.5" fill="#FF5A2E" />
+        <text x="126" y="321" font-family="Jost, sans-serif" font-size="13" fill="#ffffff">Kyoto</text>
+      </svg>
+      <p class="mt-4 text-muted text-sm">Based in Kyoto, Japan</p>
+    </div>
+  </section>
+
+</body>
+</html>
