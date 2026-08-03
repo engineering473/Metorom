@@ -5,31 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Metorom</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/Metorom/assets/index-qGCKaLtR.js"></script>
-  <link rel="stylesheet" crossorigin href="/Metorom/assets/index-e_ucWKEm.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/Metorom/assets/index-BlP41RQ9.js"></script>
+  <link rel="stylesheet" crossorigin href="/Metorom/assets/index-g3yJYwQw.css">
 </head>
 <body class="bg-ink text-white font-body">
 
   <!-- ============ NAV ============ -->
-  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-6 mix-blend-difference">
-    <span class="font-heading font-bold tracking-tight text-sm uppercase" data-en="Metorom" data-ja="メトロム">Metorom</span>
-    <div class="flex items-center gap-6 md:gap-8">
-      <div class="hidden md:flex items-center gap-8 text-xs uppercase tracking-widest text-white/70">
+  <nav class="fixed top-0 left-0 right-0 z-50 h-20 flex items-center justify-between px-4 sm:px-6 md:px-10 mix-blend-difference">
+    <a href="#top" id="brand-home" class="flex items-center gap-3">
+      <span class="font-heading font-bold tracking-tight text-sm uppercase whitespace-nowrap" data-en="Metorom" data-ja="メトロム">Metorom</span>
+    </a>
+    <div class="flex items-center gap-4 sm:gap-6 md:gap-8">
+      <div class="hidden md:flex items-center gap-8 text-xs uppercase tracking-widest text-white/70 whitespace-nowrap">
         <a href="#project" class="hover:text-white transition" data-en="Project" data-ja="プロジェクト">Project</a>
         <a href="#studio" class="hover:text-white transition" data-en="Studio" data-ja="スタジオ">Studio</a>
         <a href="#contact" class="hover:text-white transition" data-en="Contact" data-ja="お問い合わせ">Contact</a>
       </div>
-      <button id="lang-toggle" class="text-xs uppercase tracking-widest text-white/70 hover:text-white transition border border-white/20 rounded-full px-3 py-1.5">
+      <button id="lang-toggle" class="text-xs uppercase tracking-widest text-white/70 hover:text-white transition border border-white/20 rounded-full px-3 py-1.5 whitespace-nowrap">
         日本語
       </button>
       <!-- Drop your logo at public/images/logo.png — shows here automatically once the file exists. -->
-      <img src="/images/logo.png" alt="Logo" class="h-7 w-auto" onerror="this.style.display='none'" />
+      <a href="#top" id="logo-home">
+        <img src="/Metorom/images/logo.png" alt="Logo" class="h-6 sm:h-7 w-auto" onerror="this.style.display='none'" />
+      </a>
     </div>
   </nav>
 
   <!-- ============ ABOUT US (full-bleed hero) ============ -->
-  <section class="relative min-h-screen flex flex-col justify-end px-6 md:px-10 pb-20 overflow-hidden">
+  <section id="top" class="relative min-h-screen flex flex-col justify-end px-6 md:px-10 pb-20 overflow-hidden">
     <!-- Product video placeholder — fills the hero as a background layer.
          Drop your render at public/videos/product.mp4 and swap the div
          below for the <video> tag underneath it. -->
@@ -38,7 +42,7 @@
     </div>
     <!--
     <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline>
-      <source src="/videos/product.mp4" type="video/mp4" />
+      <source src="/Metorom/videos/product.mp4" type="video/mp4" />
     </video>
     -->
     <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/10"></div>
@@ -62,11 +66,11 @@
   <!-- ============ CALM / TATAMI ============ -->
   <section class="min-h-screen flex flex-col md:flex-row items-center justify-center gap-16 px-6 md:px-20 py-24 bg-surface">
     <div class="max-w-md text-center md:text-left">
-      <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4">Designed to calm</p>
+      <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="Designed to calm" data-ja="心を落ち着かせるための設計">Designed to calm</p>
       <h2 class="font-heading font-bold uppercase text-4xl md:text-5xl leading-[1.05] tracking-tight">
-        When you sit down,<br />everything slows<span class="text-accent">.</span>
+        <span data-en="When you sit down, everything slows" data-ja="腰を下ろすと、すべてがゆっくりと動き出す">When you sit down,<br />everything slows</span><span class="text-accent">.</span>
       </h2>
-      <p class="mt-6 text-muted text-lg">
+      <p class="mt-6 text-muted text-lg" data-en="This speaker was designed for the tatami room — a space built around stillness. That constraint shaped everything: the way the cabinet sits low, the way the sound settles instead of demanding attention. Sitting down should feel like the room exhales." data-ja="このスピーカーは畳の部屋のために設計されました — 静けさを中心に作られた空間です。その制約がすべてを形づくりました。キャビネットが低く座る様子、音が主張せずに落ち着いていく様子。腰を下ろすことは、部屋がひと息つくような感覚であるべきです。">
         This speaker was designed for the tatami room — a space built
         around stillness. That constraint shaped everything: the way the
         cabinet sits low, the way the sound settles instead of demanding
@@ -108,15 +112,15 @@
   <!-- ============ ABOUT THE PROJECT ============ -->
   <section class="min-h-screen flex flex-col items-center justify-center text-center px-6 py-24 relative overflow-hidden">
     <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="About the project" data-ja="プロジェクトについて">About the project</p>
-    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-3xl" data-en="A three-way monitor, designed from the driver up." data-ja="ドライバーから設計した、3ウェイ・モニタースピーカー。">
-      A three-way monitor,<br />designed from the driver up<span class="text-accent">.</span>
+    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-3xl">
+      <span data-en="A three-way monitor, designed from the driver up" data-ja="ドライバーから設計した、3ウェイ・モニタースピーカー">A three-way monitor,<br />designed from the driver up</span><span class="text-accent">.</span>
     </h2>
     <p class="mt-6 max-w-lg text-muted text-lg">
       Dual midranges split by a passive crossover to kill comb filtering, a
       horn-loaded compression tweeter, and a 12" driver handling the low
       end — all tuned in REW and stitched together with active DSP.
     </p>
-    <div class="mt-10 grid grid-cols-3 gap-8 text-left max-w-lg">
+    <div class="mt-10 grid grid-cols-3 gap-4 sm:gap-8 text-left max-w-lg">
       <div>
         <p class="font-heading font-bold text-2xl text-accent">3</p>
         <p class="text-muted text-sm mt-1">drivers per side</p>
@@ -132,7 +136,7 @@
     </div>
 
     <!-- Measured data -->
-    <div class="mt-16 grid md:grid-cols-2 gap-6 max-w-4xl w-full text-left">
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full text-left">
       <figure class="border border-white/10 rounded-xl overflow-hidden bg-surface">
         <img src="/Metorom/images/spl.png" alt="On-axis SPL and per-driver magnitude response" class="w-full" />
         <figcaption class="px-4 py-3 text-xs text-muted">On-axis SPL, measured in REW — each driver's contribution stays within about ±2dB of flat through its passband.</figcaption>
@@ -145,8 +149,8 @@
 
     <!-- Modularity / adjustability -->
     <div class="mt-16 max-w-2xl">
-      <h3 class="font-heading font-bold uppercase text-2xl md:text-3xl tracking-tight" data-en="Built to be taken apart." data-ja="分解できるように、つくった。">
-        Built to be taken apart<span class="text-accent">.</span>
+      <h3 class="font-heading font-bold uppercase text-2xl md:text-3xl tracking-tight">
+        <span data-en="Built to be taken apart" data-ja="分解できるように、つくった">Built to be taken apart</span><span class="text-accent">.</span>
       </h3>
       <p class="mt-4 text-muted text-lg" data-en="Every driver mounts independently, the crossover is swappable, and the DSP profile is field-tunable — modularity and adjustability aren't afterthoughts here, they're the design brief." data-ja="各ドライバーは独立してマウントされ、クロスオーバーは交換可能、DSPプロファイルは現場で調整できます。モジュール性と調整可能性は後付けではなく、設計の出発点です。">
         Every driver mounts independently, the crossover is swappable, and
@@ -158,11 +162,11 @@
 
   <!-- ============ SILK ROAD ============ -->
   <section class="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center bg-surface">
-    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4">Where the road ends</p>
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="Where the road ends" data-ja="道の終わる場所">Where the road ends</p>
     <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-3xl">
-      We draw from the Silk Road<span class="text-accent">.</span>
+      <span data-en="We draw from the Silk Road" data-ja="私たちはシルクロードから着想を得ています">We draw from the Silk Road</span><span class="text-accent">.</span>
     </h2>
-    <p class="mt-6 max-w-xl text-muted text-lg">
+    <p class="mt-6 max-w-xl text-muted text-lg" data-en="Its overland routes are usually mapped as ending in Chang'an — but the goods kept moving. Carried onward by Japanese missions to Tang China, Persian glassware and Central Asian textiles reached the imperial storehouses of Nara. The Shōsōin repository still holds them today — proof that this corner of Japan was, over a thousand years ago, already connected to the other end of the continent." data-ja="陸路は一般的に長安で終わるとされていますが、品々はそこで止まりませんでした。遣唐使によって運ばれたペルシャのガラス器や中央アジアの織物は、奈良の正倉院にまで届きました。正倉院には今もそれらが保管されており、千年以上前からこの地が大陸の反対側とつながっていたことを物語っています。">
       Its overland routes are usually mapped as ending in Chang'an — but
       the goods kept moving. Carried onward by Japanese missions to Tang
       China, Persian glassware and Central Asian textiles reached the
@@ -184,23 +188,22 @@
 
   <!-- ============ PHILOSOPHY ============ -->
   <section id="studio" class="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center">
-    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-6">How we work</p>
+    <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-6" data-en="How we work" data-ja="私たちの仕事のしかた">How we work</p>
     <h2 class="font-heading font-bold uppercase text-3xl md:text-5xl leading-[1.15] tracking-tight max-w-2xl">
-      A human-centered design studio<span class="text-accent">,</span><br />
-      symbiotic with nature<span class="text-accent">.</span>
+      <span data-en="A human-centered design studio, symbiotic with nature" data-ja="自然と共生する、人間中心のデザインスタジオ">A human-centered design studio,<br />symbiotic with nature</span><span class="text-accent">.</span>
     </h2>
-    <p class="mt-6 max-w-lg text-muted text-lg">
+    <p class="mt-6 max-w-lg text-muted text-lg" data-en="Flexibility and adaptability aren't features we add — they're the starting point." data-ja="柔軟性と適応性は、あとから加える機能ではありません。それが出発点です。">
       Flexibility and adaptability aren't features we add — they're the
       starting point.
     </p>
     <div class="mt-16 grid gap-10 md:grid-cols-2 max-w-3xl text-left">
       <blockquote class="border-l-2 border-accent pl-6">
-        <p class="font-heading font-bold text-xl md:text-2xl leading-snug">
+        <p class="font-heading font-bold text-xl md:text-2xl leading-snug" data-en="&quot;Humans are analog, living in a digital world.&quot;" data-ja="「人間はアナログな存在だ。デジタルな世界に生きている。」">
           "Humans are analog, living in a digital world."
         </p>
       </blockquote>
       <blockquote class="border-l-2 border-accent pl-6">
-        <p class="font-heading font-bold text-xl md:text-2xl leading-snug">
+        <p class="font-heading font-bold text-xl md:text-2xl leading-snug" data-en="&quot;Resonant ideation: an idea — or a product — that vibrates, and evokes feeling through that vibration.&quot;" data-ja="「共鳴する発想 — 振動し、その振動を通じて感情を呼び起こすアイデアやプロダクトのこと。」">
           "Resonant ideation: an idea — or a product — that vibrates, and
           evokes feeling through that vibration."
         </p>
@@ -211,8 +214,8 @@
   <!-- ============ CONTACT ============ -->
   <section id="contact" class="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-surface">
     <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mb-4" data-en="Contact" data-ja="お問い合わせ">Contact</p>
-    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-2xl" data-en="Let's talk sound." data-ja="音について、話しましょう。">
-      Let's talk sound<span class="text-accent">.</span>
+    <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-2xl">
+      <span data-en="Let's talk sound" data-ja="音について、話しましょう">Let's talk sound</span><span class="text-accent">.</span>
     </h2>
     <p class="mt-6 max-w-md text-muted text-lg">
       Questions about the build, or want to work together? Reach out.
