@@ -6,10 +6,15 @@
   <title>Metorom</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/Metorom/assets/index-BlP41RQ9.js"></script>
-  <link rel="stylesheet" crossorigin href="/Metorom/assets/index-g3yJYwQw.css">
+  <script type="module" crossorigin src="/Metorom/assets/index-B0JhtpZa.js"></script>
+  <link rel="stylesheet" crossorigin href="/Metorom/assets/index-BDS6zAuB.css">
 </head>
 <body class="bg-ink text-white font-body">
+
+  <!-- ============ PAGE PROGRESS BAR ============ -->
+  <div class="fixed top-0 left-0 right-0 h-1 z-[9999] bg-white/15">
+    <div id="page-progress-fill" class="h-full bg-accent" style="width:0%"></div>
+  </div>
 
   <!-- ============ NAV ============ -->
   <nav class="fixed top-0 left-0 right-0 z-50 h-20 flex items-center justify-between px-4 sm:px-6 md:px-10 mix-blend-difference">
@@ -87,21 +92,21 @@
 
       <div class="overlay absolute inset-0 pointer-events-none">
         <div class="absolute top-8 left-8 right-8 flex justify-between items-baseline text-[11px] tracking-wide text-white/50">
-          <span class="text-white font-medium">Three-Way Monitor</span>
+          <span class="text-white font-medium" data-en="Three-Way Monitor" data-ja="3ウェイ・モニタースピーカー">Three-Way Monitor</span>
           <span id="readout">Front</span>
         </div>
 
         <div id="annotations" class="pointer-events-none absolute inset-0"></div>
 
         <div id="intro" class="absolute left-1/2 bottom-16 -translate-x-1/2 flex flex-col items-center gap-2 text-xs tracking-wide text-white/50 transition-opacity duration-300 text-center">
-          <span>Move your mouse to tilt · scroll to rotate</span>
+          <span data-en="Move your mouse to tilt · scroll to rotate" data-ja="マウスを動かすと傾き・スクロールで回転します">Move your mouse to tilt · scroll to rotate</span>
         </div>
 
         <div class="absolute bottom-8 left-8 flex items-center gap-4 pointer-events-auto">
           <div class="w-32 h-px bg-white/20">
             <div id="fill" class="h-full bg-accent" style="width:0%"></div>
           </div>
-          <button id="skip-btn" class="text-[11px] tracking-wide text-white/50 hover:text-accent transition underline">
+          <button id="skip-btn" class="text-[11px] tracking-wide text-white/50 hover:text-accent transition underline" data-en="Skip" data-ja="スキップ">
             Skip
           </button>
         </div>
@@ -123,15 +128,15 @@
     <div class="mt-10 grid grid-cols-3 gap-4 sm:gap-8 text-left max-w-lg">
       <div>
         <p class="font-heading font-bold text-2xl text-accent">3</p>
-        <p class="text-muted text-sm mt-1">drivers per side</p>
+        <p class="text-muted text-sm mt-1" data-en="drivers per side" data-ja="片側あたりのドライバー数">drivers per side</p>
       </div>
       <div>
         <p class="font-heading font-bold text-2xl text-accent">608mm</p>
-        <p class="text-muted text-sm mt-1">midrange spacing</p>
+        <p class="text-muted text-sm mt-1" data-en="midrange spacing" data-ja="ミッドレンジ間隔">midrange spacing</p>
       </div>
       <div>
         <p class="font-heading font-bold text-2xl text-accent">510µs</p>
-        <p class="text-muted text-sm mt-1">DSP latency</p>
+        <p class="text-muted text-sm mt-1" data-en="DSP latency" data-ja="DSPレイテンシー">DSP latency</p>
       </div>
     </div>
 
@@ -139,11 +144,11 @@
     <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full text-left">
       <figure class="border border-white/10 rounded-xl overflow-hidden bg-surface">
         <img src="/Metorom/images/spl.png" alt="On-axis SPL and per-driver magnitude response" class="w-full" />
-        <figcaption class="px-4 py-3 text-xs text-muted">On-axis SPL, measured in REW — each driver's contribution stays within about ±2dB of flat through its passband.</figcaption>
+        <figcaption class="px-4 py-3 text-xs text-muted" data-en="On-axis SPL, measured in REW — each driver's contribution stays within about ±2dB of flat through its passband." data-ja="REWで測定したオンアクシスSPL — 各ドライバーはそれぞれの帯域内でおおむね±2dB以内に収まっています。">On-axis SPL, measured in REW — each driver's contribution stays within about ±2dB of flat through its passband.</figcaption>
       </figure>
       <figure class="border border-white/10 rounded-xl overflow-hidden bg-surface">
         <img src="/Metorom/images/directivity.png" alt="Horizontal directivity plot" class="w-full" />
-        <figcaption class="px-4 py-3 text-xs text-muted">Horizontal directivity — controlled dispersion narrows gradually with frequency instead of beaming.</figcaption>
+        <figcaption class="px-4 py-3 text-xs text-muted" data-en="Horizontal directivity — controlled dispersion narrows gradually with frequency instead of beaming." data-ja="水平指向性 — 分散特性は周波数の上昇とともに徐々に絞られ、ビーミングを起こしません。">Horizontal directivity — controlled dispersion narrows gradually with frequency instead of beaming.</figcaption>
       </figure>
     </div>
 
@@ -217,7 +222,7 @@
     <h2 class="font-heading font-bold uppercase text-4xl md:text-6xl leading-[1.05] tracking-tight max-w-2xl">
       <span data-en="Let's talk sound" data-ja="音について、話しましょう">Let's talk sound</span><span class="text-accent">.</span>
     </h2>
-    <p class="mt-6 max-w-md text-muted text-lg">
+    <p class="mt-6 max-w-md text-muted text-lg" data-en="Questions about the build, or want to work together? Reach out." data-ja="ビルドについての質問、または一緒に仕事をしたい方は、お気軽にご連絡ください。">
       Questions about the build, or want to work together? Reach out.
     </p>
     <a href="mailto:hello@example.com"
@@ -232,7 +237,7 @@
         <circle cx="116.6" cy="317.8" r="4.5" fill="#FF5A2E" />
         <text x="126" y="321" font-family="Jost, sans-serif" font-size="13" fill="#ffffff">Kyoto</text>
       </svg>
-      <p class="mt-4 text-muted text-sm">Based in Kyoto, Japan</p>
+      <p class="mt-4 text-muted text-sm" data-en="Based in Kyoto, Japan" data-ja="京都を拠点に活動しています">Based in Kyoto, Japan</p>
     </div>
   </section>
 
