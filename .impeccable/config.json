@@ -124,6 +124,24 @@
         ],
         "createdAt": "2026-09-28T22:56:18.705Z",
         "reason": "The pre-existing interactive-version chooser retains its Georgia, Menlo, and Impact display accents alongside self-hosted DM Sans body; it is separate from the five new family systems."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "concepts/dark/impeccable/index.html"
+        ],
+        "createdAt": "2026-09-28T23:03:01.410Z",
+        "reason": "Agent verified the open rules have 0.65–1.5rem child insets and the measure/event sections inherit large .im-shell padding; the detector misses those insets."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "concepts/dark/taste/index.html"
+        ],
+        "createdAt": "2026-09-28T23:06:12.089Z",
+        "reason": "Agent verified bordered grid cells have 1.2–1.5rem insets, record/gather inherit .ta-section padding, and measure summaries center text within 5–6rem rows; detector misses these rules."
       }
     ]
   }
