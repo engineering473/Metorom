@@ -11,6 +11,119 @@
         ],
         "createdAt": "2026-09-28T12:52:06.674Z",
         "reason": "User pinned glow as the lighting language for the single-accent dark cinematic HUD family."
+      },
+      {
+        "rule": "hero-eyebrow-chip",
+        "value": "*",
+        "files": [
+          "concepts/haze/*/index.html"
+        ],
+        "createdAt": "2026-09-28T13:10:51.689Z",
+        "reason": "User pinned pill badges for the soft haze family; the two hero chips are short section labels."
+      },
+      {
+        "rule": "wide-tracking",
+        "value": "*",
+        "files": [
+          "concepts/haze/*/index.html"
+        ],
+        "createdAt": "2026-09-28T13:10:51.824Z",
+        "reason": "The tracked text is short metadata and pill labels in the user-pinned airy report direction; paragraphs use normal tracking."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "concepts/haze/*/index.html"
+        ],
+        "createdAt": "2026-09-28T13:10:52.004Z",
+        "reason": "Visual review confirmed ruled stats and accordion lists have 1.2–2rem child padding; detector treats open border-top rules as card edges."
+      },
+      {
+        "rule": "numbered-section-labels",
+        "value": "*",
+        "files": [
+          "concepts/haze/*/index.html"
+        ],
+        "createdAt": "2026-09-28T13:10:52.126Z",
+        "reason": "The numbered chapter labels are intentional report navigation and field-note wayfinding in the requested visual family."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "concepts/haze/taste/index.html"
+        ],
+        "createdAt": "2026-09-28T13:10:52.235Z",
+        "reason": "The report variant uses cream as a neutral under visible soft blue/apricot haze; the user pinned this soft gradient direction."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T13:13:24.223Z",
+        "reason": "The gallery hero has 4rem bottom padding and full-bleed media; its overlaid captions have 1.3rem inset. Visual QA found no cramped text."
+      },
+      {
+        "rule": "wide-tracking",
+        "value": "*",
+        "files": [
+          "concepts/index.html",
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T13:13:24.341Z",
+        "reason": "Tracked lettering is limited to short navigational metadata and variant labels in the two design choosers."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "concepts/index.html",
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T13:13:24.457Z",
+        "reason": "Neutral paper is intentional in the galleries so the five pinned site families can be compared without bias."
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "concepts/index.html",
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T13:13:24.703Z",
+        "reason": "The soft blue haze is confined to a CSS-only preview tile for the user-requested soft-gradient family, not a generic dark-site hero."
+      },
+      {
+        "rule": "numbered-section-labels",
+        "value": "*",
+        "files": [
+          "concepts/dark/impeccable/index.html"
+        ],
+        "createdAt": "2026-09-28T13:15:17.884Z",
+        "reason": "The three numbered Silk Road stops are the user-requested scrolling philosophy sequence and serve as meaningful route labels."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "concepts/*/*/index.html",
+          "concepts/index.html",
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T22:56:18.567Z",
+        "reason": "This repo intentionally compares five independent colour systems; DESIGN.md records palette anchors while each family.css is the complete source of truth for its own tints."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-28T22:56:18.705Z",
+        "reason": "The pre-existing interactive-version chooser retains its Georgia, Menlo, and Impact display accents alongside self-hosted DM Sans body; it is separate from the five new family systems."
       }
     ]
   }

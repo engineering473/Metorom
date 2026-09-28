@@ -58,6 +58,7 @@ em{font-style:normal}
 .im-slot-foot{border-top:1px solid #4b5b47}
 .im-callout{position:absolute;display:grid;grid-template-columns:2rem 1.7rem minmax(0,11rem);align-items:center;gap:.55rem;max-width:18rem;color:#b8c5b4;line-height:1.35}
 .im-callout strong{color:var(--acid);font:500 .75rem/1.2 var(--mono)}
+.im-callout span:last-child{font-family:'Manrope',sans-serif;font-size:.8rem;letter-spacing:0;text-transform:none}
 .im-callout-line{height:1px;background:var(--acid);box-shadow:0 0 10px #c7fc69a0}
 .im-callout-upper{top:30%;left:-2.5rem}
 .im-callout-lower{right:-2rem;bottom:26%}
@@ -120,8 +121,8 @@ details[open] .plus::after,details[open] .ta-detail-mark::after{transform:rotate
 .im-event-link>span:last-child{color:var(--acid)}
 .im-footer{padding:3rem clamp(1.25rem,3vw,3.5rem) 2rem;background:#090b09}
 .im-footer>div:first-child{font-size:clamp(5rem,17vw,17rem);font-weight:400;letter-spacing:-.11em;line-height:1;white-space:nowrap;overflow:hidden}
-.im-footer nav{display:flex;justify-content:space-between;gap:2rem;border-top:1px solid var(--line);padding:1rem 0 2rem;font:400 .75rem/1.4 var(--mono);text-transform:uppercase}
-.im-footer>span{color:#aab6a7}
+.im-footer nav{display:flex;justify-content:space-between;gap:2rem;border-top:1px solid var(--line);padding:1rem 0 2rem;font:400 .75rem/1.4 var(--mono)}
+.im-footer>span{color:#aab6a7;font-family:'Manrope',sans-serif;font-size:.8rem;letter-spacing:0;text-transform:none}
 
 /* Field Notes direction: an editorial sequence with a full-width reserved image frame. */
 .dark-taste{background:#050605;color:#f3f5ed}
@@ -204,6 +205,7 @@ details[open] .plus::after,details[open] .ta-detail-mark::after{transform:rotate
 .ta-footer{padding:2rem clamp(1.25rem,3vw,4rem);overflow:hidden}
 .ta-footer-id,.ta-footer-links{display:flex;justify-content:space-between;gap:1rem;border-top:1px solid #505d49;padding-top:.7rem;color:#aebbaa}
 .ta-footer-id a,.ta-footer-links a{color:var(--acid)}
+.ta-footer-links>span{font-family:'Manrope',sans-serif;font-size:.8rem;letter-spacing:0;text-transform:none}
 .ta-footer-word{font-family:'Barlow Condensed',sans-serif;font-size:clamp(5rem,17vw,18rem);font-weight:400;letter-spacing:-.055em;line-height:1.12;white-space:nowrap}
 
 @media(max-width:1100px){

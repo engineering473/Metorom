@@ -111,7 +111,7 @@ details p { max-width: 68ch; }
 .im-event-meta { grid-column: 1 / -1; border-top: 1px solid #bbb6af; border-bottom: 1px solid #bbb6af; padding: 1rem 0; display: flex; justify-content: space-between; gap: 1rem; color: var(--rust); font-size: .75rem; font-weight: 600; letter-spacing: .04em; }
 .im-footer { overflow: hidden; border-top: 1px solid #bbb6af; }
 .im-footer-word { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(8rem, 22vw, 26rem); font-weight: 500; line-height: .69; letter-spacing: -.04em; text-align: center; color: var(--rust); white-space: nowrap; padding-top: 1.5rem; }
-.im-footer > div:last-child { padding: 1.5rem clamp(1rem, 2.8vw, 3rem); display: flex; justify-content: space-between; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.im-footer > div:last-child { padding: 1.5rem clamp(1rem, 2.8vw, 3rem); display: flex; justify-content: space-between; font-size: .75rem; letter-spacing: .04em; }
 
 /* The second variant uses the broad lifestyle lead and alternating product
    panels of the locally supplied GRAU composition, with square edges and a
