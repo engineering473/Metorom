@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "concepts/dark/*/index.html"
+        ],
+        "createdAt": "2026-09-28T12:52:06.674Z",
+        "reason": "User pinned glow as the lighting language for the single-accent dark cinematic HUD family."
+      }
+    ]
+  }
+}

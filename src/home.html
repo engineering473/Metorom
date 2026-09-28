@@ -1,0 +1,154 @@
+<a class="skip-link" href="#main" data-en="Skip to content" data-ja="本文へ移動">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="./index.html" aria-label="Metorom home" data-en-aria="Metorom home" data-ja-aria="メトロム ホーム">
+    <span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="brand-word">METOROM</span>
+  </a>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" data-en-aria="Open menu" data-ja-aria="メニューを開く"><span></span><span></span></button>
+  <nav class="header-nav" id="main-nav" aria-label="Main navigation" data-en-aria="Main navigation" data-ja-aria="メインナビゲーション">
+    <a href="#project" data-en="The object" data-ja="製品">The object</a>
+    <a href="#road" data-en="Philosophy" data-ja="思想">Philosophy</a>
+    <a href="./event.html" data-en="Event" data-ja="イベント">Event</a>
+    <a href="#contact" data-en="Contact" data-ja="お問い合わせ">Contact</a>
+  </nav>
+  <div class="header-actions">
+    <button class="sound-toggle" type="button" aria-pressed="false" data-en-aria="Toggle sound" data-ja-aria="音を切り替える"><span class="sound-indicator" aria-hidden="true"></span><span data-en="Sound" data-ja="音">Sound</span></button>
+    <button class="lang-toggle" type="button" aria-label="Switch to Japanese" data-en-aria="Switch to Japanese" data-ja-aria="英語に切り替える">日本語</button>
+  </div>
+</header>
+<main id="main">
+  <section class="hero" id="home">
+    <div class="hero-copy">
+      <p class="eyebrow"><span data-en="METOROM / SOUND OBJECTS" data-ja="メトロム / 音のかたち">METOROM / SOUND OBJECTS</span> <span class="hero-index">01—03</span></p>
+      <h1 class="display"><span data-en="Sound, given" data-ja="音に、">Sound, given</span> <em data-en="a shape." data-ja="かたちを。">a shape.</em></h1>
+      <p class="lede" data-en="A three-way loudspeaker shaped by listening, measurement, and the freedom to keep experimenting." data-ja="聴くこと、測ること、試し続ける自由から生まれた、3ウェイ・スピーカー。">A three-way loudspeaker shaped by listening, measurement, and the freedom to keep experimenting.</p>
+      <div class="hero-actions">
+        <a class="button" href="#project"><span data-en="Explore the object" data-ja="製品を見る">Explore the object</span><span aria-hidden="true">↗</span></a>
+        <a class="button-secondary" href="./event.html"><span data-en="Listening event" data-ja="試聴イベント">Listening event</span><span aria-hidden="true">↗</span></a>
+      </div>
+      <p class="hero-footnote" data-en="Independent audio design · Kyoto, Japan" data-ja="独立した音響設計 · 京都、日本">Independent audio design · Kyoto, Japan</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-ring art-ring-one"></div><div class="art-ring art-ring-two"></div>
+      <div class="art-type">M<span>↗</span></div>
+      <div class="atelier-instrument">
+        <div class="atelier-instrument-top"><span data-en="ACOUSTIC STUDY / 001" data-ja="音響スタディ / 001">ACOUSTIC STUDY / 001</span><span>METOROM ©</span></div>
+        <div class="atelier-instrument-disc"><span class="atelier-instrument-core"></span></div>
+        <div class="atelier-instrument-scale"><span>20 Hz</span><span data-en="LISTEN / MEASURE / REPEAT" data-ja="聴く / 測る / 繰り返す">LISTEN / MEASURE / REPEAT</span><span>20 kHz</span></div>
+      </div>
+      <canvas class="scope-canvas" data-scope></canvas>
+      <div class="art-caption">20—20kHz <span>∞</span> <span data-en="03 DRIVERS" data-ja="ドライバー 03">03 DRIVERS</span></div>
+    </div>
+    <div class="hero-side-note" data-en="SCROLL TO EXPLORE ↓" data-ja="スクロールして探索 ↓">SCROLL TO EXPLORE ↓</div>
+  </section>
+
+  <section class="section intro-section" id="approach">
+    <div class="section-head">
+      <p class="micro-label" data-en="01 / THE APPROACH" data-ja="01 / アプローチ">01 / THE APPROACH</p>
+      <h2 class="section-title" data-en="Space for sound to slow down." data-ja="音がゆっくり届く空間。">Space for sound to slow down.</h2>
+    </div>
+    <div class="intro-content">
+      <p class="section-copy" data-en="The room, the cabinet, and the listener belong in the same conversation. We tune the system as a whole, then make room for quiet attention." data-ja="部屋、筐体、聴く人。そのすべてをひとつの関係として考えます。システム全体を調整し、音に耳を傾ける余白をつくります。">The room, the cabinet, and the listener belong in the same conversation. We tune the system as a whole, then make room for quiet attention.</p>
+      <div class="intro-image"><img data-asset="images/calm-render.webp" alt="Speaker and seated figure in a design render" data-en-alt="Speaker and seated figure in a design render" data-ja-alt="スピーカーと座った人物のデザインレンダリング" loading="lazy"></div>
+    </div>
+  </section>
+
+  <section class="speaker-scroll" id="project" aria-label="Interactive speaker model" data-en-aria="Interactive speaker model" data-ja-aria="操作できるスピーカーの3Dモデル">
+    <div class="viewer-stage">
+      <div class="viewer-visual">
+        <canvas class="viewer-canvas" id="canvas" aria-label="Rotating three-dimensional speaker model" data-en-aria="Rotating three-dimensional speaker model" data-ja-aria="回転するスピーカーの3Dモデル"></canvas>
+        <div class="viewer-hud"><span data-en="02 / THE OBJECT" data-ja="02 / 製品">02 / THE OBJECT</span><span data-view-readout>FRONT</span></div>
+        <p class="viewer-hint" data-en="Scroll to rotate · Move pointer to explore" data-ja="スクロールで回転 · ポインターで視点を変える">Scroll to rotate · Move pointer to explore</p>
+      </div>
+      <aside class="viewer-rail" aria-label="Speaker components" data-en-aria="Speaker components" data-ja-aria="スピーカーの構成">
+        <p class="micro-label" data-en="THREE-WAY MONITOR / COMPONENTS" data-ja="3ウェイ・モニター / 構成">THREE-WAY MONITOR / COMPONENTS</p>
+        <details class="viewer-label">
+          <summary><span>01</span><strong>Alpha 6A</strong><span class="expand-icon" aria-hidden="true">+</span></summary>
+          <p data-en="Dedicated midrange driver. A separate acoustic path gives voices and instruments space to breathe." data-ja="専用のミッドレンジ・ドライバー。独立した音響経路が、声や楽器の表情を引き出します。">Dedicated midrange driver. A separate acoustic path gives voices and instruments space to breathe.</p>
+        </details>
+        <details class="viewer-label">
+          <summary><span>02</span><strong>BMS 4540ND</strong><span class="expand-icon" aria-hidden="true">+</span></summary>
+          <p data-en="Compression driver and horn for controlled high-frequency coverage." data-ja="高域の指向性を整えるコンプレッション・ドライバーとホーン。">Compression driver and horn for controlled high-frequency coverage.</p>
+        </details>
+        <details class="viewer-label">
+          <summary><span>03</span><strong>LAB 12</strong><span class="expand-icon" aria-hidden="true">+</span></summary>
+          <p data-en="Low-frequency foundation for the three-way system." data-ja="3ウェイ・システムの低域を支えるドライバー。">Low-frequency foundation for the three-way system.</p>
+        </details>
+        <div class="viewer-controls">
+          <div class="wave-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Model scroll progress" data-en-aria="Model scroll progress" data-ja-aria="モデルのスクロール進行度"></div>
+          <button id="skip-btn" type="button" data-en="Skip model ↓" data-ja="モデルをスキップ ↓">Skip model ↓</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section project-section" id="details">
+    <div class="section-head">
+      <p class="micro-label" data-en="03 / OPEN BY DESIGN" data-ja="03 / 開かれた設計">03 / OPEN BY DESIGN</p>
+      <h2 class="section-title" data-en="Built to be understood." data-ja="理解できるように、つくる。">Built to be understood.</h2>
+      <p class="section-copy" data-en="Each driver has a purpose. The structure is modular, the DSP profile can be tuned, and measurement stays part of the conversation." data-ja="各ドライバーには役割があります。構造はモジュール式で、DSPの設定は調整でき、測定結果も設計の対話に加わります。">Each driver has a purpose. The structure is modular, the DSP profile can be tuned, and measurement stays part of the conversation.</p>
+    </div>
+    <div class="project-grid">
+      <div class="metric"><strong>03</strong><span data-en="DRIVERS / SIDE" data-ja="ドライバー / 片側">DRIVERS / SIDE</span></div>
+      <div class="metric"><strong>608<span>mm</span></strong><span data-en="MIDRANGE SPACING" data-ja="中域ユニット間隔">MIDRANGE SPACING</span></div>
+      <div class="metric"><strong>510<span>µs</span></strong><span data-en="DSP LATENCY" data-ja="DSPレイテンシー">DSP LATENCY</span></div>
+    </div>
+    <div class="expand-grid">
+      <details class="expand-card">
+        <summary><span class="card-image"><img data-asset="images/spl.png" alt="Frequency response graph" data-en-alt="Frequency response graph" data-ja-alt="周波数応答グラフ" loading="lazy"></span><span class="card-body"><small data-en="MEASUREMENT / 01" data-ja="測定 / 01">MEASUREMENT / 01</small><strong data-en="Frequency response" data-ja="周波数応答">Frequency response</strong><span data-en="Open the measurement notes" data-ja="測定メモを開く">Open the measurement notes</span></span><span class="expand-icon" aria-hidden="true">+</span></summary>
+        <div class="card-extra"><p data-en="This REW plot shows the on-axis response and the contribution of each driver. The crossover regions are visible where their curves meet; these measurements guide listening and tuning rather than replacing them." data-ja="REWで測定した軸上応答と、各ドライバーの寄与を示しています。カーブが交わる部分にクロスオーバー帯域が見えます。測定は試聴と調整の指針です。">This REW plot shows the on-axis response and the contribution of each driver. The crossover regions are visible where their curves meet; these measurements guide listening and tuning rather than replacing them.</p></div>
+      </details>
+      <details class="expand-card">
+        <summary><span class="card-image"><img data-asset="images/directivity.png" alt="Horizontal directivity graph" data-en-alt="Horizontal directivity graph" data-ja-alt="水平方向の指向性グラフ" loading="lazy"></span><span class="card-body"><small data-en="MEASUREMENT / 02" data-ja="測定 / 02">MEASUREMENT / 02</small><strong data-en="Horizontal directivity" data-ja="水平方向の指向性">Horizontal directivity</strong><span data-en="Open the measurement notes" data-ja="測定メモを開く">Open the measurement notes</span></span><span class="expand-icon" aria-hidden="true">+</span></summary>
+        <div class="card-extra"><p data-en="The color map shows how sound energy changes with angle and frequency. It helps us check that the speaker behaves predictably beyond a single listening point." data-ja="角度と周波数による音のエネルギーの変化を色で示しています。ひとつの試聴位置だけでなく、広い範囲での振る舞いを確認できます。">The color map shows how sound energy changes with angle and frequency. It helps us check that the speaker behaves predictably beyond a single listening point.</p></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="road-scroll" id="road" aria-label="Silk Road design story" data-en-aria="Silk Road design story" data-ja-aria="シルクロードとデザイン思想">
+    <div class="road-stage">
+      <div class="road-layout">
+        <div class="road-visual">
+          <p class="micro-label" data-en="04 / A ROUTE OF IDEAS" data-ja="04 / 思想の道">04 / A ROUTE OF IDEAS</p>
+          <h2 class="section-title" data-en="A road made by exchange." data-ja="交流がつくる道。">A road made by exchange.</h2>
+          <svg class="road-svg" viewBox="0 0 900 360" role="img" aria-label="Curved route with four stops" data-en-aria="Curved route with four stops" data-ja-aria="4つの地点を結ぶ曲線">
+            <path class="road-base" data-road-path d="M 65 260 C 200 260 200 70 345 120 S 550 310 665 215 S 775 75 835 110" />
+            <path class="road-progress-path" data-road-progress d="M 65 260 C 200 260 200 70 345 120 S 550 310 665 215 S 775 75 835 110" />
+            <g data-road-stops></g>
+          </svg>
+          <p class="road-caption" data-en="Follow the line. Each stop is a principle, not a literal travel itinerary." data-ja="線をたどってください。各地点は実際の旅程ではなく、設計思想を表しています。">Follow the line. Each stop is a principle, not a literal travel itinerary.</p>
+        </div>
+        <div class="road-story">
+          <article class="road-panel is-active" data-road-panel><span data-en="01 / ORIGIN" data-ja="01 / 起点">01 / ORIGIN</span><h3 data-en="Begin with listening." data-ja="聴くことから始める。">Begin with listening.</h3><p data-en="A product begins with a person, a room, and a moment of attention. Those are the first design constraints." data-ja="製品は、人と部屋、そして耳を傾ける瞬間から始まります。それが最初の設計条件です。">A product begins with a person, a room, and a moment of attention. Those are the first design constraints.</p></article>
+          <article class="road-panel" data-road-panel><span data-en="02 / EXCHANGE" data-ja="02 / 交流">02 / EXCHANGE</span><h3 data-en="Let ideas meet." data-ja="アイデアを出会わせる。">Let ideas meet.</h3><p data-en="The Silk Road inspires us as a network of exchange. Useful ideas can arrive from engineering, craft, music, and everyday life." data-ja="シルクロードは交流のネットワークとして私たちを刺激します。工学、工芸、音楽、日常から有用な発想が届きます。">The Silk Road inspires us as a network of exchange. Useful ideas can arrive from engineering, craft, music, and everyday life.</p></article>
+          <article class="road-panel" data-road-panel><span data-en="03 / EXPERIMENT" data-ja="03 / 実験">03 / EXPERIMENT</span><h3 data-en="Test, tune, repeat." data-ja="試し、整え、繰り返す。">Test, tune, repeat.</h3><p data-en="Measurements reveal a pattern; listening gives it meaning. We move between the two until the object feels resolved." data-ja="測定はパターンを示し、試聴はそこに意味を与えます。納得できるまで、その間を行き来します。">Measurements reveal a pattern; listening gives it meaning. We move between the two until the object feels resolved.</p></article>
+          <article class="road-panel" data-road-panel><span data-en="04 / RETURN" data-ja="04 / 次へ">04 / RETURN</span><h3 data-en="Make room for change." data-ja="変化の余地を残す。">Make room for change.</h3><p data-en="Modular parts and adjustable tuning let the system evolve. The end of one route can be the start of another." data-ja="交換できる部品と調整可能な音づくりにより、システムは進化できます。ひとつの道の終わりは次の始まりです。">Modular parts and adjustable tuning let the system evolve. The end of one route can be the start of another.</p></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section studio-section" id="studio">
+    <div class="section-head">
+      <p class="micro-label" data-en="05 / THE STUDIO" data-ja="05 / スタジオ">05 / THE STUDIO</p>
+      <h2 class="section-title" data-en="Human first. Always in motion." data-ja="人を中心に。常に変わり続ける。">Human first. Always in motion.</h2>
+    </div>
+    <div class="studio-grid">
+      <details class="expand-card philosophy-card"><summary><span class="card-body"><small data-en="01 / ANALOG" data-ja="01 / アナログ">01 / ANALOG</small><strong data-en="Humans are analog." data-ja="人はアナログ。">Humans are analog.</strong><span data-en="Read the idea" data-ja="考えを読む">Read the idea</span></span><span class="expand-icon" aria-hidden="true">+</span></summary><div class="card-extra"><p data-en="Digital tools can be precise, but listening remains physical and personal. We design for that human experience." data-ja="デジタルの道具は精密でも、聴く体験は身体的で個人的です。その人間的な体験のために設計します。">Digital tools can be precise, but listening remains physical and personal. We design for that human experience.</p></div></details>
+      <details class="expand-card philosophy-card"><summary><span class="card-body"><small data-en="02 / RESONANCE" data-ja="02 / 共鳴">02 / RESONANCE</small><strong data-en="Ideas should resonate." data-ja="アイデアは共鳴する。">Ideas should resonate.</strong><span data-en="Read the idea" data-ja="考えを読む">Read the idea</span></span><span class="expand-icon" aria-hidden="true">+</span></summary><div class="card-extra"><p data-en="A useful object can also evoke feeling. We look for form, sound, and interaction that belong together." data-ja="役に立つものは、感情も呼び起こせます。形、音、操作がひとつになる関係を探します。">A useful object can also evoke feeling. We look for form, sound, and interaction that belong together.</p></div></details>
+    </div>
+  </section>
+
+  <section class="section event-teaser" id="event">
+    <div><p class="micro-label" data-en="06 / LISTEN TOGETHER" data-ja="06 / 一緒に聴く">06 / LISTEN TOGETHER</p><h2 class="section-title" data-en="Come hear what we mean." data-ja="私たちの音を、聴きに来てください。">Come hear what we mean.</h2><p class="section-copy" data-en="We are shaping a listening event around the three-way monitor: a chance to hear the system and talk about its design. Details are being prepared." data-ja="3ウェイ・モニターを中心とした試聴イベントを準備しています。実際に音を聴き、設計について話すための場です。詳細は準備中です。">We are shaping a listening event around the three-way monitor: a chance to hear the system and talk about its design. Details are being prepared.</p></div>
+    <a class="event-orbit" href="./event.html" aria-label="Find out more about the Metorom listening event" data-en-aria="Find out more about the Metorom listening event" data-ja-aria="メトロム試聴イベントについて詳しく見る"><span class="event-orbit-title" data-en="METOROM LISTENING SESSION" data-ja="メトロム 試聴イベント">METOROM LISTENING SESSION</span><span class="event-orbit-cta" data-en="FIND OUT MORE ↗" data-ja="詳しく見る ↗">FIND OUT MORE ↗</span></a>
+  </section>
+
+  <section class="section contact-section" id="contact">
+    <p class="micro-label" data-en="07 / CONTACT" data-ja="07 / お問い合わせ">07 / CONTACT</p>
+    <h2 class="section-title" data-en="Let's talk sound." data-ja="音について話しましょう。">Let's talk sound.</h2>
+    <p class="section-copy" data-en="Questions about the build, collaboration, or the listening event? Contact details will be announced here." data-ja="製作、コラボレーション、試聴イベントについてのご質問は、こちらへ。連絡先は後日お知らせします。">Questions about the build, collaboration, or the listening event? Contact details will be announced here.</p>
+    <p class="contact-location" data-en="Based in Kyoto, Japan" data-ja="京都を拠点に活動">Based in Kyoto, Japan</p>
+  </section>
+</main>
+<footer class="site-footer"><span>© METOROM</span><a href="../../index.html" data-en="View all three designs" data-ja="3つのデザインを見る">View all three designs</a><a href="#home" data-en="Back to top ↑" data-ja="ページの先頭へ ↑">Back to top ↑</a></footer>

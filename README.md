@@ -1,116 +1,65 @@
-# MicroMelt Audio — Vite + Tailwind + Three.js
+# Metorom website directions
 
-A one-page site: About Us → 3D speaker experience → About the Project →
-Contact.
+The [ten-study gallery](concepts/index.html) compares five website families, each with two structurally distinct variants. Hero images are intentionally deferred. Every new study uses a flat CSS media placeholder sized and positioned for future imagery; no image is generated or sourced for these ten pages.
 
-## Run it
+| Family | Impeccable | Taste |
+| --- | --- | --- |
+| Monochrome product minimal | [The Object](concepts/monochrome/impeccable/index.html) | [Open by Design](concepts/monochrome/taste/index.html) |
+| Warm architectural editorial | [A Room to Listen In](concepts/warm/impeccable/index.html) | [Sound Belongs Somewhere](concepts/warm/taste/index.html) |
+| Colour-led tile catalogue | [Object Catalogue](concepts/colour/impeccable/index.html) | [Sound in Place](concepts/colour/taste/index.html) |
+| Soft gradient haze | [Atmosphere](concepts/haze/impeccable/index.html) | [Listening Report](concepts/haze/taste/index.html) |
+| Dark cinematic HUD | [Instrument](concepts/dark/impeccable/index.html) | [Field Notes](concepts/dark/taste/index.html) |
 
-```bash
-npm install
-npm run dev
-```
+The source references and design rationale are recorded in [site-families.md](design/inspiration/pinterest/site-families.md), [PRODUCT.md](PRODUCT.md), and [DESIGN.md](DESIGN.md). Shared concept behaviour lives in `src/concept-runtime.js`; each family owns its own CSS and page structure. Local `@fontsource` packages provide the typography without a live font service. The 21st bookmarked components informed hierarchy and navigation details; the free account currently has no component retrieval or AI generation credit, so the implementation is native HTML/CSS.
 
-## Page structure
+Three complete versions of the Metorom website live in separate folders:
 
-```
-About Us (static)
-  ↓ scroll
-3D speaker experience (pinned/sticky while scrolling through it)
-  ↓ scroll
-About the Project (static)
-  ↓ scroll
-Contact (static)
-```
+| Version | Home | Event | Direction |
+| --- | --- | --- | --- |
+| Atelier | versions/atelier/index.html | versions/atelier/event.html | Warm editorial typography and paper tones |
+| Signal | versions/signal/index.html | versions/signal/event.html | Dark instrument interface and electric color |
+| Journey | versions/journey/index.html | versions/journey/event.html | Expressive blue and coral visual storytelling |
 
-The 3D section uses a tall container with a `position: sticky` canvas
-inside it — that's what makes it stay pinned while you scroll through its
-own range, then release naturally into the next section. Its scroll
-progress is calculated relative to its own position on the page (see
-`updateProgress` in `src/scene.js`), not the whole document, so it doesn't
-care what's above or below it.
+The repository root links to both the ten new studies and the three previous interactive versions. All pages are built together by Vite. The interactive versions have their own page structures and theme stylesheets; they share the responsive viewer, sound, Silk Road path behavior, language controls, full-page scroll progress, and model loading progress.
 
-## 3D section interactions
+## Run locally
 
-- **Move your mouse** — subtle parallax tilt on top of whatever rotation
-  state you're scrolled to.
-- **Scroll** — rotates: front (0%) → back (50%) → top (100%), via the
-  `VIEWS` array in `src/scene.js`.
-- **Skip button** next to the progress bar (bottom left) — jumps straight
-  past the 3D section to About the Project.
-- **View dots** (Front/Back/Top, right edge) — show current state, click
-  to jump to one.
-- **Hotspot dots** — only on 5 whitelisted parts (`HOTSPOT_NAMES` near the
-  top of `scene.js`: Horn, Horn Driver Cover, Alpha 6A Right, Lab12, DSP
-  Back plate). Hover for a description tooltip, click to focus.
-- **Line of sight**: hotspots use a real raycast from the camera to each
-  part every frame — if something else is the nearest hit, the dot hides.
-  This is a genuine occlusion check now, not a rough facing-direction
-  guess.
-- **Click a dot → focus**: renders the full scene blurred, then re-renders
-  *only* the focused mesh sharply on top (masking it out from the blur) —
-  everything else stays blurred until you close focus.
+Requires a current Node.js version supported by Vite 8.
 
-## Typography & color
+    npm ci
+    npm run dev
 
-- Headings: `font-heading` (Helvetica Neue/Helvetica/Arial, bold).
-- Body copy: `font-body` (Jost, loaded from Google Fonts).
-- One accent color, `accent` in `tailwind.config.js` (`#FF4B3E`) — used
-  deliberately sparingly: hotspot dots, the active view dot, the contact
-  button, a couple of background accent blobs. Everything else stays
-  neutral so the accent still reads as "poppy" rather than blending in.
+Open the URL shown by Vite. The root gallery links to the concept gallery and the three interactive versions. To build all 18 pages:
 
-## Descriptions
+    npm run build
+    npm run preview
 
-Click a hotspot dot to add/edit a description — stored in the browser via
-`localStorage`, listed in the "Descriptions" panel (top right of the 3D
-section) with per-item removal and a "Clear all".
+The Vite base path is /Metorom/ for this repository's GitHub Pages URL. If the repository name changes, update base in vite.config.js.
 
-## Your model
+## Structure
 
-`public/models/assembly.glb` — compressed with `@gltf-transform/cli`
-(texture resize + WebP, mesh simplification, Meshopt geometry
-compression) while keeping every part as a separate node. See the
-pipeline commands in git history / prior README revisions if you need to
-re-run it on a new export — same idea: `dedup → resize → webp → weld →
-simplify → meshopt`, and always check node/mesh count afterward with
-`npx @gltf-transform/cli inspect` to make sure nothing got merged.
+- index.html: design chooser
+- concepts/index.html: gallery comparing all ten image-free studies
+- concepts/{monochrome,warm,colour,haze,dark}/{impeccable,taste}/: ten website studies
+- concepts/*/family.css: self-contained type, colour, and layout for each family
+- src/concept-runtime.js: lightweight full-page scroll progress for the studies
+- versions/{atelier,signal,journey}/: separate home and event pages
+- src/home.html, src/event.html: Atelier page structure and English/Japanese copy
+- src/home-signal.html, src/event-signal.html, src/signal.css: Signal
+- src/home-journey.html, src/event-journey.html, src/journey.css: Journey
+- src/atelier.css: additional Atelier visual treatment
+- src/main.js: language, navigation, asset paths, model progress, and page wiring
+- src/site.css: responsive layout and three visual themes
+- src/scene.js: scroll-controlled Three.js speaker model; sleeps while offscreen
+- src/silk-road.js: path-derived markers and scroll narrative
+- src/sound.js: optional Web Audio cues and oscilloscope canvas
+- public/models/assembly.glb: speaker model
+- public/images/: product render and measurement plots
 
-## Notes on recent fixes
+Sound starts only after the visitor enables it. Reduced-motion settings are respected. Expandable information uses native details elements. The speaker component descriptions are in a separate rail so they cannot cover the canvas. The full-page progress line follows document scroll, while the speaker viewer has a separate load bar that reaches 100% only after the model is prepared.
 
-- **Mesh shading**: the faceted/bad-triangulation look was flat per-face
-  normals surviving from the original export, not a topology problem —
-  `weld` alone doesn't fix that (it only merges bitwise-identical
-  vertices). Normals are now recomputed properly: averaged per unique
-  vertex *position* rather than per index, so shared surface points get
-  one consistent smooth normal regardless of how the source file indexed
-  them. If a future re-export still looks faceted, re-run that
-  normal-averaging step before `weld`/`meshopt` — see git history for the
-  script, or ask and I'll hand it over again.
-- **Japan map** (bottom of Contact): real simplified coastline data (the
-  four main islands — Honshu, Hokkaido, Kyushu, Shikoku — from
-  `world-atlas`'s 50m-resolution dataset), not a hand-drawn shape. Kyoto's
-  dot is placed from its actual coordinates (35.0116°N, 135.7681°E)
-  projected the same way.
-- **Tatami scene**: I don't have access to a licensed "person sitting" 3D
-  asset, so the figure is a small procedural low-poly form (primitives —
-  capsule torso, sphere head, folded-leg capsules) rather than an imported
-  model — deliberately stylized/faceless to fit the site's abstract visual
-  language instead of attempting fake realism. Swap it for a real rigged
-  character in `src/tatami-scene.js` (`buildSeatedFigure()`) if you get
-  one — the rest of the scene (floor, lighting, camera) doesn't depend on it.
+## Content that still needs real details
 
+The event page is a concept. Date, venue, price, and booking are explicitly marked “to be announced.” The contact section also awaits a real contact address. Update this content when it is confirmed; do not publish made-up details.
 
-```
-speaker-explode-vite/
-├── index.html          # all four sections
-├── src/
-│   ├── main.js           # DOM wiring: skip button, descriptions panel, inspector
-│   ├── scene.js           # Three.js scene, GLB loading, rotation, hotspots, focus-blur
-│   └── style.css          # Tailwind directives + hotspot/view-dot styles
-├── public/
-│   └── models/
-│       └── assembly.glb
-├── tailwind.config.js    # accent color + heading/body font tokens
-├── postcss.config.js
-└── vite.config.js
-```
+The Null Society reference uses licensed Maxeville Mono. This repository uses system typefaces instead of including that font without a license. If a license becomes available, the type stack can be updated in src/site.css.

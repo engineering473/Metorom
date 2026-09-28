@@ -1,0 +1,273 @@
+/* Atelier's opening reads like the first spread of an audio design journal. */
+.atelier-instrument { display: none; }
+
+body[data-theme='atelier'] .hero {
+  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  background: #f5f1e8;
+}
+
+body[data-theme='atelier'] .hero-copy {
+  padding-top: clamp(3rem, 5vw, 5.8rem);
+  padding-bottom: clamp(3rem, 5vw, 5.8rem);
+}
+
+body[data-theme='atelier'] .hero .eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  width: 100%;
+  color: var(--ink);
+}
+
+body[data-theme='atelier'] .hero .eyebrow::before {
+  width: 2.25rem;
+  height: 2px;
+  background: var(--accent);
+  content: '';
+}
+
+body[data-theme='atelier'] .hero-index {
+  margin: 0 0 0 auto;
+  color: var(--accent);
+}
+
+body[data-theme='atelier'] .display {
+  max-width: 11ch;
+  margin-block: auto .22em;
+  font-size: clamp(4.5rem, 7.8vw, 9rem);
+  font-weight: 500;
+  letter-spacing: -.082em;
+  line-height: .88;
+}
+
+body[data-theme='atelier'] .display em {
+  display: block;
+  color: var(--accent);
+  font-weight: 400;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+body[data-theme='atelier'] .lede {
+  max-width: 37ch;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  color: #454941;
+  font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+  line-height: 1.45;
+}
+
+body[data-theme='atelier'] .hero-actions {
+  gap: .7rem 1.2rem;
+}
+
+body[data-theme='atelier'] .hero-actions .button-secondary {
+  padding-inline: .4rem;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: .32em;
+}
+
+body[data-theme='atelier'] .hero-actions .button-secondary:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+body[data-theme='atelier'] .hero-footnote {
+  width: 100%;
+  margin-top: auto;
+  padding-top: clamp(2.5rem, 5vw, 5rem);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: .69rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+body[data-theme='atelier'] .hero-art {
+  min-height: min(760px, calc(100svh - var(--header-h) - 3rem));
+  margin: 1.5rem 0 1.5rem clamp(1.25rem, 2.5vw, 2.5rem);
+  color: #303c32;
+  background: #d9d2c3;
+  background-image: linear-gradient(#6c6b5717 1px, transparent 1px), linear-gradient(90deg, #6c6b5717 1px, transparent 1px);
+  background-size: 2rem 2rem;
+}
+
+body[data-theme='atelier'] .hero-art::before {
+  inset: 1rem;
+  border: 1px solid #626b5a65;
+  border-radius: 0;
+  opacity: 1;
+}
+
+body[data-theme='atelier'] .hero-art .art-ring,
+body[data-theme='atelier'] .hero-art .art-type {
+  display: none;
+}
+
+body[data-theme='atelier'] .atelier-instrument {
+  position: absolute;
+  inset: clamp(1.4rem, 2vw, 2rem);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(.57rem, .7vw, .73rem);
+  font-weight: 600;
+  letter-spacing: .1em;
+  line-height: 1.4;
+}
+
+.atelier-instrument-top,
+.atelier-instrument-scale {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.atelier-instrument-top { top: 0; }
+.atelier-instrument-scale { bottom: 2.25rem; }
+.atelier-instrument-scale span:nth-child(2) { text-align: center; }
+
+.atelier-instrument-disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(72%, 29rem);
+  aspect-ratio: 1;
+  border: 1px solid #273129;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 42%, #515a50 0 3%, #252f27 15%, #121914 31%, #252e25 39%, #101813 44%, #555f51 45%, #222b23 48%, #151d17 55%, #4b5549 56%, #212a22 57%, #151b16 66%, #28332a 67%, #d9d2c3 68%);
+  box-shadow: 0 1.2rem 2.4rem #313b332b, 0 0 0 1.15rem #d9d2c3, 0 0 0 calc(1.15rem + 1px) #555f51;
+  transform: translate(-50%, -54%);
+}
+
+.atelier-instrument-disc::before,
+.atelier-instrument-disc::after {
+  position: absolute;
+  border: 1px solid #424e4273;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.atelier-instrument-disc::before { inset: -15%; }
+.atelier-instrument-disc::after { inset: -24%; border-style: dashed; opacity: .6; }
+
+.atelier-instrument-core {
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #343e35, #111713 72%);
+  box-shadow: inset 0 0 1.4rem #0008, 0 0 0 1px #697469;
+}
+
+body[data-theme='atelier'] .hero-art .scope-canvas {
+  top: 60%;
+  left: 9%;
+  z-index: 4;
+  width: 82%;
+  height: 13%;
+  --scope-color: #ea643f;
+}
+
+body[data-theme='atelier'] .art-caption {
+  z-index: 4;
+  right: 2rem;
+  bottom: 1.5rem;
+  left: 2rem;
+  padding-top: .8rem;
+  border-top: 1px solid #52604e5a;
+  font-size: .62rem;
+}
+
+/* The event circle is the link and provides the only event teaser action. */
+.event-orbit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: 1.35rem;
+  padding: 1.4rem;
+  cursor: pointer;
+  transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.event-orbit:hover,
+.event-orbit:focus-visible {
+  background: var(--accent-ink);
+  color: var(--accent);
+  transform: rotate(0deg) scale(1.025);
+}
+
+.event-orbit .event-orbit-cta {
+  width: auto;
+  padding-top: .5rem;
+  border-top: 1px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: clamp(.58rem, .9vw, .75rem);
+  font-weight: 600;
+  letter-spacing: .1em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  body[data-theme='atelier'] .display { font-size: clamp(3.7rem, 7.5vw, 6rem); }
+  body[data-theme='atelier'] .hero-art { min-height: 550px; }
+}
+
+@media (max-width: 760px) {
+  body[data-theme='atelier'] .hero { display: flex; flex-direction: column; }
+  body[data-theme='atelier'] .hero-copy {
+    gap: 0;
+    padding: 2rem 0 1.35rem;
+  }
+  body[data-theme='atelier'] .hero .eyebrow { gap: .6rem; font-size: .58rem; }
+  body[data-theme='atelier'] .hero .eyebrow::before { width: 1.3rem; }
+  body[data-theme='atelier'] .display {
+    margin: 2rem 0 1rem;
+    font-size: clamp(3.6rem, 13vw, 6.2rem);
+  }
+  body[data-theme='atelier'] .lede {
+    max-width: 40ch;
+    margin-bottom: 1.4rem;
+    font-size: 1rem;
+  }
+  body[data-theme='atelier'] .hero-actions .button { min-height: 2.9rem; }
+  body[data-theme='atelier'] .hero-footnote {
+    margin-top: 1.8rem;
+    padding-top: .8rem;
+    font-size: .58rem;
+  }
+  body[data-theme='atelier'] .hero-art {
+    flex: none;
+    width: 100%;
+    min-height: clamp(320px, 62vw, 450px);
+    max-height: none;
+    margin: 0 0 1.25rem;
+  }
+  body[data-theme='atelier'] .atelier-instrument { inset: 1.25rem; }
+  body[data-theme='atelier'] .atelier-instrument-disc { width: min(54%, 18rem); }
+  body[data-theme='atelier'] .hero-art .scope-canvas { top: 62%; }
+  body[data-theme='atelier'] .art-caption { right: 1.25rem; left: 1.25rem; bottom: .8rem; }
+  .event-orbit { width: min(76vw, 320px); }
+}
+
+@media (max-width: 420px) {
+  body[data-theme='atelier'] .display { font-size: clamp(2.6rem, 12.7vw, 3.8rem); }
+  html[lang='ja'] body[data-theme='atelier'] .display em { white-space: normal; }
+  body[data-theme='atelier'] .hero-actions { gap: .25rem .7rem; }
+  body[data-theme='atelier'] .hero-actions :is(.button, .button-secondary) { font-size: .67rem; }
+  body[data-theme='atelier'] .atelier-instrument-disc { width: 58%; }
+  .event-orbit { width: min(78vw, 300px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-orbit { transition: none; }
+}
