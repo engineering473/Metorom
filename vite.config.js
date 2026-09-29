@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 const conceptInputs = Object.fromEntries(
   ['monochrome', 'warm', 'colour', 'haze', 'dark'].flatMap((family) =>
@@ -12,6 +14,8 @@ const conceptInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/Metorom/',
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: { '@': import.meta.dirname } },
   server: { port: 5173 },
   build: {
     rollupOptions: {
@@ -24,6 +28,7 @@ export default defineConfig({
         journey: resolve(import.meta.dirname, 'versions/journey/index.html'),
         journeyEvent: resolve(import.meta.dirname, 'versions/journey/event.html'),
         conceptGallery: resolve(import.meta.dirname, 'concepts/index.html'),
+        conceptColourTasteV2: resolve(import.meta.dirname, 'concepts/colour/taste-v2/index.html'),
         ...conceptInputs
       }
     }
