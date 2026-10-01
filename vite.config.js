@@ -29,6 +29,11 @@ export default defineConfig({
         journeyEvent: resolve(import.meta.dirname, 'versions/journey/event.html'),
         conceptGallery: resolve(import.meta.dirname, 'concepts/index.html'),
         conceptColourTasteV2: resolve(import.meta.dirname, 'concepts/colour/taste-v2/index.html'),
+        conceptColourTasteV2Contact: resolve(import.meta.dirname, 'concepts/colour/taste-v2/contact.html'),
+        conceptSculpturalV2: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/index.html'),
+        conceptSculpturalV2Contact: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/contact.html'),
+        conceptSculpturalV2Event: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/event.html'),
+        conceptSculpturalV2Future: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/future.html'),
         ...conceptInputs
       }
     }

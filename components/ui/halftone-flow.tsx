@@ -9,6 +9,7 @@ export type HalftoneFlowProps = {
   hue?: number;
   saturation?: number;
   brightness?: number;
+  waveDensity?: number;
   playing?: boolean;
   className?: string;
   style?: CSSProperties;
@@ -28,6 +29,7 @@ const FRAGMENT_SHADER = `
   uniform vec2 u_resolution;
   uniform float u_time;
   uniform float u_light;
+  uniform float u_waves;
 
   mat2 rotate(float angle) {
     float s = sin(angle);
@@ -44,12 +46,12 @@ const FRAGMENT_SHADER = `
     for (int i = 1; i < 4; i++) {
       float layer = float(i);
       flow *= rotate(0.065 * sin(time * 0.38 + layer));
-      flow.x += sin(flow.y * (2.4 + layer * 0.68) + time) * 0.22 / layer;
-      flow.y += cos(flow.x * (1.8 + layer * 0.48) - time * 0.82) * 0.19 / layer;
+      flow.x += sin(flow.y * (2.4 + layer * 0.68) * u_waves + time) * 0.16 / layer;
+      flow.y += cos(flow.x * (1.8 + layer * 0.48) * u_waves - time * 0.82) * 0.15 / layer;
     }
 
-    float wave = sin(flow.x * 5.2 + flow.y * 2.6 + sin(flow.y * 4.0 - time) * 0.5);
-    float current = cos(flow.y * 4.5 - flow.x * 1.8 + time * 0.74);
+    float wave = sin((flow.x * 5.2 + flow.y * 2.6) * u_waves + sin(flow.y * 4.0 * u_waves - time) * 0.5);
+    float current = cos((flow.y * 4.5 - flow.x * 1.8) * u_waves + time * 0.74);
     float intensity = smoothstep(-0.56, 0.88, wave * 0.68 + current * 0.32);
 
     float cellSize = clamp(shortSide / 116.0, 5.5, 10.0);
@@ -84,7 +86,7 @@ function compileShader(gl: WebGLRenderingContext, kind: number, source: string) 
   return null;
 }
 
-function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number) {
+function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number, waveDensity: number) {
   const context = canvas.getContext("2d");
   if (!context) return;
 
@@ -102,10 +104,10 @@ function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number
     for (let x = cellSize / 2; x < width; x += cellSize) {
       const px = (x - width / 2) / shortSide;
       const py = (y - height / 2) / shortSide;
-      const flowX = px + Math.sin(py * 3.08) * 0.22 + Math.sin(py * 3.76) * 0.11;
-      const flowY = py + Math.cos(flowX * 2.28) * 0.19 + Math.cos(flowX * 2.76) * 0.095;
-      const wave = Math.sin(flowX * 5.2 + flowY * 2.6 + Math.sin(flowY * 4) * 0.5);
-      const current = Math.cos(flowY * 4.5 - flowX * 1.8);
+      const flowX = px + Math.sin(py * 3.08 * waveDensity) * 0.16 + Math.sin(py * 3.76 * waveDensity) * 0.08;
+      const flowY = py + Math.cos(flowX * 2.28 * waveDensity) * 0.15 + Math.cos(flowX * 2.76 * waveDensity) * 0.08;
+      const wave = Math.sin((flowX * 5.2 + flowY * 2.6) * waveDensity + Math.sin(flowY * 4 * waveDensity) * 0.5);
+      const current = Math.cos((flowY * 4.5 - flowX * 1.8) * waveDensity);
       const intensity = clamp((wave * 0.68 + current * 0.32 + 0.56) / 1.44, 0, 1);
       const radius = cellSize * (0.045 + intensity * 0.41);
       context.globalAlpha = 0.15 + intensity * 0.82;
@@ -122,6 +124,7 @@ export function HalftoneFlow({
   hue = 0,
   saturation = 1,
   brightness = 1,
+  waveDensity = 1,
   playing = true,
   className,
   style,
@@ -134,6 +137,7 @@ export function HalftoneFlow({
   const safeHue = clamp(hue, -180, 180);
   const safeSaturation = clamp(saturation, 0, 2);
   const safeBrightness = clamp(brightness, 0.35, 1.65);
+  const safeWaveDensity = clamp(waveDensity, 0.5, 2.5);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -167,6 +171,7 @@ export function HalftoneFlow({
     let resolution: WebGLUniformLocation | null = null;
     let time: WebGLUniformLocation | null = null;
     let light: WebGLUniformLocation | null = null;
+    let waves: WebGLUniformLocation | null = null;
     let lost = false;
 
     if (ready && gl && program && buffer) {
@@ -182,6 +187,7 @@ export function HalftoneFlow({
       resolution = gl.getUniformLocation(program, "u_resolution");
       time = gl.getUniformLocation(program, "u_time");
       light = gl.getUniformLocation(program, "u_light");
+      waves = gl.getUniformLocation(program, "u_waves");
     }
 
     let visible = false;
@@ -196,6 +202,7 @@ export function HalftoneFlow({
       gl.uniform2f(resolution, size.width, size.height);
       gl.uniform1f(time, motion.matches ? 0 : elapsed);
       gl.uniform1f(light, safeMode === "light" ? 1 : 0);
+      gl.uniform1f(waves, safeWaveDensity);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -241,7 +248,7 @@ export function HalftoneFlow({
         }
         draw();
       } else {
-        drawFallback(fallback!, safeMode, size.width, size.height);
+        drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity);
       }
     }
 
@@ -253,7 +260,7 @@ export function HalftoneFlow({
       glCanvas.style.display = "none";
       fallback!.hidden = false;
       fallback!.style.display = "block";
-      drawFallback(fallback!, safeMode, size.width, size.height);
+      drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity);
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -293,7 +300,7 @@ export function HalftoneFlow({
       if (gl && vertex) gl.deleteShader(vertex);
       if (gl && fragment) gl.deleteShader(fragment);
     };
-  }, [safeMode]);
+  }, [safeMode, safeWaveDensity]);
 
   useEffect(() => {
     playingRef.current = playing;

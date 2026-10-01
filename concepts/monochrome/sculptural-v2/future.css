@@ -1,0 +1,46 @@
+.sc-future-page{padding-top:103px}
+.sc-future-hero{display:grid;grid-template-columns:54% 46%;min-height:calc(100svh - 103px);background:var(--paper)}
+.sc-future-hero__copy{display:flex;flex-direction:column;min-height:680px;padding:26px max(3.7vw,24px) 28px}
+.sc-future-hero__meta{display:flex;justify-content:space-between;gap:1rem;font-size:11px;font-weight:600;letter-spacing:.09em;color:var(--muted)}
+.sc-future-hero__statement{margin:auto 0;padding:72px 0 52px}
+.sc-future-hero h1{font-size:clamp(4.5rem,8vw,8.3rem);line-height:.93;text-wrap:balance}
+.sc-future-hero__statement p{max-width:42ch;margin-top:39px;font-size:15px}
+.sc-future-hero__statement .sc-outline-link{margin-top:35px}
+.sc-future-hero__qualification{border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.sc-future-hero__drawing{position:relative;min-height:680px;overflow:hidden;background:#dfe8df;color:#607d68}
+.sc-future-hero__drawing svg{position:absolute;inset:-8% -10%;width:120%;height:116%;fill:none;stroke:currentColor;stroke-width:1.3;vector-effect:non-scaling-stroke}
+.sc-future-hero__drawing span{position:absolute;right:28px;bottom:25px;left:28px;border-top:1px solid #829987;padding-top:12px;font-size:10px;font-weight:600;letter-spacing:.09em;color:#365440}
+.sc-future-intro{padding-top:clamp(125px,14vw,200px);padding-bottom:clamp(125px,14vw,200px);background:#e9ede8}
+.sc-future-intro h2,.sc-future-studies h2,.sc-future-close h2{font-size:clamp(3.3rem,6vw,6rem);line-height:1.04;text-wrap:balance}
+.sc-future-intro p{max-width:53ch;margin:45px 0 0 auto;font-size:15px}
+.sc-future-studies{padding-top:clamp(120px,13vw,190px);padding-bottom:clamp(130px,14vw,210px);background:var(--paper)}
+.sc-future-studies__heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.52fr);align-items:end;gap:5vw}
+.sc-future-studies__heading p{max-width:38ch;padding-bottom:7px;font-size:15px}
+.sc-future-studies__list{margin-top:clamp(70px,8vw,120px);border-top:1px solid var(--ink)}
+.sc-future-study{display:grid;grid-template-columns:20% 43% minmax(0,1fr);gap:3.5%;align-items:start;border-bottom:1px solid var(--line);padding:43px 0 50px}
+.sc-future-study__meta{display:flex;flex-direction:column;gap:13px;padding-top:9px;font-size:10px;font-weight:600;letter-spacing:.09em;color:var(--muted)}
+.sc-future-study__meta span:last-child{color:#5f7865}
+.sc-future-study h3{max-width:13ch;font-size:clamp(2.25rem,3.35vw,3.8rem);font-weight:300;letter-spacing:-.038em;line-height:1.12;text-wrap:balance}
+.sc-future-study__copy p{max-width:40ch;margin-top:25px;font-size:14px}
+.sc-future-figure{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:center;aspect-ratio:1.46;min-height:210px;overflow:hidden;background:#e8ede8;color:#607569}
+.sc-future-figure svg{display:block;width:100%;height:100%}
+.sc-future-figure__fine{fill:none;stroke:currentColor;stroke-width:1.2}
+.sc-future-figure__signal{fill:none;stroke:var(--sc-accent);stroke-width:1.5}
+.sc-future-figure__point{fill:var(--sc-accent)}
+.sc-future-figure--room{background:#e0e8e2}
+.sc-future-figure--exchange{background:#e9e9e3}
+.sc-future-figure span{position:absolute;right:14px;bottom:12px;left:14px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#4a6353}
+.sc-future-close{padding-top:clamp(120px,15vw,220px);padding-bottom:clamp(120px,15vw,220px);background:#19231e;color:var(--paper)}
+.sc-future-close .sc-rail-label{color:#c4d4c5}
+.sc-future-close>div{display:flex;flex-direction:column;align-items:flex-start}
+.sc-future-close p{max-width:40ch;margin:36px 0 0 auto;font-size:15px}
+.sc-future-close__links{display:flex;align-items:center;gap:30px;align-self:flex-end;margin-top:32px}
+.sc-future-close .sc-outline-link{border-color:var(--paper)}
+.sc-future-close .sc-outline-link:hover{color:#19231e}
+.sc-future-close__secondary{display:inline-flex;align-items:center;gap:9px;border-bottom:1px solid currentColor;padding-bottom:7px;font-size:13px;transition:color .2s ease}
+.sc-future-close__secondary:hover{color:#bfd5c2}
+@media(max-width:1050px){.sc-future-hero{grid-template-columns:1fr 1fr}.sc-future-hero h1{font-size:clamp(4.3rem,8vw,7rem)}.sc-future-study{grid-template-columns:19% 41% minmax(0,1fr);gap:3%}}
+@media(max-width:760px){.sc-future-page{padding-top:83px}.sc-future-hero{display:block}.sc-future-hero__copy{min-height:600px;padding:24px 20px 30px}.sc-future-hero__meta span:last-child{display:none}.sc-future-hero__statement{padding:70px 0 48px}.sc-future-hero h1{font-size:clamp(4.2rem,14vw,6.6rem)}.sc-future-hero__statement p{max-width:39ch;margin-top:30px;font-size:14px}.sc-future-hero__statement .sc-outline-link{margin-top:28px}.sc-future-hero__qualification{font-size:10px}.sc-future-hero__drawing{min-height:320px}.sc-future-hero__drawing span{right:20px;bottom:20px;left:20px}.sc-future-intro,.sc-future-studies,.sc-future-close{padding-top:100px;padding-bottom:100px}.sc-future-intro h2,.sc-future-studies h2,.sc-future-close h2{font-size:clamp(3rem,10vw,5.4rem)}.sc-future-intro p{margin:30px 0 0;font-size:14px}.sc-future-studies__heading{display:block}.sc-future-studies__heading p{margin-top:28px;padding:0;font-size:14px}.sc-future-studies__list{margin-top:60px}.sc-future-study{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;padding:30px 0 35px}.sc-future-study__meta{grid-column:1/-1;flex-direction:row;justify-content:space-between;padding:0}.sc-future-study h3{font-size:clamp(1.8rem,6vw,2.8rem)}.sc-future-study__copy p{margin-top:18px;font-size:12px}.sc-future-figure{min-height:180px;aspect-ratio:1}.sc-future-close p{margin:30px 0 0;font-size:14px}.sc-future-close__links{align-self:flex-start;align-items:flex-start;flex-direction:column;gap:25px}}
+@media(max-width:500px){.sc-future-study{display:block}.sc-future-study__meta{margin-bottom:28px}.sc-future-study__copy p{margin-top:16px;font-size:13px}.sc-future-figure{height:230px;aspect-ratio:auto;margin-top:30px}.sc-future-hero__drawing{min-height:270px}}
+@media(max-width:380px){.sc-future-hero__copy{min-height:550px}.sc-future-hero h1{font-size:14vw}.sc-future-hero__drawing{min-height:240px}}
+@media(prefers-reduced-motion:reduce){.sc-future-close__secondary{transition:none}}

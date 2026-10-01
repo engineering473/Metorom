@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
-const MODEL_URL = new URL('../../models/assembly.glb', location.href).href;
+const MODEL_URL = new URL(`${import.meta.env.BASE_URL}models/assembly.glb`, location.origin).href;
 const FRONT_ROTATION_Y = -Math.PI / 2;
 const EDGE_ANGLE_THRESHOLD = 15;
 const MAX_TILT = 0.05;
@@ -35,7 +35,7 @@ function viewNameAt(progress) {
   return VIEWS[2].name;
 }
 
-export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProgress = () => {} }) {
+export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProgress = () => {}, renderFallback = true, appearance = 'wireframe', captureFrames = false }) {
   if (!canvas || !sectionEl) {
     throw new Error('initScene requires canvas and sectionEl.');
   }
@@ -47,19 +47,26 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
   let inView = false;
   let modelReady = false;
   let disposed = false;
+  let failed = false;
   let progress = 0;
+  let renderedProgress = 0;
   let modelRadius = 1;
   let modelSize = new THREE.Vector3(1, 1, 1);
   let lastWidth = 0;
   let lastHeight = 0;
   const pointer = { x: 0, y: 0 };
   const smoothedPointer = { x: 0, y: 0 };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pixelRatio = () => Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.25 : 1.5);
 
   function showFallback() {
-    if (disposed || canvas.parentElement?.querySelector('[data-scene-fallback]')) return;
+    if (disposed || failed || canvas.parentElement?.querySelector('[data-scene-fallback]')) return;
+    failed = true;
     stopRendering();
     onLoadProgress(0, 'error');
     canvas.style.display = 'none';
+
+    if (!renderFallback) return;
 
     const parent = canvas.parentElement;
     if (!parent) return;
@@ -87,9 +94,13 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
 
   try {
     onLoadProgress(0, 'loading');
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2));
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power', preserveDrawingBuffer: captureFrames });
+    renderer.setPixelRatio(pixelRatio());
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    if (appearance === 'rendered') {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+    }
   } catch (error) {
     console.warn('Could not start the 3D speaker view.', error);
     showFallback();
@@ -99,6 +110,15 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
   canvas.setAttribute('role', 'img');
 
   const scene = new THREE.Scene();
+  if (appearance === 'rendered') {
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c2ae, 2));
+    const key = new THREE.DirectionalLight(0xffffff, 2.4);
+    key.position.set(-4, 7, 9);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xc7d9ee, 0.9);
+    fill.position.set(6, 1, -5);
+    scene.add(fill);
+  }
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 500);
   const pivot = new THREE.Group();
   pivot.rotation.y = FRONT_ROTATION_Y;
@@ -131,10 +151,11 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
     if (width !== lastWidth || height !== lastHeight) {
       lastWidth = width;
       lastHeight = height;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2));
+      renderer.setPixelRatio(pixelRatio());
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       fitCamera();
+      startRendering();
     }
     updateProgress();
   }
@@ -145,15 +166,18 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
     const scrollRange = Math.max(1, rect.height - window.innerHeight);
     progress = clamp01(-rect.top / scrollRange);
     onProgress(progress, viewNameAt(progress));
+    startRendering();
   }
 
   function render() {
     frame = 0;
-    if (disposed || !inView || document.hidden || !modelReady) return;
+    if (disposed || failed || !inView || document.hidden || !modelReady) return;
 
-    smoothedPointer.x = lerp(smoothedPointer.x, pointer.x, 0.08);
-    smoothedPointer.y = lerp(smoothedPointer.y, pointer.y, 0.08);
-    const base = rotationAt(progress);
+    const smoothing = reducedMotion ? 1 : 0.14;
+    renderedProgress = lerp(renderedProgress, progress, smoothing);
+    smoothedPointer.x = lerp(smoothedPointer.x, pointer.x, smoothing);
+    smoothedPointer.y = lerp(smoothedPointer.y, pointer.y, smoothing);
+    const base = rotationAt(renderedProgress);
     turntable.rotation.x = -smoothedPointer.y * MAX_TILT;
     turntable.rotation.y = base.ry + smoothedPointer.x * MAX_TILT;
     zTurntable.rotation.z = base.rz;
@@ -165,11 +189,17 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
       showFallback();
       return;
     }
-    frame = requestAnimationFrame(render);
+    if (
+      Math.abs(renderedProgress - progress) > 0.001 ||
+      Math.abs(smoothedPointer.x - pointer.x) > 0.001 ||
+      Math.abs(smoothedPointer.y - pointer.y) > 0.001
+    ) {
+      frame = requestAnimationFrame(render);
+    }
   }
 
   function startRendering() {
-    if (!frame && !disposed && inView && !document.hidden && modelReady) {
+    if (!frame && !disposed && !failed && inView && !document.hidden && modelReady) {
       frame = requestAnimationFrame(render);
     }
   }
@@ -180,14 +210,17 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
   }
 
   function onPointerMove(event) {
+    if (reducedMotion) return;
     const rect = canvas.getBoundingClientRect();
     pointer.x = clamp01((event.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
     pointer.y = clamp01((event.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;
+    startRendering();
   }
 
   function onPointerLeave() {
     pointer.x = 0;
     pointer.y = 0;
+    startRendering();
   }
 
   function onVisibilityChange() {
@@ -230,24 +263,47 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
       model.position.sub(center);
       zTurntable.add(model);
 
-      const edgeMaterial = new THREE.LineBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.72,
-      });
-      model.traverse(object => {
-        if (!object.isMesh) return;
-        object.material = new THREE.MeshBasicMaterial({
+      if (appearance === 'wireframe') {
+        const edgeMaterial = new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.72,
+        });
+        const surfaceMaterial = new THREE.MeshBasicMaterial({
           color: 0x11110f,
           transparent: true,
           opacity: 0.14,
           depthWrite: true,
         });
-        object.add(new THREE.LineSegments(
-          new THREE.EdgesGeometry(object.geometry, EDGE_ANGLE_THRESHOLD),
-          edgeMaterial,
-        ));
-      });
+        model.traverse(object => {
+          if (!object.isMesh) return;
+          object.material = surfaceMaterial;
+          object.add(new THREE.LineSegments(
+            new THREE.EdgesGeometry(object.geometry, EDGE_ANGLE_THRESHOLD),
+            edgeMaterial,
+          ));
+        });
+      } else {
+        // The GLB was exported with several named materials but default white
+        // base colours. Restore the dark driver and trim treatment of the
+        // supplied studio render while retaining its original textures.
+        const materialColors = {
+          'Soft Rubber': 0x252a26,
+          'Warnex Black': 0x222723,
+          'Special Yellow Kevlar': 0x202521,
+          'Leather_-_Perforated_(Yellow)': 0x232923,
+          'Fabric mesh': 0x343b35,
+          'Dark metal': 0x343a35,
+        };
+        model.traverse(object => {
+          if (!object.isMesh) return;
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach(material => {
+            const color = materialColors[material.name];
+            if (color && material.color) material.color.setHex(color);
+          });
+        });
+      }
 
       fitCamera();
       modelReady = true;
@@ -266,12 +322,13 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
     showFallback();
   });
 
-  canvas.addEventListener('webglcontextlost', event => {
+  function onContextLost(event) {
     event.preventDefault();
     showFallback();
-  }, { once: true });
+  }
+  canvas.addEventListener('webglcontextlost', onContextLost, { once: true });
 
-  return () => {
+  const dispose = () => {
     disposed = true;
     stopRendering();
     observer?.disconnect();
@@ -281,6 +338,30 @@ export function initScene({ canvas, sectionEl, onProgress = () => {}, onLoadProg
     document.removeEventListener('visibilitychange', onVisibilityChange);
     window.removeEventListener('scroll', updateProgress);
     window.removeEventListener('resize', resize);
+    canvas.removeEventListener('webglcontextlost', onContextLost);
+    scene.traverse(object => {
+      if (object.isMesh || object.isLineSegments) object.geometry?.dispose();
+      if (object.material) {
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach(material => material.dispose());
+      }
+    });
     renderer.dispose();
   };
+
+  // Used by the offline capture harness only. The site plays the resulting
+  // video and does not load this scene for its scroll-controlled speaker.
+  if (captureFrames) {
+    dispose.captureAt = value => {
+      if (!modelReady || disposed || failed) return false;
+      stopRendering();
+      const position = clamp01(value);
+      const rotation = rotationAt(position);
+      turntable.rotation.set(0, rotation.ry, 0);
+      zTurntable.rotation.z = rotation.rz;
+      renderer.render(scene, camera);
+      return true;
+    };
+  }
+  return dispose;
 }

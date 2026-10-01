@@ -1,0 +1,44 @@
+.frc-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:clamp(65px,8vw,125px)}
+.frc-card{position:relative;display:flex;flex-direction:column;min-height:398px;overflow:hidden;border:1px solid #d1dcd3;border-radius:24px;background:#f8faf8;box-shadow:0 3px 16px #1b30220a;isolation:isolate;transition:transform .3s cubic-bezier(.2,.75,.2,1),box-shadow .3s ease}
+.frc-card[data-motion-card]{opacity:0;transform:translateY(26px);filter:blur(5px);transition:opacity .75s ease,transform .75s cubic-bezier(.18,.7,.2,1),filter .75s ease,box-shadow .3s ease}
+.frc-card[data-motion-card].is-visible{opacity:1;transform:none;filter:none;animation:none}
+.frc-card[data-motion-card]:nth-child(2){transition-delay:.12s}
+.frc-card[data-motion-card].is-visible:hover{transform:translateY(-4px)}
+.frc-card:hover{transform:translateY(-4px);box-shadow:0 20px 42px #1b30221c}
+.frc-card::before{position:absolute;z-index:-1;inset:0 0 54px auto;width:68%;background:linear-gradient(270deg,#dce8dfb8 0%,#eaf0e991 54%,transparent 100%);content:"";pointer-events:none}
+.frc-card--system::before{background:linear-gradient(270deg,#dce8e2cf 0%,#eaf0e980 54%,transparent 100%)}
+.frc-card__main{position:relative;z-index:2;flex:1;padding:29px 32px 28px;pointer-events:none}
+.frc-card__header{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.frc-card__header h3{font-size:17px;font-weight:600;letter-spacing:-.025em;line-height:1.2}
+.frc-card__header>span{flex-shrink:0;border:1px solid #c5d3c8;border-radius:999px;padding:7px 11px;background:#ffffffb0;font-size:11px;font-weight:600;letter-spacing:.015em;color:#41584b}
+.frc-card__legend{display:flex;flex-wrap:wrap;gap:8px 17px;margin-top:15px;color:#526359;font-size:11px;font-weight:500}
+.frc-card__legend>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.frc-card__legend i,.frc-plot__tooltip i{display:inline-block;flex:0 0 auto;width:7px;height:7px;border-radius:50%}
+.frc-card__metric{position:absolute;top:47%;left:32px;display:flex;flex-direction:column;gap:0;transform:translateY(-32%)}
+.frc-card__metric strong{font-size:clamp(5rem,7.6vw,8rem);font-weight:300;line-height:.9;letter-spacing:-.07em;font-variant-numeric:tabular-nums}
+.frc-card__metric span{margin-top:9px;color:#53645a;font-size:12px;font-weight:500}
+.frc-card__chart{position:absolute;z-index:1;top:80px;right:15px;bottom:54px;width:68%}
+.frc-plot{position:relative;width:100%;height:100%;outline-offset:2px;cursor:crosshair;touch-action:pan-y}
+.frc-plot svg{display:block;width:100%;height:100%;overflow:visible}
+.frc-plot__grid-line{stroke:#92a296;stroke-width:1;opacity:.24;stroke-dasharray:2 5;vector-effect:non-scaling-stroke}
+.frc-plot__series{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1px 1px #ffffffaa)}
+.frc-card .frc-plot__series{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s cubic-bezier(.18,.7,.2,1)}
+.frc-card.is-visible .frc-plot__series{stroke-dashoffset:0}
+.frc-card .frc-plot__series:nth-of-type(2){transition-delay:.12s}
+.frc-card .frc-plot__series:nth-of-type(3){transition-delay:.24s}
+.frc-plot__unit,.frc-plot__tick{font-family:Manrope,sans-serif;font-size:11px;font-weight:600;fill:#65776a}
+.frc-plot__unit{font-size:11px;letter-spacing:.08em}
+.frc-plot__cursor line{stroke:#53685a;stroke-width:1;stroke-dasharray:3 4;opacity:.65;vector-effect:non-scaling-stroke}
+.frc-plot__cursor circle{stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke}
+.frc-plot__tooltip{position:absolute;z-index:3;top:10%;display:flex;flex-direction:column;gap:5px;min-width:160px;border:1px solid #c6d3c8;border-radius:11px;padding:9px 11px;background:#fffffff5;box-shadow:0 10px 25px #1b302225;pointer-events:none;transform:translateX(-50%);color:#213328;font-size:10px;white-space:nowrap}
+.frc-plot__tooltip strong{margin-bottom:3px;font-size:11px}
+.frc-plot__tooltip span{display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:6px}
+.frc-plot__tooltip b{margin-left:8px;font-weight:600}
+.frc-card__footer{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:54px;border-top:1px solid #d5ded6;padding:12px 32px;background:#ffffffed;color:#647369;font-size:10px;font-weight:600;letter-spacing:.05em}
+.frc-card__footer>span:last-child{color:#364d3e;letter-spacing:0;text-align:right;text-transform:none}
+.frc-card__footer strong{margin-left:6px;font-size:12px;color:#264637;white-space:nowrap}
+.frc-card__footer strong small{font-size:10px;font-weight:500;color:#647369}
+@media(min-width:1280px){.frc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.frc-card{min-height:386px}.frc-card__main{padding:25px 23px}.frc-card__header{gap:8px}.frc-card__header h3{font-size:14px}.frc-card__header>span{padding:6px 8px;font-size:9px}.frc-card__legend{gap:6px 10px;margin-top:13px;font-size:9px}.frc-card__metric{top:48%;left:23px}.frc-card__metric strong{font-size:5.7rem}.frc-card__metric span{font-size:10px}.frc-card__chart{top:91px;right:7px;bottom:67px;width:64%}.frc-plot__tick{font-size:17px}.frc-plot__unit{font-size:16px}.frc-card__footer{min-height:67px;padding:10px 22px;line-height:1.3}.frc-card__footer>span:first-child{max-width:144px}.frc-card__variance{max-width:160px}.frc-card__footer strong{display:block;margin:2px 0 0;font-size:11px}.frc-card__footer strong small{font-size:9px}}
+@media(max-width:760px){.frc-grid{gap:10px;margin-top:55px}.frc-card{min-height:485px;border-radius:18px}.frc-card::before{inset:130px 0 54px;width:100%;background:linear-gradient(180deg,#f8faf8,#e3ede5c7)}.frc-card__main{padding:22px 20px}.frc-card__header{align-items:start}.frc-card__header h3{max-width:180px;font-size:15px}.frc-card__header>span{font-size:10px;padding:6px 8px}.frc-card__legend{margin-top:11px;gap:7px 12px;font-size:10px}.frc-card__metric{top:112px;left:20px;transform:none}.frc-card__metric strong{font-size:5rem}.frc-card__metric span{font-size:11px}.frc-card__chart{top:205px;right:14px;bottom:58px;left:11px;width:auto}.frc-card__footer{min-height:58px;padding:10px 20px;font-size:9px}.frc-card__footer strong{display:block;margin-left:0;font-size:10px}.frc-plot__tooltip{top:5%;min-width:145px}}
+@media(max-width:380px){.frc-card__header>span{font-size:9px}.frc-card__footer{gap:8px}.frc-card__footer>span:first-child{max-width:120px}.frc-plot__tooltip{top:13%}}
+@media(prefers-reduced-motion:reduce){.frc-card,.frc-card[data-motion-card]{opacity:1;transform:none;filter:none;transition:none}.frc-card .frc-plot__series{stroke-dashoffset:0;transition:none}}

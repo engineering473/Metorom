@@ -13,5 +13,5 @@
     "types": ["vite/client"],
     "paths": { "@/*": ["./*"] }
   },
-  "include": ["components/**/*.tsx", "concepts/colour/taste-v2/**/*.tsx"]
+  "include": ["components/**/*.tsx", "concepts/colour/taste-v2/**/*.tsx", "concepts/monochrome/sculptural-v2/**/*.tsx"]
 }

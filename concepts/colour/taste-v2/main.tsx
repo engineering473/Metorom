@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import HalftoneFlow from "@/components/ui/halftone-flow";
+import SiteChrome from "@/components/ui/site-chrome";
+import SpeakerViewer from "@/components/ui/speaker-viewer";
 import StatsBento from "@/components/ui/stats-bento";
 import "./styles.css";
 
 const EVENT_URL = "../../../versions/atelier/event.html";
+const ROOM_IMAGE = `${import.meta.env.BASE_URL}images/taste-v2/benihibata-room.webp`;
+const EARTH_IMAGE = `${import.meta.env.BASE_URL}images/taste-v2/rikyucha-room.webp`;
+const LISTENER_IMAGE = `${import.meta.env.BASE_URL}images/taste-v2/listener-speaker.webp`;
 
 const drivers = [
   {
@@ -14,6 +19,8 @@ const drivers = [
     description: "A dedicated acoustic path for the part of music we hear most directly.",
     detail: "The current design places 608 mm between the midrange units. Their position is listened to and measured as part of the complete system.",
     tone: "warm",
+    image: EARTH_IMAGE,
+    visualLabel: "MIDRANGE / IN CONTEXT",
   },
   {
     number: "02",
@@ -22,6 +29,8 @@ const drivers = [
     description: "A compression driver and horn shape how high frequencies travel into the room.",
     detail: "Horizontal directivity measurements help us understand the system beyond a single listening position.",
     tone: "rust",
+    image: ROOM_IMAGE,
+    visualLabel: "HORN / IN CONTEXT",
   },
   {
     number: "03",
@@ -30,6 +39,8 @@ const drivers = [
     description: "A low-frequency foundation considered with the cabinet and the room around it.",
     detail: "Its role is tuned alongside the other paths. The system is designed as a whole, rather than as a collection of separate drivers.",
     tone: "ink",
+    image: LISTENER_IMAGE,
+    visualLabel: "LOW END / LISTENING SCALE",
   },
 ] as const;
 
@@ -56,77 +67,31 @@ const method = [
   },
 ] as const;
 
-function makeWavePath() {
-  const parts: string[] = [];
-  for (let x = 0; x <= 1200; x += 5) {
-    const swell = 1.8 + 4.8 * Math.pow(Math.sin((x / 1200) * Math.PI * 7), 2);
-    const y = 9 + Math.sin(x * 0.12) * swell * 0.68 + Math.sin(x * 0.31) * swell * 0.2;
-    parts.push(`${x === 0 ? "M" : "L"}${x} ${y.toFixed(2)}`);
-  }
-  return parts.join(" ");
-}
-
-const WAVE_PATH = makeWavePath();
-
-function usePageProgress() {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const range = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(range > 0 ? Math.min(100, Math.max(0, (window.scrollY / range) * 100)) : 100);
-    };
-    const requestUpdate = () => {
-      if (!frame) frame = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-    return () => {
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  return progress;
-}
-
-function PageProgress() {
-  const progress = usePageProgress();
-  return (
-    <div className="page-progress" role="progressbar" aria-label="Page progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
-      <svg className="page-progress__track" viewBox="0 0 1200 18" preserveAspectRatio="none" aria-hidden="true">
-        <path d={WAVE_PATH} />
-      </svg>
-      <svg className="page-progress__value" viewBox="0 0 1200 18" preserveAspectRatio="none" aria-hidden="true" style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}>
-        <path d={WAVE_PATH} />
-      </svg>
-    </div>
-  );
-}
-
 function App() {
   const [motionEnabled, setMotionEnabled] = useState(() =>
     typeof window === "undefined" || !window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
 
+  useEffect(() => {
+    const elements = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <PageProgress />
-      <header className="site-header" id="top">
-        <a href="#top" className="site-header__brand" aria-label="Metorom, back to top">METOROM<span className="site-header__brand-dot">.</span></a>
-        <nav className="site-header__nav" aria-label="Main navigation">
-          <a href="#system">System</a>
-          <a href="#components">Components</a>
-          <a href="#method">Method</a>
-          <a href="#event">Event</a>
-        </nav>
-        <a className="site-header__original" href="../taste/index.html">Original study <span aria-hidden="true">↗</span></a>
-      </header>
+      <SiteChrome />
 
       <main id="main">
         <section className="hero page-shell" aria-labelledby="hero-title">
@@ -160,26 +125,37 @@ function App() {
           <div className="hero__foot"><span>SCROLL TO EXPLORE THE SYSTEM</span><span>LISTEN / MEASURE / REVISE</span></div>
         </section>
 
+        <div className="hero-bridge page-shell" data-reveal aria-hidden="true">
+          <span>FROM SOUND TO OBJECT</span><span className="hero-bridge__rule" /><span>↓</span>
+        </div>
+
         <section className="system page-shell" id="system" aria-labelledby="system-label">
-          <div className="section-heading section-heading--compact">
+          <div className="section-heading section-heading--compact" data-reveal>
             <span className="section-index" id="system-label">01 / SYSTEM AT A GLANCE</span>
             <p>One object, several conversations between driver, cabinet, room, and listener.</p>
           </div>
-          <StatsBento />
+          <div data-reveal><StatsBento /></div>
+          <figure className="system-scene bento-tile" data-reveal>
+            <img src={ROOM_IMAGE} alt="Rust-coloured Metorom speaker set among dense green foliage" width="1600" height="900" loading="lazy" decoding="async" />
+            <figcaption><span>01 / A SYSTEM IN SPACE</span><span>FORM FOLLOWS THE WAY WE LISTEN</span></figcaption>
+          </figure>
         </section>
 
+        <SpeakerViewer />
+
         <section className="components page-shell" id="components" aria-labelledby="components-title">
-          <div className="section-heading">
+          <div className="section-heading" data-reveal>
             <span className="section-index">02 / COMPONENTS</span>
             <h2 id="components-title">Built from<br /><em>clear parts.</em></h2>
             <p>Each path has a purpose. The interest lies in how they meet.</p>
           </div>
-          <div className="component-grid">
+          <div className="component-grid" data-reveal>
             {drivers.map((driver) => (
               <article className={`component-card component-card--${driver.tone} bento-tile`} key={driver.number}>
                 <div className="component-card__visual" aria-hidden="true">
+                  <img src={driver.image} alt="" loading="lazy" decoding="async" />
                   <span className="component-card__visual-index">{driver.number}</span>
-                  <span className="component-card__placeholder">PRODUCT IMAGE RESERVED</span>
+                  <span className="component-card__visual-label">{driver.visualLabel}</span>
                 </div>
                 <div className="component-card__content">
                   <span className="tile-eyebrow">{driver.designation}</span>
@@ -196,12 +172,12 @@ function App() {
         </section>
 
         <section className="method page-shell" id="method" aria-labelledby="method-title">
-          <div className="section-heading section-heading--method">
+          <div className="section-heading section-heading--method" data-reveal>
             <span className="section-index">03 / METHOD</span>
             <h2 id="method-title">A route,<br /><em>not a formula.</em></h2>
             <p>The Silk Road is a metaphor for exchange. Different disciplines bring useful ideas into the same room.</p>
           </div>
-          <div className="method-grid">
+          <div className="method-grid" data-reveal>
             {method.map((step) => (
               <article className="method-card bento-tile" key={step.number}>
                 <span className="method-card__number">{step.number}</span>
@@ -211,17 +187,26 @@ function App() {
                 </div>
               </article>
             ))}
+            <div className="method-image bento-tile">
+              <img src={EARTH_IMAGE} alt="Earth-toned Metorom monitor among tropical foliage" width="1200" height="675" loading="lazy" decoding="async" />
+              <span>AN OBJECT IN CONTEXT / 001</span>
+            </div>
+            <div className="method-inset bento-tile">
+              <span>TATAMI STUDY / 04</span>
+              <p>Each part finds its place in relation to the others.</p>
+              <div className="method-inset__pattern" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+            </div>
           </div>
           <p className="method__note">Listening gives the measurements meaning. The next revision keeps the conversation open.</p>
         </section>
 
         <section className="event page-shell" id="event" aria-labelledby="event-title">
-          <div className="section-heading section-heading--event">
+          <div className="section-heading section-heading--event" data-reveal>
             <span className="section-index">04 / LISTENING SESSION</span>
             <h2 id="event-title">Hear it<br /><em>in a room.</em></h2>
             <p>A small session around the three-way monitor is being planned. Hear the system, inspect its design, and join the conversation.</p>
           </div>
-          <div className="event-grid">
+          <div className="event-grid" data-reveal>
             <a href={EVENT_URL} className="event-action bento-tile" aria-label="Explore the planned Metorom listening session">
               <span className="tile-eyebrow">AN INVITATION IN THE MAKING</span>
               <strong>COME<br />LISTEN<span>.</span></strong>
@@ -236,6 +221,18 @@ function App() {
               </dl>
               <p>Planning is underway. The event page will carry confirmed details when they are ready.</p>
             </div>
+          </div>
+        </section>
+
+        <section className="contact-teaser page-shell" aria-labelledby="contact-teaser-title" data-reveal>
+          <div className="contact-teaser__panel bento-tile">
+            <span className="section-index">05 / CONTACT · KYOTO, JAPAN</span>
+            <h2 id="contact-teaser-title">KEEP THE<br /><em>CONVERSATION.</em></h2>
+            <a href="./contact.html">Contact Metorom <span aria-hidden="true">↗</span></a>
+          </div>
+          <div className="contact-teaser__visual bento-tile">
+            <img src={LISTENER_IMAGE} alt="Illustration of a listener facing a Metorom speaker" width="1400" height="800" loading="lazy" decoding="async" />
+            <span>LISTENING BEGINS WITH A PERSON</span>
           </div>
         </section>
       </main>

@@ -1,5 +1,9 @@
 # Metorom website directions
 
+The [new sculptural study](concepts/monochrome/sculptural-v2/index.html) builds on The Object with a denser Taste v2 halftone flow across its hero and introduction, a supplied studio render, a scroll-controlled wireframe film of the speaker turning from front to back and top, restrained frequency-response cards, a [conversation page](concepts/monochrome/sculptural-v2/contact.html), a separate [listening event page](concepts/monochrome/sculptural-v2/event.html), and a [Future Works page](concepts/monochrome/sculptural-v2/future.html) for clearly speculative directions. The plotted driver and full-system responses are illustrative, not measurements. The event page keeps the venue, date, and tickets pending until confirmed.
+
+The current [Listen Closer site](concepts/colour/taste-v2/index.html) develops the colour-led Taste direction with the supplied Metorom imagery and logo. It includes a floating navigation, a scroll-driven 3D speaker, sound-wave page progress, optional scroll sound, and a [Contact page](concepts/colour/taste-v2/contact.html) with Kyoto marked on an interactive globe. The root design chooser links directly to this current direction.
+
 The [ten-study gallery](concepts/index.html) compares five website families, each with two structurally distinct variants. Hero images are intentionally deferred. Every new study uses a flat CSS media placeholder sized and positioned for future imagery; no image is generated or sourced for these ten pages.
 
 | Family | Impeccable | Taste |
@@ -29,7 +33,7 @@ Requires a current Node.js version supported by Vite 8.
     npm ci
     npm run dev
 
-Open the URL shown by Vite. The root gallery links to the concept gallery and the three interactive versions. To build all 18 pages:
+Open the URL shown by Vite. The root gallery links to the current site, concept gallery, and three earlier interactive versions. To build all 20 pages:
 
     npm run build
     npm run preview
@@ -38,7 +42,8 @@ The Vite base path is /Metorom/ for this repository's GitHub Pages URL. If the r
 
 ## Structure
 
-- index.html: design chooser
+- index.html: design chooser with a link to the current site
+- concepts/colour/taste-v2/: current Listen Closer site and Contact page
 - concepts/index.html: gallery comparing all ten image-free studies
 - concepts/{monochrome,warm,colour,haze,dark}/{impeccable,taste}/: ten website studies
 - concepts/*/family.css: self-contained type, colour, and layout for each family
@@ -60,6 +65,6 @@ Sound starts only after the visitor enables it. Reduced-motion settings are resp
 
 ## Content that still needs real details
 
-The event page is a concept. Date, venue, price, and booking are explicitly marked “to be announced.” The contact section also awaits a real contact address. Update this content when it is confirmed; do not publish made-up details.
+The event page is a concept. Date, venue, price, and booking are explicitly marked “to be announced.” Update this content when it is confirmed; do not publish made-up details. The Contact page uses the confirmed engineering@metorom.com address.
 
 The Null Society reference uses licensed Maxeville Mono. This repository uses system typefaces instead of including that font without a license. If a license becomes available, the type stack can be updated in src/site.css.

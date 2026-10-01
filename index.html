@@ -57,12 +57,14 @@
     @keyframes breathe{to{height:calc(7% + 50% * var(--h));opacity:.55}}
     .gallery-progress{position:fixed;z-index:30;top:0;left:0;right:0;height:5px;background:#d9d1c5;pointer-events:none}
     .gallery-progress span{display:block;height:100%;width:var(--p,0%);background:#c64c30}
+    .current-direction{display:flex;justify-content:space-between;align-items:center;gap:1rem;border-bottom:1px solid #aaa498;padding:1rem 0;font-size:.78rem;font-weight:700;letter-spacing:.02em}
+    .current-direction a{border-bottom:1px solid currentColor;padding:.25rem 0;color:#b84429;text-decoration:none}
     .versions-intro{display:flex;justify-content:space-between;gap:2rem;align-items:end;margin-top:5rem;padding-bottom:1rem;border-bottom:1px solid #aaa498}
     .versions-intro h2{font-family:Georgia,serif;font-size:clamp(2.5rem,5vw,5.5rem);font-weight:400;letter-spacing:-.04em;line-height:1;margin:0}
     .versions-intro p{max-width:28ch;line-height:1.5;margin:0;color:#65615a}
     @media(max-width:900px){.grid{grid-template-columns:1fr;margin-top:3rem}.card{min-height:0}.preview{height:250px}.preview strong{font-size:4rem}}
     @media(max-width:900px){.gallery-hero{grid-template-columns:1fr;min-height:0;padding-block:4rem 2rem}.gallery-art{min-height:420px}.versions-intro{margin-top:3rem}}
-    @media(max-width:600px){.gallery-hero{gap:2rem}.gallery-art{min-height:340px}.versions-intro{display:block}.versions-intro p{margin-top:1rem}.gallery-secondary{display:block;margin:1.3rem 0 0}}
+    @media(max-width:600px){.gallery-hero{gap:2rem}.gallery-art{min-height:340px}.versions-intro{display:block}.versions-intro p{margin-top:1rem}.gallery-secondary{display:block;margin:1.3rem 0 0}.current-direction{align-items:start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}.card:hover{transform:none}.gallery-wave i{animation:none}}
   </style>
 </head>
@@ -70,10 +72,12 @@
 <div class="gallery-progress" role="progressbar" aria-label="Page scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
 <main>
   <header><strong>METOROM</strong><span>WEBSITE STUDY / 2026</span></header>
+  <div class="current-direction"><span>Current direction / Listen Closer</span><a href="./concepts/colour/taste-v2/index.html">Open the current site ↗</a></div>
+  <div class="current-direction"><span>New study / Sculptural Product × Listen Closer</span><a href="./concepts/monochrome/sculptural-v2/index.html">Open the new study ↗</a></div>
   <section class="gallery-hero">
     <div>
       <h1>Sound takes many forms.</h1>
-      <p class="intro">One object, thirteen expressions. Compare ten new website studies across five design families, then explore the three earlier interactive versions.</p>
+      <p class="intro">Explore the current Metorom site, then compare ten design studies and three earlier interactive versions.</p>
       <p class="intro intro-ja" lang="ja">五つのデザインで十の新しい表現を比較し、三つのインタラクティブなサイトもご覧ください。</p>
       <a class="gallery-cta" href="./concepts/index.html">Explore ten new studies <span aria-hidden="true">↗</span></a>
       <a class="gallery-secondary" href="#versions">See interactive versions ↓</a>
