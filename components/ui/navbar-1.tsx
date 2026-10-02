@@ -16,9 +16,9 @@ const sections = [
 
 export function Navbar1({ contact = false }: Navbar1Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [navSize, setNavSize] = useState({ width: 1000, height: 66 });
   const navShell = useRef<HTMLDivElement>(null);
+  const progressOutline = useRef<SVGRectElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
   const firstMobileLink = useRef<HTMLAnchorElement>(null);
   const reduceMotion = useReducedMotion();
@@ -37,18 +37,33 @@ export function Navbar1({ contact = false }: Navbar1Props) {
 
   useEffect(() => {
     let frame = 0;
+    let viewportWidth = window.innerWidth;
+    let stableViewportHeight = window.innerHeight;
     const update = () => {
       frame = 0;
-      const range = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(range > 0 ? Math.min(100, Math.max(0, window.scrollY / range * 100)) : 0);
+      const scrollHeight = document.scrollingElement?.scrollHeight ?? document.documentElement.scrollHeight;
+      const range = Math.max(1, scrollHeight - stableViewportHeight);
+      const maxCurrentScroll = Math.max(0, scrollHeight - window.innerHeight);
+      const atEnd = window.scrollY >= maxCurrentScroll - 2;
+      const progress = atEnd ? 100 : Math.min(100, Math.max(0, window.scrollY / range * 100));
+      progressOutline.current?.setAttribute("stroke-dasharray", `${progress} 100`);
     };
     const requestUpdate = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const onResize = () => {
+      // Safari's browser chrome changes innerHeight during a scroll. Keep the
+      // progress denominator stable until the screen width/orientation changes.
+      if (Math.abs(window.innerWidth - viewportWidth) > 8) {
+        viewportWidth = window.innerWidth;
+        stableViewportHeight = window.innerHeight;
+      }
+      requestUpdate();
+    };
     update();
     window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("resize", onResize);
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
@@ -96,7 +111,7 @@ export function Navbar1({ contact = false }: Navbar1Props) {
           <div ref={navShell} className="sc-nav-shell flex items-center justify-between px-6 py-3 bg-white rounded-full shadow-lg w-full max-w-5xl relative z-10">
             <svg className="sc-progress-outline" viewBox={`0 0 ${navSize.width} ${navSize.height}`} aria-hidden="true">
               <rect x="1.5" y="1.5" width={navSize.width - 3} height={navSize.height - 3} rx={(navSize.height - 3) / 2} pathLength="100" />
-              <rect className="sc-progress-outline__active" x="1.5" y="1.5" width={navSize.width - 3} height={navSize.height - 3} rx={(navSize.height - 3) / 2} pathLength="100" strokeDasharray={`${progress} 100`} />
+              <rect ref={progressOutline} className="sc-progress-outline__active" x="1.5" y="1.5" width={navSize.width - 3} height={navSize.height - 3} rx={(navSize.height - 3) / 2} pathLength="100" strokeDasharray="0 100" />
             </svg>
             <motion.a
               className="sc-brand flex items-center"

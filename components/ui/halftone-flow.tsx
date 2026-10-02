@@ -54,7 +54,7 @@ const FRAGMENT_SHADER = `
     float current = cos((flow.y * 4.5 - flow.x * 1.8) * u_waves + time * 0.74);
     float intensity = smoothstep(-0.56, 0.88, wave * 0.68 + current * 0.32);
 
-    float cellSize = clamp(shortSide / 116.0, 5.5, 10.0);
+    float cellSize = clamp(shortSide / 116.0, 4.0, 10.0);
     vec2 grid = gl_FragCoord.xy / cellSize;
     float distanceToCenter = length(fract(grid) - 0.5);
     float radius = 0.045 + intensity * 0.41;
@@ -145,6 +145,7 @@ export function HalftoneFlow({
     if (!host || !fallback) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const lowPower = window.matchMedia("(pointer: coarse), (max-width: 760px)").matches;
     const glCanvas = document.createElement("canvas");
     glCanvas.setAttribute("aria-hidden", "true");
     glCanvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none";
@@ -217,7 +218,7 @@ export function HalftoneFlow({
       if (!visible || document.hidden || motion.matches || lost || !playingRef.current) return;
       if (lastTick) elapsed += Math.min((now - lastTick) / 1000, 0.1);
       lastTick = now;
-      if (now - lastFrame >= 1000 / 30) {
+      if (now - lastFrame >= 1000 / (lowPower ? 18 : 30)) {
         draw();
         lastFrame = now;
       }
@@ -233,7 +234,7 @@ export function HalftoneFlow({
       const bounds = host!.getBoundingClientRect();
       const pixelRatio = Math.min(
         window.devicePixelRatio || 1,
-        1.5,
+        lowPower ? 1 : 1.5,
         Math.sqrt(1_800_000 / Math.max(1, bounds.width * bounds.height)),
       );
       size = {

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metorom turntable capture</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: #171b17; }
+      #scene { height: 220vh; }
+      #stage { position: sticky; top: 0; height: 100vh; }
+      #canvas { display: block; width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <section id="scene"><div id="stage"><canvas id="canvas"></canvas></div></section>
+    <script type="module">
+      import { initScene } from '../src/scene.js';
+      window.disposeTurntable = initScene({
+        canvas: document.getElementById('canvas'),
+        sectionEl: document.getElementById('scene'),
+        appearance: 'wireframe',
+        captureFrames: true,
+        renderFallback: false,
+        onLoadProgress: (_value, status) => { document.body.dataset.status = status; },
+        onProgress: (progress, view) => {
+          document.body.dataset.progress = progress.toFixed(3);
+          document.body.dataset.view = view;
+        },
+      });
+      window.captureAt = (progress) => window.disposeTurntable.captureAt(progress);
+    </script>
+  </body>
+</html>

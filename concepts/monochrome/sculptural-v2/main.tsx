@@ -6,7 +6,9 @@ import { Navbar1 } from "@/components/ui/navbar-1";
 import FrequencyResponseCards from "@/components/ui/frequency-response-cards";
 import RenderedObject from "./rendered-object";
 import SectionIndex from "./section-index";
+import { SiteEditor, useSitePreview } from "./site-editor";
 import "./styles.css";
+import "./site-editor.css";
 
 const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render.png`;
 
@@ -17,6 +19,9 @@ const paths = [
 ] as const;
 
 function App() {
+  const [settings, setSettings] = useSitePreview();
+  const { copy } = settings;
+
   useEffect(() => {
     const cards = [...document.querySelectorAll<HTMLElement>("[data-motion-card], [data-section-reveal]")];
     if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -45,9 +50,9 @@ function App() {
           <div className="sc-hero__content">
             <div className="sc-hero__meta"><span>METOROM / THREE-WAY MONITOR</span><span>KYOTO, JAPAN</span></div>
             <div className="sc-hero__statement">
-              <h1 id="sc-hero-title">Sound, given<br />a shape.</h1>
-              <p>One loudspeaker. Three acoustic paths. Designed to be examined as closely as it is heard.</p>
-              <a className="sc-outline-link" href="#object">Explore the object <ArrowDownRight size={17} aria-hidden="true" /></a>
+              <h1 id="sc-hero-title">{copy.heroTitle}</h1>
+              <p>{copy.heroBody}</p>
+              <a className="sc-outline-link" href="#object">{copy.heroButton} <ArrowDownRight size={17} aria-hidden="true" /></a>
             </div>
           </div>
           <figure className="sc-hero__render">
@@ -58,17 +63,17 @@ function App() {
 
           <section className="sc-intro sc-shell" aria-labelledby="sc-intro-title">
           <span className="sc-rail-label">THE IDEA</span>
-          <div className="sc-intro__body"><h2 id="sc-intro-title">Every element<br />has a purpose.</h2><p>Metorom is a modular monitor. Its parts remain visible because the relationships between them matter: driver, cabinet, room, and listener.</p></div>
+          <div className="sc-intro__body"><h2 id="sc-intro-title">{copy.ideaTitle}</h2><p>{copy.ideaBody}</p></div>
           </section>
         </div>
 
-        <RenderedObject />
+        <RenderedObject title={copy.objectTitle} intro={copy.objectBody} />
 
         <section className="sc-architecture sc-shell" id="architecture" aria-labelledby="sc-architecture-title" data-section-reveal>
           <span className="sc-rail-label">ARCHITECTURE</span>
           <div className="sc-architecture__body">
-            <h2 id="sc-architecture-title">Open construction.</h2>
-            <p className="sc-architecture__intro">Each acoustic path has a role. The modular structure leaves room for listening, measurement, and revision.</p>
+            <h2 id="sc-architecture-title">{copy.architectureTitle}</h2>
+            <p className="sc-architecture__intro">{copy.architectureBody}</p>
             <div className="sc-parts">
               {paths.map((path) => (
                 <details key={path.title}>
@@ -83,7 +88,7 @@ function App() {
         <section className="sc-measure sc-shell" id="measurements" aria-labelledby="sc-measure-title" data-section-reveal>
           <span className="sc-rail-label">MEASURE / LISTEN</span>
           <div className="sc-measure__body">
-            <div className="sc-measure__lead"><h2 id="sc-measure-title">Measured.<br />Then listened to.</h2><p>Frequency response and horizontal directivity show how a change behaves. Listening in a room tells us what that change means.</p></div>
+            <div className="sc-measure__lead"><h2 id="sc-measure-title">{copy.measurementTitle}</h2><p>{copy.measurementBody}</p></div>
             <FrequencyResponseCards />
             <dl className="sc-spec-table">
               <div><dt>System</dt><dd>Three-way monitor</dd></div>
@@ -100,7 +105,7 @@ function App() {
         <section className="sc-listening sc-shell" id="listening" aria-labelledby="sc-listening-title" data-section-reveal>
           <span className="sc-rail-label">A GATHERING</span>
           <div className="sc-listening__body">
-            <div><h2 id="sc-listening-title">Come closer<br />to the sound.</h2><p>A small listening session around the three-way monitor is being prepared. Hear the system in a room, see how it is built, and join the conversation.</p><a className="sc-outline-link" href="./event.html">Explore the listening event <ArrowUpRight size={17} aria-hidden="true" /></a></div>
+            <div><h2 id="sc-listening-title">{copy.listeningTitle}</h2><p>{copy.listeningBody}</p><a className="sc-outline-link" href="./event.html">{copy.listeningButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
             <div className="sc-listening__facts"><dl><div><dt>Venue</dt><dd>To be announced</dd></div><div><dt>Date & time</dt><dd>To be announced</dd></div><div><dt>Tickets</dt><dd>Details to follow</dd></div></dl><p>Event details will be added when confirmed.</p></div>
           </div>
         </section>
@@ -108,18 +113,19 @@ function App() {
         <section className="sc-future-teaser sc-shell" aria-labelledby="sc-future-teaser-title">
           <div>
             <span className="sc-rail-label">WHAT COULD FOLLOW</span>
-            <h2 id="sc-future-teaser-title">Future works.</h2>
-            <p>A notebook of possible directions for the object, the room, and the exchanges around them. These are open questions, not announced products.</p>
-            <a className="sc-outline-link" href="./future.html">Explore future works <ArrowUpRight size={17} aria-hidden="true" /></a>
+            <h2 id="sc-future-teaser-title">{copy.futureTitle}</h2>
+            <p>{copy.futureBody}</p>
+            <a className="sc-outline-link" href="./future.html">{copy.futureButton} <ArrowUpRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
 
         <section className="sc-conversation sc-shell" id="conversation" aria-labelledby="sc-conversation-title">
           <span className="sc-rail-label">OPEN CHANNEL / KYOTO</span>
-          <div><h2 id="sc-conversation-title">Keep the<br />conversation open.</h2><p>Questions about the build, a future listening session, or a possible collaboration? There is a place to start.</p><a className="sc-outline-link" href="./contact.html#sc-contact-compose">Start a conversation <ArrowUpRight size={17} aria-hidden="true" /></a></div>
+          <div><h2 id="sc-conversation-title">{copy.conversationTitle}</h2><p>{copy.conversationBody}</p><a className="sc-outline-link" href="./contact.html#sc-contact-compose">{copy.conversationButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
         </section>
       </main>
       <footer className="sc-footer"><a href="#top" className="sc-footer__wordmark" aria-label="Metorom, back to top">METOROM</a><div><span>INDEPENDENT AUDIO DESIGN / KYOTO</span><a href="../../index.html">ALL STUDIES <ArrowUpRight size={15} aria-hidden="true" /></a></div></footer>
+      <SiteEditor settings={settings} onChange={setSettings} />
     </>
   );
 }

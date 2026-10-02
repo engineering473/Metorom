@@ -1,0 +1,43 @@
+@import "@fontsource/dm-sans/latin-300.css";
+@import "@fontsource/dm-sans/latin-400.css";
+@import "@fontsource/barlow-condensed/latin-400.css";
+@import "@fontsource/barlow-condensed/latin-500.css";
+@import "@fontsource/newsreader/latin-400.css";
+
+body{font-family:var(--sc-body-font,"Manrope",sans-serif)}
+.sc-hero h1,.sc-intro h2,.sc-object h2,.sc-architecture h2,.sc-measure h2,.sc-listening h2,.sc-future-teaser h2,.sc-conversation h2,.sc-footer__wordmark{font-family:var(--sc-display-font,"Manrope",sans-serif);white-space:pre-line}
+.sc-hero__render{transform:scale(var(--sc-hero-scale,1));transform-origin:center}
+
+.sc-editor{position:fixed;z-index:500;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));font-family:"Manrope",sans-serif;color:#171a18}
+.sc-editor__toggle{display:block;min-height:46px;margin-left:auto;border:1px solid #243a2b;border-radius:999px;padding:0 20px;background:#203f2d;color:#fff;font-size:13px;font-weight:600;box-shadow:0 10px 28px #14271a2b}
+.sc-editor__panel{position:absolute;right:0;bottom:58px;width:min(420px,calc(100vw - 24px));max-height:min(78dvh,760px);overflow-y:auto;overscroll-behavior:contain;border:1px solid #b9c8bc;border-radius:20px;padding:22px;background:#f7f8f4;box-shadow:0 24px 70px #15271c3d}
+.sc-editor__heading{display:flex;justify-content:space-between;align-items:center;gap:15px;color:#46604d;font-size:10px;font-weight:700;letter-spacing:.12em}
+.sc-editor__heading button{display:grid;place-items:center;width:40px;height:40px;border:1px solid #c7d3c9;border-radius:50%;background:#fff;color:#203f2d}
+.sc-editor__panel h2{margin:8px 0 10px;font-family:"Manrope",sans-serif;font-size:29px;font-weight:500;letter-spacing:-.035em;line-height:1.15}
+.sc-editor__help{max-width:43ch;margin:0 0 25px;color:#475a4c;font-size:12px;line-height:1.55}
+.sc-editor__controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.sc-editor label{display:flex;flex-direction:column;gap:7px;color:#33483a;font-size:11px;font-weight:600;line-height:1.3}
+.sc-editor select,.sc-editor textarea{width:100%;border:1px solid #bdcabe;border-radius:9px;padding:10px 11px;background:#fff;color:#17221a;font:400 13px/1.45 "Manrope",sans-serif}
+.sc-editor select{min-height:42px}
+.sc-editor textarea{min-height:58px;resize:vertical}
+.sc-editor__color input{width:100%;height:42px;border:1px solid #bdcabe;border-radius:9px;padding:4px;background:#fff;cursor:pointer}
+.sc-editor input[type="range"]{width:100%;min-height:32px;accent-color:#2b604b}
+.sc-editor output{align-self:flex-end;margin-top:-20px;color:#5c6c61;font-variant-numeric:tabular-nums}
+.sc-editor__copy{margin-top:22px;border-top:1px solid #cad5cb}
+.sc-editor__copy details{border-bottom:1px solid #cad5cb;padding:0 0 12px}
+.sc-editor__copy summary{display:flex;justify-content:space-between;align-items:center;min-height:48px;color:#1f3225;font-size:13px;font-weight:600}
+.sc-editor__copy summary::after{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);content:""}
+.sc-editor__copy details[open] summary::after{transform:rotate(225deg)}
+.sc-editor__copy label{margin:10px 0 15px}
+.sc-editor__actions{display:flex;gap:8px;margin-top:20px}
+.sc-editor__actions button{min-height:42px;flex:1;border:1px solid #263e2d;border-radius:999px;padding:0 12px;background:#263e2d;color:#fff;font-size:12px;font-weight:600}
+.sc-editor__actions button+button{background:transparent;color:#263e2d}
+.sc-editor__exit{display:inline-block;margin-top:16px;border-bottom:1px solid currentColor;padding-bottom:3px;color:#365744;font-size:11px;font-weight:600}
+.sc-editor__message{margin-top:14px;color:#365744;font-size:11px;line-height:1.5}
+.sc-editor :focus-visible{outline:2px solid #2b604b;outline-offset:3px}
+
+@media(max-width:600px){
+  .sc-editor{right:12px;bottom:max(12px,env(safe-area-inset-bottom))}
+  .sc-editor__panel{bottom:56px;max-height:calc(100dvh - 95px);padding:18px;border-radius:17px}
+  .sc-editor__controls{gap:10px}
+}

@@ -33,6 +33,10 @@ main{overflow:clip}.sc-shell{display:grid;grid-template-columns:18% minmax(0,1fr
 .sc-object__poster{object-fit:contain;object-position:center}
 .sc-object__video{position:absolute;z-index:2;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .3s ease}
 .sc-object__video.is-ready{opacity:1}
+.sc-object__sprite{position:absolute;z-index:2;inset:0;display:grid;place-items:center;opacity:0;transition:opacity .3s ease;pointer-events:none}
+.sc-object__sprite.is-ready{opacity:1}
+.sc-object__sprite-frame{height:100%;max-width:100%;aspect-ratio:480/570;background-repeat:no-repeat;background-size:500% 500%}
+.sc-object__video{z-index:3}
 
 /* One halftone field crosses the hero boundary before dissolving into paper. */
 .sc-opening{position:relative;isolation:isolate;overflow:hidden;background:var(--paper)}
