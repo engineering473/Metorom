@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SiteCopy } from "./site-copy";
 
 const POSTER = `${import.meta.env.BASE_URL}images/concepts/speaker-wireframe-poster.png`;
 const FILM = `${import.meta.env.BASE_URL}videos/speaker-scroll.mp4`;
@@ -14,8 +15,9 @@ function viewAt(progress: number): Position["view"] {
   return "Top";
 }
 
-export default function RenderedObject({ title, intro }: { title: string; intro: string }) {
+export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef(0);
   const [position, setPosition] = useState<Position>({ percent: 0, view: "Front" });
@@ -24,13 +26,13 @@ export default function RenderedObject({ title, intro }: { title: string; intro:
   const [framesError, setFramesError] = useState(false);
   const [filmReady, setFilmReady] = useState(false);
   const [filmError, setFilmError] = useState(false);
-  const outro = Math.min(1, Math.max(0, (position.percent / 100 - 0.82) / 0.18));
   const frame = Math.min(FRAME_COUNT - 1, Math.round(position.percent / 100 * (FRAME_COUNT - 1)));
   const frameColumn = frame % FRAME_COLUMNS;
   const frameRow = Math.floor(frame / FRAME_COLUMNS);
   const showFilm = !frameMode && !filmError;
   const showingFilm = showFilm && filmReady;
   const ready = showingFilm || framesReady;
+  const view = position.view === "Front" ? copy.viewFront : position.view === "Back" ? copy.viewBack : copy.viewTop;
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 760px), (pointer: coarse)");
@@ -66,9 +68,12 @@ export default function RenderedObject({ title, intro }: { title: string; intro:
     const update = () => {
       frame = 0;
       const section = sectionRef.current;
-      if (!section) return;
+      const sticky = stickyRef.current;
+      if (!section || !sticky) return;
       const rect = section.getBoundingClientRect();
-      const range = Math.max(1, rect.height - window.innerHeight);
+      // Use the pinned element's own height: svh can differ from innerHeight
+      // when mobile browser chrome opens, and the desktop layout has a floor.
+      const range = Math.max(1, rect.height - sticky.getBoundingClientRect().height);
       const progress = Math.min(1, Math.max(0, -rect.top / range));
       progressRef.current = progress;
       const next = { percent: Math.round(progress * 100), view: viewAt(progress) };
@@ -79,29 +84,35 @@ export default function RenderedObject({ title, intro }: { title: string; intro:
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+    window.visualViewport?.addEventListener("resize", schedule);
+    const resizeObserver = new ResizeObserver(schedule);
+    if (sectionRef.current) resizeObserver.observe(sectionRef.current);
+    if (stickyRef.current) resizeObserver.observe(stickyRef.current);
     return () => {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
+      resizeObserver.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
   }, [seekToScroll]);
 
   return (
     <section ref={sectionRef} className="sc-object" id="object" aria-labelledby="sc-object-title">
-      <div className="sc-object__sticky">
+      <div ref={stickyRef} className="sc-object__sticky">
         <div className="sc-object__copy">
-          <p className="sc-overline">ONE FORM / THREE ACOUSTIC PATHS</p>
-          <h2 id="sc-object-title">{title}</h2>
-          <p className="sc-object__intro">{intro}</p>
+          <p className="sc-overline">{copy.objectOverline}</p>
+          <h2 id="sc-object-title">{copy.objectTitle}</h2>
+          <p className="sc-object__intro">{copy.objectBody}</p>
           <div className="sc-object__view">
-            <span>VIEW / {position.view.toUpperCase()}</span>
+            <span>{copy.viewLabel} / {view}</span>
             <span>{position.percent.toString().padStart(2, "0")}%</span>
           </div>
-          <div className="sc-object__track" role="progressbar" aria-label="Speaker film progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={position.percent} aria-valuetext={`${position.view} view, ${position.percent}%`}><span style={{ transform: `scaleX(${position.percent / 100})` }} /></div>
-          <p className="sc-object__hint">The film follows your scroll. Move up to turn the speaker back.</p>
+          <div className="sc-object__track" role="progressbar" aria-label={copy.objectProgressAria} aria-valuemin={0} aria-valuemax={100} aria-valuenow={position.percent} aria-valuetext={`${copy.viewLabel} / ${view}, ${position.percent}%`}><span style={{ transform: `scaleX(${position.percent / 100})` }} /></div>
+          <p className="sc-object__hint">{copy.objectHint}</p>
         </div>
         <div className="sc-object__stage" aria-busy={!ready && !framesError}>
-          {!ready && <img className="sc-object__poster" src={POSTER} alt="Wireframe study of the Metorom loudspeaker" width="640" height="760" loading="lazy" decoding="async" />}
+          {!ready && <img className="sc-object__poster" src={POSTER} alt={copy.objectPosterAlt} width="640" height="760" loading="lazy" decoding="async" />}
           <div className={`sc-object__sprite${framesReady && !showingFilm ? " is-ready" : ""}`} aria-hidden="true">
             <div className="sc-object__sprite-frame" style={{ backgroundImage: `url("${FRAMES}")`, backgroundPosition: `${frameColumn * 25}% ${frameRow * 25}%` }} />
           </div>
@@ -113,15 +124,14 @@ export default function RenderedObject({ title, intro }: { title: string; intro:
             muted
             playsInline
             disablePictureInPicture
-            aria-label="Scroll-controlled wireframe film of the Metorom loudspeaker rotating from the front to the back and top"
+            aria-label={copy.objectVideoAlt}
             onLoadedMetadata={seekToScroll}
             onLoadedData={() => { setFilmReady(true); seekToScroll(); }}
             onSeeked={seekToScroll}
             onError={() => setFilmError(true)}
           />}
-          <div className="sc-object__transition" style={{ opacity: outro }} aria-hidden="true" />
-          <div className="sc-object__stage-label" style={{ opacity: 1 - outro * 0.65 }}><span>METOROM / MODEL 001</span><span>{showingFilm ? "WIREFRAME FILM" : framesReady ? "WIREFRAME STUDY" : "MODEL / 001"}</span></div>
-          {framesError && !showingFilm && <p className="sc-object__fallback" role="status">The rotating study is unavailable here. The wireframe poster still shows the speaker.</p>}
+          <div className="sc-object__stage-label"><span>{copy.objectBrand} / {copy.objectStageModel}</span><span>{showingFilm ? copy.objectStageFilm : framesReady ? copy.objectStageStudy : copy.objectStageModel}</span></div>
+          {framesError && !showingFilm && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
       </div>
     </section>

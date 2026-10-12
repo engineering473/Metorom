@@ -1,4 +1,5 @@
 import { useId, useState, type KeyboardEvent, type PointerEvent } from "react";
+import type { SiteCopy } from "../../concepts/monochrome/sculptural-v2/site-copy";
 import "./frequency-response-cards.css";
 
 type ResponsePoint = { hz: number; db: number };
@@ -76,9 +77,9 @@ function pathFor(points: ResponsePoint[], minimum: number, maximum: number) {
   return points.map(({ hz, db }, index) => `${index ? "L" : "M"}${logX(hz).toFixed(1)},${yFor(db, minimum, maximum).toFixed(1)}`).join(" ");
 }
 
-function formatFrequency(hz: number) {
-  if (hz >= 1000) return `${Number((hz / 1000).toFixed(hz >= 10000 ? 0 : 1))} kHz`;
-  return `${Math.round(hz)} Hz`;
+function formatFrequency(hz: number, copy: SiteCopy) {
+  if (hz >= 1000) return `${Number((hz / 1000).toFixed(hz >= 10000 ? 0 : 1))} ${copy.chartKilohertzUnit}`;
+  return `${Math.round(hz)} ${copy.chartHertzUnit}`;
 }
 
 type ResponsePlotProps = {
@@ -87,10 +88,11 @@ type ResponsePlotProps = {
   yMax: number;
   yTicks: number[];
   label: string;
+  copy: SiteCopy;
   filled?: boolean;
 };
 
-function ResponsePlot({ series, yMin, yMax, yTicks, label, filled = false }: ResponsePlotProps) {
+function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false }: ResponsePlotProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const rawId = useId().replace(/:/g, "");
   const gridId = `frc-grid-${rawId}`;
@@ -112,7 +114,7 @@ function ResponsePlot({ series, yMin, yMax, yTicks, label, filled = false }: Res
   };
 
   return (
-    <div className="frc-plot" role="img" tabIndex={0} aria-label={`${label}. Illustrative frequency response from 20 hertz to 20 kilohertz. Focus and use left or right arrow keys to inspect values.`} onPointerMove={setIndexFromPointer} onPointerLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(plottedIndex)} onBlur={() => setActiveIndex(null)} onKeyDown={handleKeyDown}>
+    <div className="frc-plot" role="img" tabIndex={0} aria-label={`${label}. ${copy.chartPlotInstructions}`} onPointerMove={setIndexFromPointer} onPointerLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(plottedIndex)} onBlur={() => setActiveIndex(null)} onKeyDown={handleKeyDown}>
       <svg viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <pattern id={gridId} width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#8c9c91" opacity=".35" /></pattern>
@@ -123,37 +125,40 @@ function ResponsePlot({ series, yMin, yMax, yTicks, label, filled = false }: Res
         {[20, 100, 1000, 10000, 20000].map((hz) => <line key={hz} x1={logX(hz)} x2={logX(hz)} y1={PLOT.top} y2={PLOT.bottom} className="frc-plot__grid-line" />)}
         {yTicks.map((db) => <line key={db} x1={PLOT.left} x2={PLOT.right} y1={yFor(db, yMin, yMax)} y2={yFor(db, yMin, yMax)} className="frc-plot__grid-line" />)}
         {filled && <path d={`${pathFor(series[0].data, yMin, yMax)} L${PLOT.right},${PLOT.bottom} L${PLOT.left},${PLOT.bottom} Z`} fill={`url(#${fillId})`} clipPath={`url(#${clipId})`} />}
-        {series.map((item) => <path key={item.name} d={pathFor(item.data, yMin, yMax)} className="frc-plot__series" pathLength={1} stroke={item.color} strokeWidth={item.name === "Complete speaker" ? 3.1 : 2.5} clipPath={`url(#${clipId})`} />)}
+        {series.map((item) => <path key={item.shortName} d={pathFor(item.data, yMin, yMax)} className="frc-plot__series" pathLength={1} stroke={item.color} strokeWidth={filled ? 3.1 : 2.5} clipPath={`url(#${clipId})`} />)}
         {activeIndex !== null && <g className="frc-plot__cursor"><line x1={logX(activeHz)} x2={logX(activeHz)} y1={PLOT.top} y2={PLOT.bottom} /><circle cx={logX(activeHz)} cy={yFor(series[0].data[activeIndex].db, yMin, yMax)} r="4.5" fill={series[0].color} /></g>}
-        <text x="27" y="18" className="frc-plot__unit">SPL / dB</text>
+        <text x="27" y="18" className="frc-plot__unit">{copy.chartUnit}</text>
         {yTicks.map((db) => <text key={db} x="2" y={yFor(db, yMin, yMax) + 3} className="frc-plot__tick">{db}</text>)}
-        {[[20, "20"], [100, "100"], [1000, "1k"], [10000, "10k"], [20000, "20k"]].map(([hz, text]) => <text key={hz} x={logX(Number(hz))} y="287" textAnchor={Number(hz) === 20 ? "start" : Number(hz) === 20000 ? "end" : "middle"} className="frc-plot__tick">{text}</text>)}
+        {[[20, copy.chartTick20], [100, copy.chartTick100], [1000, copy.chartTick1000], [10000, copy.chartTick10000], [20000, copy.chartTick20000]].map(([hz, text]) => <text key={hz} x={logX(Number(hz))} y="287" textAnchor={Number(hz) === 20 ? "start" : Number(hz) === 20000 ? "end" : "middle"} className="frc-plot__tick">{text}</text>)}
       </svg>
-      {activeIndex !== null && <div className="frc-plot__tooltip" style={{ left: `${Math.max(13, Math.min(74, (logX(activeHz) / PLOT.width) * 100))}%` }}><strong>{formatFrequency(activeHz)}</strong>{series.map((item) => <span key={item.name}><i style={{ background: item.color }} />{item.name}<b>{item.data[activeIndex].db.toFixed(1)} dB</b></span>)}</div>}
+      {activeIndex !== null && <div className="frc-plot__tooltip" style={{ left: `${Math.max(13, Math.min(74, (logX(activeHz) / PLOT.width) * 100))}%` }}><strong>{formatFrequency(activeHz, copy)}</strong>{series.map((item) => <span key={item.shortName}><i style={{ background: item.color }} />{item.name}<b>{item.data[activeIndex].db.toFixed(1)} {copy.chartDecibelUnit}</b></span>)}</div>}
     </div>
   );
 }
 
 type ResponseCardProps = {
   kind: "drivers" | "system";
+  copy: SiteCopy;
 };
 
-function ResponseCard({ kind }: ResponseCardProps) {
+function ResponseCard({ kind, copy }: ResponseCardProps) {
   const drivers = kind === "drivers";
-  const series = drivers ? DRIVER_SERIES : SYSTEM_SERIES;
+  const series = drivers
+    ? DRIVER_SERIES.map((item, index) => ({ ...item, name: [copy.chartDriverLowName, copy.chartDriverMidName, copy.chartDriverHighName][index] }))
+    : SYSTEM_SERIES.map((item) => ({ ...item, name: copy.chartSystemSeriesName }));
   return (
     <article className={`frc-card frc-card--${kind}`} data-motion-card>
       <div className="frc-card__main">
-        <header className="frc-card__header"><h3>{drivers ? "Individual driver response" : "Complete system response"}</h3><span>20 Hz — 20 kHz</span></header>
-        {drivers ? <div className="frc-card__legend">{series.map((item) => <span key={item.name}><i style={{ background: item.color }} />{item.name}</span>)}</div> : <div className="frc-card__legend"><span><i style={{ background: series[0].color }} />One combined response</span></div>}
-        <div className="frc-card__metric"><strong>{drivers ? "03" : "01"}</strong><span>{drivers ? "acoustic paths" : "loudspeaker"}</span></div>
+        <header className="frc-card__header"><h3>{drivers ? copy.chartDriversTitle : copy.chartSystemTitle}</h3><span>{copy.chartRange}</span></header>
+        {drivers ? <div className="frc-card__legend">{series.map((item) => <span key={item.shortName}><i style={{ background: item.color }} />{item.name}</span>)}</div> : <div className="frc-card__legend"><span><i style={{ background: series[0].color }} />{copy.chartCombinedLegend}</span></div>}
+        <div className="frc-card__metric"><strong>{drivers ? copy.chartDriversCount : copy.chartSystemCount}</strong><span>{drivers ? copy.chartPathsMetric : copy.chartSpeakerMetric}</span></div>
       </div>
-      <div className="frc-card__chart"><ResponsePlot series={series} yMin={drivers ? 38 : 72} yMax={drivers ? 92 : 88} yTicks={drivers ? [40, 60, 80] : [74, 80, 86]} label={drivers ? "LAB 12 low frequency, Alpha 6A midrange, and BMS 4540ND high frequency response" : "Full speaker frequency response"} filled={!drivers} /></div>
-      <footer className="frc-card__footer"><span>ILLUSTRATIVE DATA / NOT MEASURED</span><span className="frc-card__variance" title={drivers ? "Maximum deviation from each modeled passband mean: LAB 12, 60–150 Hz; Alpha 6A, 350 Hz–2.5 kHz; BMS 4540ND, 2.5–15 kHz." : "Maximum deviation from the modeled 40 Hz–16 kHz response mean."}>Response variance <strong>± {(drivers ? DRIVER_VARIANCE : SYSTEM_VARIANCE).toFixed(1)} dB <small>{drivers ? "in band" : "40 Hz–16 kHz"}</small></strong></span></footer>
+      <div className="frc-card__chart"><ResponsePlot series={series} yMin={drivers ? 38 : 72} yMax={drivers ? 92 : 88} yTicks={drivers ? [40, 60, 80] : [74, 80, 86]} label={drivers ? copy.chartDriversAria : copy.chartSystemAria} copy={copy} filled={!drivers} /></div>
+      <footer className="frc-card__footer"><span>{copy.chartDataNote}</span><span className="frc-card__variance" title={drivers ? copy.chartDriversVarianceTitle : copy.chartSystemVarianceTitle}>{copy.chartVarianceLabel} <strong>± {(drivers ? DRIVER_VARIANCE : SYSTEM_VARIANCE).toFixed(1)} {copy.chartDecibelUnit} <small>{drivers ? copy.chartInBand : copy.chartSystemBand}</small></strong></span></footer>
     </article>
   );
 }
 
-export default function FrequencyResponseCards() {
-  return <div className="frc-grid" aria-label="Illustrative frequency response charts"><ResponseCard kind="drivers" /><ResponseCard kind="system" /></div>;
+export default function FrequencyResponseCards({ copy }: { copy: SiteCopy }) {
+  return <div className="frc-grid" aria-label={copy.chartGridAria}><ResponseCard kind="drivers" copy={copy} /><ResponseCard kind="system" copy={copy} /></div>;
 }

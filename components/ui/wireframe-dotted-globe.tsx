@@ -4,6 +4,11 @@ type Coordinate = [longitude: number, latitude: number];
 
 interface RotatingEarthProps {
   className?: string;
+  groupLabel?: string;
+  canvasLabel?: string;
+  resetLabel?: string;
+  cityLabel?: string;
+  countryLabel?: string;
 }
 
 // Simplified land silhouettes keep the globe self-contained and usable offline.
@@ -101,7 +106,14 @@ const LAND_DOTS: Coordinate[] = LAND.flatMap((polygon, index) => {
   return dots;
 });
 
-export default function RotatingEarth({ className = "" }: RotatingEarthProps) {
+export default function RotatingEarth({
+  className = "",
+  groupLabel = "Interactive dotted globe centered on Kyoto, Japan",
+  canvasLabel = "Dotted globe. Use arrow keys or drag to rotate. Kyoto, Japan is marked.",
+  resetLabel = "Locate Kyoto",
+  cityLabel = "KYOTO",
+  countryLabel = "JAPAN",
+}: RotatingEarthProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const resetRef = useRef<() => void>(() => {});
 
@@ -236,10 +248,10 @@ export default function RotatingEarth({ className = "" }: RotatingEarthProps) {
         context.textAlign = labelOnLeft ? "right" : "left";
         context.fillStyle = "#fff6ea";
         context.font = "600 12px 'DM Sans', sans-serif";
-        context.fillText("KYOTO", lineEnd + (labelOnLeft ? -4 : 4), kyoto.y - 32);
+        context.fillText(cityLabel, lineEnd + (labelOnLeft ? -4 : 4), kyoto.y - 32);
         context.fillStyle = "#f2ba9b";
         context.font = "500 10px 'DM Sans', sans-serif";
-        context.fillText("JAPAN", lineEnd + (labelOnLeft ? -4 : 4), kyoto.y - 17);
+        context.fillText(countryLabel, lineEnd + (labelOnLeft ? -4 : 4), kyoto.y - 17);
       }
     };
 
@@ -328,18 +340,18 @@ export default function RotatingEarth({ className = "" }: RotatingEarthProps) {
       canvas.removeEventListener("keydown", keyDown);
       resetRef.current = () => {};
     };
-  }, []);
+  }, [cityLabel, countryLabel]);
 
   return (
-    <div className={`dotted-globe ${className}`} role="group" aria-label="Interactive dotted globe centered on Kyoto, Japan">
+    <div className={`dotted-globe ${className}`} role="group" aria-label={groupLabel}>
       <canvas
         ref={canvasRef}
         tabIndex={0}
-        aria-label="Dotted globe. Use arrow keys or drag to rotate. Kyoto, Japan is marked."
+        aria-label={canvasLabel}
         style={{ display: "block", width: "100%", height: "100%", cursor: "grab", touchAction: "pan-y" }}
       />
       <button className="dotted-globe__reset" type="button" onClick={() => resetRef.current()}>
-        Locate Kyoto <span aria-hidden="true">↗</span>
+        {resetLabel} <span aria-hidden="true">↗</span>
       </button>
     </div>
   );

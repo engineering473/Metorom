@@ -34,6 +34,7 @@ export default defineConfig({
         conceptSculpturalV2Contact: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/contact.html'),
         conceptSculpturalV2Event: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/event.html'),
         conceptSculpturalV2Future: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/future.html'),
+        conceptSculpturalV2Philosophy: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/philosophy.html'),
         ...conceptInputs
       }
     }

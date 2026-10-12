@@ -10,6 +10,7 @@ export type HalftoneFlowProps = {
   saturation?: number;
   brightness?: number;
   waveDensity?: number;
+  dotDensity?: number;
   playing?: boolean;
   className?: string;
   style?: CSSProperties;
@@ -30,6 +31,7 @@ const FRAGMENT_SHADER = `
   uniform float u_time;
   uniform float u_light;
   uniform float u_waves;
+  uniform float u_dots;
 
   mat2 rotate(float angle) {
     float s = sin(angle);
@@ -54,7 +56,7 @@ const FRAGMENT_SHADER = `
     float current = cos((flow.y * 4.5 - flow.x * 1.8) * u_waves + time * 0.74);
     float intensity = smoothstep(-0.56, 0.88, wave * 0.68 + current * 0.32);
 
-    float cellSize = clamp(shortSide / 116.0, 4.0, 10.0);
+    float cellSize = max(2.0, clamp(shortSide / 116.0, 4.0, 10.0) / u_dots);
     vec2 grid = gl_FragCoord.xy / cellSize;
     float distanceToCenter = length(fract(grid) - 0.5);
     float radius = 0.045 + intensity * 0.41;
@@ -86,7 +88,7 @@ function compileShader(gl: WebGLRenderingContext, kind: number, source: string) 
   return null;
 }
 
-function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number, waveDensity: number) {
+function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number, waveDensity: number, dotDensity: number) {
   const context = canvas.getContext("2d");
   if (!context) return;
 
@@ -97,7 +99,7 @@ function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number
   context.fillRect(0, 0, width, height);
 
   const shortSide = Math.min(width, height);
-  const cellSize = clamp(shortSide / 116, 6, 11);
+  const cellSize = Math.max(2, clamp(shortSide / 116, 6, 11) / dotDensity);
   context.fillStyle = isLight ? "#8e321e" : "#e1743d";
 
   for (let y = cellSize / 2; y < height; y += cellSize) {
@@ -125,6 +127,7 @@ export function HalftoneFlow({
   saturation = 1,
   brightness = 1,
   waveDensity = 1,
+  dotDensity = 1,
   playing = true,
   className,
   style,
@@ -138,6 +141,7 @@ export function HalftoneFlow({
   const safeSaturation = clamp(saturation, 0, 2);
   const safeBrightness = clamp(brightness, 0.35, 1.65);
   const safeWaveDensity = clamp(waveDensity, 0.5, 2.5);
+  const safeDotDensity = clamp(Number.isFinite(dotDensity) ? dotDensity : 1, 0.5, 4);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -173,6 +177,7 @@ export function HalftoneFlow({
     let time: WebGLUniformLocation | null = null;
     let light: WebGLUniformLocation | null = null;
     let waves: WebGLUniformLocation | null = null;
+    let dots: WebGLUniformLocation | null = null;
     let lost = false;
 
     if (ready && gl && program && buffer) {
@@ -189,6 +194,7 @@ export function HalftoneFlow({
       time = gl.getUniformLocation(program, "u_time");
       light = gl.getUniformLocation(program, "u_light");
       waves = gl.getUniformLocation(program, "u_waves");
+      dots = gl.getUniformLocation(program, "u_dots");
     }
 
     let visible = false;
@@ -204,6 +210,7 @@ export function HalftoneFlow({
       gl.uniform1f(time, motion.matches ? 0 : elapsed);
       gl.uniform1f(light, safeMode === "light" ? 1 : 0);
       gl.uniform1f(waves, safeWaveDensity);
+      gl.uniform1f(dots, safeDotDensity);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -249,7 +256,7 @@ export function HalftoneFlow({
         }
         draw();
       } else {
-        drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity);
+        drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity);
       }
     }
 
@@ -261,7 +268,7 @@ export function HalftoneFlow({
       glCanvas.style.display = "none";
       fallback!.hidden = false;
       fallback!.style.display = "block";
-      drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity);
+      drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity);
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -301,7 +308,7 @@ export function HalftoneFlow({
       if (gl && vertex) gl.deleteShader(vertex);
       if (gl && fragment) gl.deleteShader(fragment);
     };
-  }, [safeMode, safeWaveDensity]);
+  }, [safeMode, safeWaveDensity, safeDotDensity]);
 
   useEffect(() => {
     playingRef.current = playing;

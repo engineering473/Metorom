@@ -7,20 +7,27 @@ import FrequencyResponseCards from "@/components/ui/frequency-response-cards";
 import RenderedObject from "./rendered-object";
 import SectionIndex from "./section-index";
 import { SiteEditor, useSitePreview } from "./site-editor";
+import { previewHref, useLanguage } from "./language";
+import SiteFooter from "./site-footer";
 import "./styles.css";
 import "./site-editor.css";
 
-const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render.png`;
-
-const paths = [
-  { title: "High frequency", part: "BMS 4540ND / horn", copy: "A compression driver and horn give the upper range a defined path into the room." },
-  { title: "Midrange", part: "Alpha 6A / dedicated drivers", copy: "The midrange drivers carry voices and instruments with 608 mm between their centres." },
-  { title: "Low frequency", part: "LAB 12 / lower cabinet", copy: "A separate low-frequency foundation supports the system while keeping the structure legible." },
-] as const;
+const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render-front.png`;
 
 function App() {
   const [settings, setSettings] = useSitePreview();
-  const { copy } = settings;
+  const [language] = useLanguage();
+  const copy = language === "ja" ? settings.copyJa : settings.copy;
+  const paths = [
+    { id: "high", title: copy.pathHighTitle, part: copy.pathHighPart, body: copy.pathHighBody },
+    { id: "mid", title: copy.pathMidTitle, part: copy.pathMidPart, body: copy.pathMidBody },
+    { id: "low", title: copy.pathLowTitle, part: copy.pathLowPart, body: copy.pathLowBody },
+  ];
+
+  useEffect(() => {
+    document.title = `${copy.brandName} — ${copy.heroTitle.replace(/\s+/g, " ").trim()}`;
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", copy.heroBody);
+  }, [copy.brandName, copy.heroTitle, copy.heroBody]);
 
   useEffect(() => {
     const cards = [...document.querySelectorAll<HTMLElement>("[data-motion-card], [data-section-reveal]")];
@@ -41,14 +48,14 @@ function App() {
 
   return (
     <>
-      <Navbar1 />
-      <SectionIndex />
+      <Navbar1 copy={copy} />
+      <SectionIndex copy={copy} />
       <main id="main">
         <div className="sc-opening">
-          <HalftoneFlow className="sc-opening__flow" mode="light" hue={168} saturation={0.58} brightness={1.02} waveDensity={1.75} />
+          <HalftoneFlow className="sc-opening__flow" mode="light" hue={168} saturation={0.58} brightness={1.02} waveDensity={1.75} dotDensity={3} />
           <section className="sc-hero" id="top" aria-labelledby="sc-hero-title">
           <div className="sc-hero__content">
-            <div className="sc-hero__meta"><span>METOROM / THREE-WAY MONITOR</span><span>KYOTO, JAPAN</span></div>
+            <div className="sc-hero__meta"><span>{copy.heroMeta}</span><span>{copy.heroLocation}</span></div>
             <div className="sc-hero__statement">
               <h1 id="sc-hero-title">{copy.heroTitle}</h1>
               <p>{copy.heroBody}</p>
@@ -56,29 +63,29 @@ function App() {
             </div>
           </div>
           <figure className="sc-hero__render">
-            <img src={RENDER} alt="User-supplied render of the dark green Metorom loudspeaker with horn, midrange drivers, and lower cabinet" width="2400" height="2128" fetchPriority="high" />
-            <figcaption><span>OBJECT / 001</span><span>STUDIO RENDER</span></figcaption>
+            <img src={RENDER} alt={copy.heroImageAlt} width="2880" height="3840" fetchPriority="high" />
+            <figcaption><span>{copy.heroObjectTag}</span><span>{copy.heroRenderTag}</span></figcaption>
           </figure>
           </section>
 
           <section className="sc-intro sc-shell" aria-labelledby="sc-intro-title">
-          <span className="sc-rail-label">THE IDEA</span>
+          <span className="sc-rail-label">{copy.ideaRail}</span>
           <div className="sc-intro__body"><h2 id="sc-intro-title">{copy.ideaTitle}</h2><p>{copy.ideaBody}</p></div>
           </section>
         </div>
 
-        <RenderedObject title={copy.objectTitle} intro={copy.objectBody} />
+        <RenderedObject copy={copy} />
 
         <section className="sc-architecture sc-shell" id="architecture" aria-labelledby="sc-architecture-title" data-section-reveal>
-          <span className="sc-rail-label">ARCHITECTURE</span>
+          <span className="sc-rail-label">{copy.architectureRail}</span>
           <div className="sc-architecture__body">
             <h2 id="sc-architecture-title">{copy.architectureTitle}</h2>
             <p className="sc-architecture__intro">{copy.architectureBody}</p>
             <div className="sc-parts">
               {paths.map((path) => (
-                <details key={path.title}>
+                <details key={path.id}>
                   <summary><span>{path.title}</span><small>{path.part}</small><span className="sc-parts__plus" aria-hidden="true" /></summary>
-                  <p>{path.copy}</p>
+                  <p>{path.body}</p>
                 </details>
               ))}
             </div>
@@ -86,45 +93,36 @@ function App() {
         </section>
 
         <section className="sc-measure sc-shell" id="measurements" aria-labelledby="sc-measure-title" data-section-reveal>
-          <span className="sc-rail-label">MEASURE / LISTEN</span>
+          <span className="sc-rail-label">{copy.measurementRail}</span>
           <div className="sc-measure__body">
             <div className="sc-measure__lead"><h2 id="sc-measure-title">{copy.measurementTitle}</h2><p>{copy.measurementBody}</p></div>
-            <FrequencyResponseCards />
+            <FrequencyResponseCards copy={copy} />
             <dl className="sc-spec-table">
-              <div><dt>System</dt><dd>Three-way monitor</dd></div>
-              <div><dt>Construction</dt><dd>Modular</dd></div>
-              <div><dt>Midrange spacing</dt><dd>608 mm between dedicated drivers</dd></div>
-              <div><dt>DSP latency</dt><dd>510 µs</dd></div>
-              <div><dt>Measurement</dt><dd>Frequency response / horizontal directivity</dd></div>
-              <div><dt>Development</dt><dd>Kyoto, Japan</dd></div>
+              <div><dt>{copy.specSystemLabel}</dt><dd>{copy.specSystemValue}</dd></div>
+              <div><dt>{copy.specConstructionLabel}</dt><dd>{copy.specConstructionValue}</dd></div>
+              <div><dt>{copy.specSpacingLabel}</dt><dd>{copy.specSpacingValue}</dd></div>
+              <div><dt>{copy.specLatencyLabel}</dt><dd>{copy.specLatencyValue}</dd></div>
+              <div><dt>{copy.specMeasurementLabel}</dt><dd>{copy.specMeasurementValue}</dd></div>
+              <div><dt>{copy.specDevelopmentLabel}</dt><dd>{copy.specDevelopmentValue}</dd></div>
             </dl>
-            <a className="sc-text-link" href="../../../versions/signal/index.html#details">See the measurement plots <ArrowUpRight size={16} aria-hidden="true" /></a>
+            <a className="sc-text-link" href="../../../versions/signal/index.html#details">{copy.measurementLink} <ArrowUpRight size={16} aria-hidden="true" /></a>
           </div>
         </section>
 
         <section className="sc-listening sc-shell" id="listening" aria-labelledby="sc-listening-title" data-section-reveal>
-          <span className="sc-rail-label">A GATHERING</span>
+          <span className="sc-rail-label">{copy.listeningRail}</span>
           <div className="sc-listening__body">
-            <div><h2 id="sc-listening-title">{copy.listeningTitle}</h2><p>{copy.listeningBody}</p><a className="sc-outline-link" href="./event.html">{copy.listeningButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
-            <div className="sc-listening__facts"><dl><div><dt>Venue</dt><dd>To be announced</dd></div><div><dt>Date & time</dt><dd>To be announced</dd></div><div><dt>Tickets</dt><dd>Details to follow</dd></div></dl><p>Event details will be added when confirmed.</p></div>
-          </div>
-        </section>
-
-        <section className="sc-future-teaser sc-shell" aria-labelledby="sc-future-teaser-title">
-          <div>
-            <span className="sc-rail-label">WHAT COULD FOLLOW</span>
-            <h2 id="sc-future-teaser-title">{copy.futureTitle}</h2>
-            <p>{copy.futureBody}</p>
-            <a className="sc-outline-link" href="./future.html">{copy.futureButton} <ArrowUpRight size={17} aria-hidden="true" /></a>
+            <div><h2 id="sc-listening-title">{copy.listeningTitle}</h2><p>{copy.listeningBody}</p><a className="sc-outline-link" href={previewHref("./event.html")}>{copy.listeningButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
+            <div className="sc-listening__facts"><dl><div><dt>{copy.venueLabel}</dt><dd>{copy.venueValue}</dd></div><div><dt>{copy.dateLabel}</dt><dd>{copy.dateValue}</dd></div><div><dt>{copy.ticketsLabel}</dt><dd>{copy.ticketsValue}</dd></div></dl><p>{copy.listeningNote}</p></div>
           </div>
         </section>
 
         <section className="sc-conversation sc-shell" id="conversation" aria-labelledby="sc-conversation-title">
-          <span className="sc-rail-label">OPEN CHANNEL / KYOTO</span>
-          <div><h2 id="sc-conversation-title">{copy.conversationTitle}</h2><p>{copy.conversationBody}</p><a className="sc-outline-link" href="./contact.html#sc-contact-compose">{copy.conversationButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
+          <span className="sc-rail-label">{copy.conversationRail}</span>
+          <div><h2 id="sc-conversation-title">{copy.conversationTitle}</h2><p>{copy.conversationBody}</p><a className="sc-outline-link" href={previewHref("./contact.html#sc-contact-compose")}>{copy.conversationButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
         </section>
       </main>
-      <footer className="sc-footer"><a href="#top" className="sc-footer__wordmark" aria-label="Metorom, back to top">METOROM</a><div><span>INDEPENDENT AUDIO DESIGN / KYOTO</span><a href="../../index.html">ALL STUDIES <ArrowUpRight size={15} aria-hidden="true" /></a></div></footer>
+      <SiteFooter copy={copy} />
       <SiteEditor settings={settings} onChange={setSettings} />
     </>
   );

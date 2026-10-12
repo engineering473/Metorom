@@ -27,3 +27,5 @@
 .sc-contact-form__status{min-height:1.6em;margin-top:14px;color:#345a3b;font-size:12px}
 @media(max-width:760px){.sc-contact-form{scroll-margin-top:88px;margin-top:85px;border-radius:22px;padding:25px 20px}.sc-contact-form__intro{display:block}.sc-contact-form h3{font-size:clamp(2.7rem,10vw,4rem)}.sc-contact-form__intro p{margin-top:22px}.sc-contact-form__row{grid-template-columns:1fr;gap:26px}.sc-contact-form__actions button{width:100%;justify-content:space-between}}
 @media(prefers-reduced-motion:reduce){.sc-contact-form__actions button{transition:none}}
+[lang="ja"] .sc-contact-hero h1{font-size:clamp(3rem,5vw,5rem)}
+@media(max-width:760px){[lang="ja"] .sc-contact-hero h1{font-size:clamp(2.5rem,8vw,4.2rem)}}

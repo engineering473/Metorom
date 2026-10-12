@@ -1,53 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "./language";
+import { COPY_GROUPS, DEFAULT_COPY, DEFAULT_COPY_JA, type CopyKey, type SiteCopy } from "./site-copy";
+import EditorPageSelect from "./editor-page-select";
+import { loadPublishedPage, mergePublished, PublishControls } from "./published-copy";
 
 const STORAGE_KEY = "metorom-sculptural-preview-v1";
+export const COPY_MAX_LENGTH = 5000;
 
-const copyGroups = [
-  { label: "Opening", fields: [
-    ["heroTitle", "Hero headline"], ["heroBody", "Hero introduction"], ["heroButton", "Hero button"],
-    ["ideaTitle", "Idea headline"], ["ideaBody", "Idea text"],
-  ] },
-  { label: "Object and construction", fields: [
-    ["objectTitle", "Object headline"], ["objectBody", "Object text"],
-    ["architectureTitle", "Architecture headline"], ["architectureBody", "Architecture text"],
-  ] },
-  { label: "Listening and next steps", fields: [
-    ["measurementTitle", "Measurement headline"], ["measurementBody", "Measurement text"],
-    ["listeningTitle", "Listening headline"], ["listeningBody", "Listening text"], ["listeningButton", "Listening button"],
-    ["futureTitle", "Future works headline"], ["futureBody", "Future works text"], ["futureButton", "Future works button"],
-    ["conversationTitle", "Conversation headline"], ["conversationBody", "Conversation text"], ["conversationButton", "Conversation button"],
-  ] },
-] as const;
+export function downloadPreviewJson(filename: string, settings: unknown) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
-export const DEFAULT_COPY = {
-  heroTitle: "Sound, given\na shape.",
-  heroBody: "One loudspeaker. Three acoustic paths. Designed to be examined as closely as it is heard.",
-  heroButton: "Explore the object",
-  ideaTitle: "Every element\nhas a purpose.",
-  ideaBody: "Metorom is a modular monitor. Its parts remain visible because the relationships between them matter: driver, cabinet, room, and listener.",
-  objectTitle: "The object\nin the room.",
-  objectBody: "The horn, midrange drivers, and lower cabinet make one clear system. Scroll to follow the speaker from front to back and over the top.",
-  architectureTitle: "Open construction.",
-  architectureBody: "Each acoustic path has a role. The modular structure leaves room for listening, measurement, and revision.",
-  measurementTitle: "Measured.\nThen listened to.",
-  measurementBody: "Frequency response and horizontal directivity show how a change behaves. Listening in a room tells us what that change means.",
-  listeningTitle: "Come closer\nto the sound.",
-  listeningBody: "A small listening session around the three-way monitor is being prepared. Hear the system in a room, see how it is built, and join the conversation.",
-  listeningButton: "Explore the listening event",
-  futureTitle: "Future works.",
-  futureBody: "A notebook of possible directions for the object, the room, and the exchanges around them. These are open questions, not announced products.",
-  futureButton: "Explore future works",
-  conversationTitle: "Keep the\nconversation open.",
-  conversationBody: "Questions about the build, a future listening session, or a possible collaboration? There is a place to start.",
-  conversationButton: "Start a conversation",
-};
-
-export type CopyKey = keyof typeof DEFAULT_COPY;
-export type SiteCopy = Record<CopyKey, string>;
 type Font = "Manrope" | "DM Sans" | "Barlow Condensed" | "Newsreader";
 export type PreviewSettings = {
   copy: SiteCopy;
+  copyJa: SiteCopy;
   displayFont: Font;
   bodyFont: Font;
   accent: string;
@@ -57,23 +30,30 @@ export type PreviewSettings = {
 const fonts: Font[] = ["Manrope", "DM Sans", "Barlow Condensed", "Newsreader"];
 const defaults: PreviewSettings = {
   copy: DEFAULT_COPY,
+  copyJa: DEFAULT_COPY_JA,
   displayFont: "Manrope",
   bodyFont: "Manrope",
-  accent: "#2b604b",
+  accent: "#004225",
   imageScale: 100,
 };
+
+function mergeCopy(base: SiteCopy, saved: Partial<SiteCopy> | undefined): SiteCopy {
+  const copy = { ...base };
+  for (const key of Object.keys(base) as CopyKey[]) {
+    const value = saved?.[key];
+    if (typeof value === "string") copy[key] = value;
+  }
+  return copy;
+}
 
 function readSettings(): PreviewSettings {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") as Partial<PreviewSettings> | null;
     if (!saved || typeof saved !== "object") return defaults;
-    const copy = { ...DEFAULT_COPY };
-    for (const key of Object.keys(DEFAULT_COPY) as CopyKey[]) {
-      const value = saved.copy?.[key];
-      if (typeof value === "string") copy[key] = value.slice(0, 500);
-    }
     return {
-      copy,
+      // The original `copy` object remains English, preserving earlier preview edits.
+      copy: mergeCopy(DEFAULT_COPY, saved.copy),
+      copyJa: mergeCopy(DEFAULT_COPY_JA, saved.copyJa),
       displayFont: fonts.includes(saved.displayFont as Font) ? saved.displayFont as Font : defaults.displayFont,
       bodyFont: fonts.includes(saved.bodyFont as Font) ? saved.bodyFont as Font : defaults.bodyFont,
       accent: typeof saved.accent === "string" && /^#[0-9a-f]{6}$/i.test(saved.accent) ? saved.accent : defaults.accent,
@@ -87,7 +67,20 @@ function readSettings(): PreviewSettings {
 
 export function useSitePreview() {
   const enabled = new URLSearchParams(window.location.search).get("edit") === "1";
+  const hadDraft = useRef((() => { try { return enabled && localStorage.getItem(STORAGE_KEY) !== null; } catch { return false; } })());
   const [settings, setSettings] = useState<PreviewSettings>(() => enabled ? readSettings() : defaults);
+
+  useEffect(() => {
+    let active = true;
+    void loadPublishedPage("home").then((published) => {
+      if (!active || hadDraft.current) return;
+      setSettings((current) => ({ ...current,
+        copy: mergeCopy(DEFAULT_COPY, published.en),
+        copyJa: mergeCopy(DEFAULT_COPY_JA, published.ja),
+      }));
+    }).catch(() => { /* Built-in text remains available offline. */ });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -105,8 +98,11 @@ export function useSitePreview() {
 
 export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; onChange: (value: PreviewSettings) => void }) {
   const enabled = new URLSearchParams(window.location.search).get("edit") === "1";
+  const [language, setLanguage] = useLanguage();
   const [open, setOpen] = useState(enabled);
   const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [focusedKey, setFocusedKey] = useState<CopyKey | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -117,7 +113,14 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
 
   if (!enabled) return null;
 
-  const updateCopy = (key: CopyKey, value: string) => onChange({ ...settings, copy: { ...settings.copy, [key]: value } });
+  const activeCopy = language === "ja" ? settings.copyJa : settings.copy;
+  const query = search.trim().toLowerCase();
+  const groups = COPY_GROUPS.map((group) => ({ ...group, fields: group.fields.filter(([key, label]) =>
+    key === focusedKey || `${group.label} ${key} ${label} ${activeCopy[key]}`.toLowerCase().includes(query)) })).filter((group) => group.fields.length > 0);
+  const fieldCount = groups.reduce((count, group) => count + group.fields.length, 0);
+  const updateCopy = (key: CopyKey, value: string) => onChange(language === "ja"
+    ? { ...settings, copyJa: { ...settings.copyJa, [key]: value } }
+    : { ...settings, copy: { ...settings.copy, [key]: value } });
   const copySettings = async () => {
     try {
       await navigator.clipboard.writeText(JSON.stringify(settings, null, 2));
@@ -135,7 +138,12 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
       {open && <aside id="sc-editor-panel" className="sc-editor__panel" aria-label="Site preview editor">
         <div className="sc-editor__heading"><span>METOROM / PREVIEW</span><button type="button" onClick={() => setOpen(false)} aria-label="Close editor"><X size={18} aria-hidden="true" /></button></div>
         <h2>Edit this page</h2>
-        <p className="sc-editor__help">Changes appear immediately and stay on this browser. They do not publish to the public site.</p>
+        <p className="sc-editor__help">Changes appear immediately. Publish this page’s text when you are ready; your draft stays in this browser until then.</p>
+        <EditorPageSelect page="home" />
+        <div className="sc-editor__languages" role="group" aria-label="Language to edit">
+          <button type="button" aria-pressed={language === "en"} onClick={() => setLanguage("en")}>English</button>
+          <button type="button" aria-pressed={language === "ja"} onClick={() => setLanguage("ja")}>日本語</button>
+        </div>
         <div className="sc-editor__controls">
           <label>Display font
             <select value={settings.displayFont} onChange={(event) => onChange({ ...settings, displayFont: event.target.value as Font })}>
@@ -154,18 +162,24 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
             <input type="range" min="80" max="108" value={settings.imageScale} onChange={(event) => onChange({ ...settings, imageScale: Number(event.target.value) })} />
           </label>
         </div>
+        <label className="sc-editor__search">Find text
+          <input type="search" placeholder="Search sections, labels, or page text" value={search} onChange={(event) => setSearch(event.target.value)} />
+        </label>
+        <p className="sc-editor__count">{fieldCount} text fields · {language === "ja" ? "Japanese" : "English"}</p>
         <div className="sc-editor__copy">
-          {copyGroups.map((group, groupIndex) => <details key={group.label} open={groupIndex === 0}>
+          {groups.map((group, groupIndex) => <details key={group.label} open={Boolean(query) || groupIndex === 0}>
             <summary>{group.label}</summary>
             {group.fields.map(([key, label]) => <label key={key}>{label}
-              <textarea rows={key.endsWith("Title") ? 2 : 3} maxLength={500} value={settings.copy[key]} onChange={(event) => updateCopy(key, event.target.value)} />
+              <textarea rows={key.endsWith("Title") ? 2 : 3} maxLength={COPY_MAX_LENGTH} value={activeCopy[key]} onFocus={() => setFocusedKey(key)} onBlur={() => setFocusedKey(null)} onChange={(event) => updateCopy(key, event.target.value)} />
             </label>)}
           </details>)}
         </div>
         <div className="sc-editor__actions">
           <button type="button" onClick={() => void copySettings()}>Copy settings</button>
+          <button type="button" onClick={() => { downloadPreviewJson("metorom-home-preview.json", settings); setMessage("Preview settings exported as JSON."); }}>Export JSON</button>
           <button type="button" onClick={() => { onChange(defaults); setMessage("Preview reset to the published design."); }}>Reset</button>
         </div>
+        <PublishControls page="home" settings={{ version: 1, en: settings.copy, ja: settings.copyJa }} onSuccess={() => localStorage.removeItem(STORAGE_KEY)} />
         <a className="sc-editor__exit" href={window.location.pathname + window.location.hash}>Exit preview and view the published design</a>
         {message && <p className="sc-editor__message" role="status">{message}</p>}
       </aside>}
