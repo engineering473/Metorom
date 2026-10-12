@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { editHref } from "@/concepts/colour/taste-v2/live-copy";
 import "./site-chrome.css";
 
 // Match the rhythm of the bars in the 3D speaker viewer.
@@ -129,13 +128,13 @@ function useScrollSound() {
   return { enabled, toggle };
 }
 
-export function SiteChrome({ contact = false, philosophy = false }: { contact?: boolean; philosophy?: boolean }) {
+export function SiteChrome({ contact = false }: { contact?: boolean }) {
   const sound = useScrollSound();
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const base = import.meta.env.BASE_URL;
-  const home = contact || philosophy ? "./index.html" : "";
+  const home = contact ? "./index.html" : "";
   const links = [
     { label: "System", href: `${home}#system` },
     { label: "3D object", href: `${home}#object` },
@@ -168,7 +167,7 @@ export function SiteChrome({ contact = false, philosophy = false }: { contact?: 
       <a className="skip-link" href="#main">Skip to content</a>
       <PageProgress />
       <header className="site-header" id="top" ref={headerRef}>
-        <a href={contact || philosophy ? editHref("./index.html") : "#top"} className="site-header__brand" aria-label="Metorom, home">
+        <a href={contact ? "./index.html" : "#top"} className="site-header__brand" aria-label="Metorom, home">
           <img src={`${base}images/taste-v2/metorom-logo.webp`} alt="Metorom" width="260" height="107" />
         </a>
         <button
@@ -183,7 +182,7 @@ export function SiteChrome({ contact = false, philosophy = false }: { contact?: 
           {menuOpen ? "Close" : "Menu"}
         </button>
         <nav id="metorom-navigation" className={`site-header__nav${menuOpen ? " is-open" : ""}`} aria-label="Main navigation">
-          {links.map((link) => <a key={link.label} href={editHref(link.href)} aria-current={contact && link.label === "Contact" ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</a>)}
+          {links.map((link) => <a key={link.label} href={link.href} aria-current={contact && link.label === "Contact" ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</a>)}
         </nav>
         <button className="site-header__sound" type="button" aria-pressed={sound.enabled} aria-label={sound.enabled ? "Turn off scroll sound" : "Turn on scroll sound"} onClick={() => void sound.toggle()}>
           <span className="site-header__sound-glyph" aria-hidden="true"><i /><i /><i /><i /><i /></span>

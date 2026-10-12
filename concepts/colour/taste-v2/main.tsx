@@ -4,7 +4,6 @@ import HalftoneFlow from "@/components/ui/halftone-flow";
 import SiteChrome from "@/components/ui/site-chrome";
 import SpeakerViewer from "@/components/ui/speaker-viewer";
 import StatsBento from "@/components/ui/stats-bento";
-import LiveCopyEditor, { editHref } from "./live-copy";
 import "./styles.css";
 
 const EVENT_URL = "../../../versions/atelier/event.html";
@@ -229,7 +228,7 @@ function App() {
           <div className="contact-teaser__panel bento-tile">
             <span className="section-index">05 / CONTACT · KYOTO, JAPAN</span>
             <h2 id="contact-teaser-title">KEEP THE<br /><em>CONVERSATION.</em></h2>
-            <a href={editHref("./contact.html")}>Contact Metorom <span aria-hidden="true">↗</span></a>
+            <a href="./contact.html">Contact Metorom <span aria-hidden="true">↗</span></a>
           </div>
           <div className="contact-teaser__visual bento-tile">
             <img src={LISTENER_IMAGE} alt="Illustration of a listener facing a Metorom speaker" width="1400" height="800" loading="lazy" decoding="async" />
@@ -243,11 +242,10 @@ function App() {
           <a className="site-footer__wordmark" href="#top" aria-label="Metorom, back to top">METOROM</a>
           <div className="site-footer__bottom">
             <p>Independent audio design.<br />Kyoto, Japan.</p>
-            <div><a href={editHref("./philosophy.html")}>Philosophy ↗</a><a href="?edit=1">Edit text ↗</a><a href="../taste/index.html">Original Taste study ↗</a><a href="../../index.html">All directions ↗</a></div>
+            <div><a href="../taste/index.html">Original Taste study ↗</a><a href="../../index.html">All directions ↗</a></div>
           </div>
         </div>
       </footer>
-      <LiveCopyEditor />
     </>
   );
 }
