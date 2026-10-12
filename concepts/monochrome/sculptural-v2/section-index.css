@@ -10,6 +10,6 @@
 .sc-section-index a:hover,.sc-section-index .is-active a{opacity:1}
 .sc-section-index .is-active a{border-color:var(--sc-accent);padding-left:10px;font-weight:700}
 .sc-section-index.is-dark .is-active a{border-color:#a8d0b4}
-@media(min-width:761px){.sc-architecture>.sc-rail-label,.sc-measure>.sc-rail-label,.sc-listening>.sc-rail-label,.sc-conversation>.sc-rail-label{visibility:hidden}}
+@media(min-width:761px){.sc-architecture>.sc-rail-label,.sc-measure>.sc-rail-label,.sc-listening>.sc-rail-label,.sc-conversation>.sc-rail-label,.sc-philosophy>.sc-rail-label{visibility:hidden}}
 @media(max-width:760px){.sc-section-index{display:none}}
 @media(prefers-reduced-motion:reduce){.sc-section-index,.sc-section-index a{transition:none}}

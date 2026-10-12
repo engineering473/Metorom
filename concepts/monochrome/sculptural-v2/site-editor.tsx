@@ -42,6 +42,7 @@ function mergeCopy(base: SiteCopy, saved: Partial<SiteCopy> | undefined): SiteCo
   const copy = { ...base };
   for (const key of Object.keys(base) as CopyKey[]) {
     const value = saved?.[key];
+    if (key === "indexRange" && value === "01 — 04") continue;
     if (typeof value === "string") copy[key] = value;
   }
   return copy;

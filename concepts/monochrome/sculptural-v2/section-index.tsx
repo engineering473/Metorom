@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 import "./section-index.css";
 
-const chapterIds = ["architecture", "measurements", "listening", "conversation"] as const;
+const chapterIds = ["architecture", "measurements", "listening", "conversation", "philosophy"] as const;
 
 type IndexState = {
   visible: boolean;
@@ -16,6 +16,7 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
     { id: "measurements", label: copy.indexMeasurements },
     { id: "listening", label: copy.indexListening },
     { id: "conversation", label: copy.indexConversation },
+    { id: "philosophy", label: copy.indexPhilosophy },
   ] as const;
   const [state, setState] = useState<IndexState>({ visible: false, active: "architecture", dark: false });
   const indexRef = useRef<HTMLElement>(null);
@@ -26,20 +27,21 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
       frame = 0;
       const first = document.getElementById(chapterIds[0]);
       const last = document.getElementById(chapterIds[chapterIds.length - 1]);
-      if (!first || !last) return;
+      const conversation = document.getElementById("conversation");
+      if (!first || !last || !conversation) return;
       const threshold = Math.min(125, window.innerHeight * 0.16);
       const indexBounds = indexRef.current?.getBoundingClientRect();
       const indexTop = indexBounds?.top ?? threshold;
       const indexBottom = indexBounds?.bottom ?? threshold;
-      const conversationBounds = last.getBoundingClientRect();
-      const philosophyTop = document.getElementById("philosophy")?.getBoundingClientRect().top ?? conversationBounds.bottom;
+      const indexCenter = (indexTop + indexBottom) / 2;
+      const conversationBounds = conversation.getBoundingClientRect();
       const visible = first.getBoundingClientRect().top <= threshold
-        && philosophyTop > indexBottom + 80;
+        && last.getBoundingClientRect().bottom > indexBottom + 80;
       let active: string = chapters[0].id;
       for (const id of chapterIds) {
         if ((document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= threshold) active = id;
       }
-      const dark = conversationBounds.top <= (indexTop + indexBottom) / 2;
+      const dark = conversationBounds.top <= indexCenter && conversationBounds.bottom > indexCenter;
       setState((previous) => previous.visible === visible && previous.active === active && previous.dark === dark
         ? previous : { visible, active, dark });
     };
