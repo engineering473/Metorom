@@ -10,6 +10,7 @@ import { SiteEditor, useSitePreview } from "./site-editor";
 import { previewHref, useLanguage } from "./language";
 import SiteFooter from "./site-footer";
 import "./styles.css";
+import "./philosophy.css";
 import "./site-editor.css";
 
 const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render-front.png`;
@@ -18,6 +19,7 @@ function App() {
   const [settings, setSettings] = useSitePreview();
   const [language] = useLanguage();
   const copy = language === "ja" ? settings.copyJa : settings.copy;
+  const philosophyParagraphs = copy.philosophyBody.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const paths = [
     { id: "high", title: copy.pathHighTitle, part: copy.pathHighPart, body: copy.pathHighBody },
     { id: "mid", title: copy.pathMidTitle, part: copy.pathMidPart, body: copy.pathMidBody },
@@ -120,6 +122,18 @@ function App() {
         <section className="sc-conversation sc-shell" id="conversation" aria-labelledby="sc-conversation-title">
           <span className="sc-rail-label">{copy.conversationRail}</span>
           <div><h2 id="sc-conversation-title">{copy.conversationTitle}</h2><p>{copy.conversationBody}</p><a className="sc-outline-link" href={previewHref("./contact.html#sc-contact-compose")}>{copy.conversationButton} <ArrowUpRight size={17} aria-hidden="true" /></a></div>
+        </section>
+
+        <section className="sc-philosophy sc-shell" id="philosophy" aria-labelledby="sc-philosophy-title">
+          <span className="sc-rail-label">{copy.philosophyRail}</span>
+          <div className="sc-philosophy__body">
+            <h2 id="sc-philosophy-title">{copy.philosophyTitle}</h2>
+            <p className="sc-philosophy__statement">{copy.philosophyStatement}</p>
+            <p className="sc-philosophy__introduction">{copy.philosophyIntroduction}</p>
+            {philosophyParagraphs.length > 0 && <div className="sc-philosophy__text">
+              {philosophyParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            </div>}
+          </div>
         </section>
       </main>
       <SiteFooter copy={copy} />

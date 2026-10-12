@@ -122,6 +122,11 @@ export const DEFAULT_COPY = {
   conversationTitle: "Keep the\nconversation open.",
   conversationBody: "Questions about the build, a future listening session, or a possible collaboration? There is a place to start.",
   conversationButton: "Start a conversation",
+  philosophyRail: "PHILOSOPHY",
+  philosophyTitle: "Philosophy",
+  philosophyStatement: "Our philosophy,\nin our own words.",
+  philosophyIntroduction: "The philosophy statement will be added here.",
+  philosophyBody: "",
   footerTag: "INDEPENDENT AUDIO DESIGN / KYOTO",
   footerStudies: "ALL STUDIES",
   footerTopAria: "Metorom, back to top",
@@ -148,6 +153,7 @@ export const DEFAULT_COPY_JA: SiteCopy = {
   specSystemLabel: "システム", specSystemValue: "3ウェイモニター", specConstructionLabel: "構造", specConstructionValue: "モジュール式", specSpacingLabel: "中域の間隔", specSpacingValue: "専用ドライバー間 608 mm", specLatencyLabel: "DSPレイテンシー", specLatencyValue: "510 µs", specMeasurementLabel: "測定", specMeasurementValue: "周波数特性 / 水平指向性", specDevelopmentLabel: "開発拠点", specDevelopmentValue: "日本・京都", measurementLink: "測定グラフを見る",
   listeningRail: "試聴の場", listeningTitle: "音に、\n近づく。", listeningBody: "3ウェイモニターを囲む小さな試聴会を準備しています。部屋で音を聴き、構造を見て、対話に加わってください。", listeningButton: "試聴会について", venueLabel: "会場", venueValue: "未定", dateLabel: "日時", dateValue: "未定", ticketsLabel: "チケット", ticketsValue: "詳細は後日", listeningNote: "詳細が決まり次第、こちらに掲載します。",
   conversationRail: "お問い合わせ / 京都", conversationTitle: "対話を、\n続けよう。", conversationBody: "製作や今後の試聴会、共同制作についてのご質問はありませんか。ここから対話を始められます。", conversationButton: "お問い合わせ",
+  philosophyRail: "設計思想", philosophyTitle: "設計思想", philosophyStatement: "私たちの考えを、\n私たちの言葉で。", philosophyIntroduction: "設計思想の文章は、後日掲載します。", philosophyBody: "",
   footerTag: "京都発・独立系オーディオデザイン", footerStudies: "すべてのスタディ", footerTopAria: "Metoromのトップへ戻る",
   footerPhilosophy: "設計思想", footerEdit: "テキストを編集", footerNavigationAria: "フッターナビゲーション",
 };
@@ -163,5 +169,6 @@ export const COPY_GROUPS: { label: string; fields: [CopyKey, string][] }[] = [
   { label: "Construction", fields: [["architectureRail", "Section label"], ["architectureTitle", "Headline"], ["architectureBody", "Introduction"], ["pathHighTitle", "High-frequency title"], ["pathHighPart", "High-frequency part"], ["pathHighBody", "High-frequency description"], ["pathMidTitle", "Midrange title"], ["pathMidPart", "Midrange part"], ["pathMidBody", "Midrange description"], ["pathLowTitle", "Low-frequency title"], ["pathLowPart", "Low-frequency part"], ["pathLowBody", "Low-frequency description"]] },
   { label: "Measurements", fields: [["measurementRail", "Section label"], ["measurementTitle", "Headline"], ["measurementBody", "Introduction"], ["chartDriversTitle", "Driver chart title"], ["chartSystemTitle", "System chart title"], ["chartRange", "Chart range"], ["chartCombinedLegend", "Combined legend"], ["chartDriverLowName", "Low driver name"], ["chartDriverMidName", "Mid driver name"], ["chartDriverHighName", "High driver name"], ["chartSystemSeriesName", "System series name"], ["chartPathsMetric", "Acoustic paths metric"], ["chartSpeakerMetric", "Speaker metric"], ["chartDataNote", "Illustrative data note"], ["chartVarianceLabel", "Variance label"], ["chartInBand", "In band label"], ["chartSystemBand", "System band"], ["chartDriversAria", "Driver chart description"], ["chartSystemAria", "System chart description"], ["chartGridAria", "Charts accessible name"], ["chartPlotInstructions", "Chart keyboard instructions"], ["chartDriversVarianceTitle", "Driver variance explanation"], ["chartSystemVarianceTitle", "System variance explanation"], ["chartUnit", "Chart unit"], ["specSystemLabel", "System label"], ["specSystemValue", "System value"], ["specConstructionLabel", "Construction label"], ["specConstructionValue", "Construction value"], ["specSpacingLabel", "Spacing label"], ["specSpacingValue", "Spacing value"], ["specLatencyLabel", "Latency label"], ["specLatencyValue", "Latency value"], ["specMeasurementLabel", "Measurement label"], ["specMeasurementValue", "Measurement value"], ["specDevelopmentLabel", "Development label"], ["specDevelopmentValue", "Development value"], ["measurementLink", "Plots link"]] },
   { label: "Listening", fields: [["listeningRail", "Section label"], ["listeningTitle", "Headline"], ["listeningBody", "Introduction"], ["listeningButton", "Event button"], ["venueLabel", "Venue label"], ["venueValue", "Venue value"], ["dateLabel", "Date label"], ["dateValue", "Date value"], ["ticketsLabel", "Tickets label"], ["ticketsValue", "Tickets value"], ["listeningNote", "Event note"]] },
+  { label: "Philosophy", fields: [["philosophyRail", "Section label"], ["philosophyTitle", "Heading"], ["philosophyStatement", "Statement"], ["philosophyIntroduction", "Introduction"], ["philosophyBody", "Full philosophy text"]] },
   { label: "Conversation & footer", fields: [["conversationRail", "Conversation label"], ["conversationTitle", "Conversation headline"], ["conversationBody", "Conversation text"], ["conversationButton", "Conversation button"], ["footerTag", "Footer tagline"], ["footerStudies", "Studies link"], ["footerTopAria", "Footer accessible name"], ["footerPhilosophy", "Philosophy link"], ["footerEdit", "Edit text link"], ["footerNavigationAria", "Footer navigation accessible name"]] },
 ];

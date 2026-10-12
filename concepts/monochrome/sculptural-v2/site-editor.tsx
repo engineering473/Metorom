@@ -6,7 +6,8 @@ import EditorPageSelect from "./editor-page-select";
 import { loadPublishedPage, mergePublished, PublishControls } from "./published-copy";
 
 const STORAGE_KEY = "metorom-sculptural-preview-v1";
-export const COPY_MAX_LENGTH = 5000;
+const LEGACY_PHILOSOPHY_KEY = "metorom-sculptural-preview-philosophy-v1";
+export const COPY_MAX_LENGTH = 20000;
 
 export function downloadPreviewJson(filename: string, settings: unknown) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }));
@@ -46,18 +47,41 @@ function mergeCopy(base: SiteCopy, saved: Partial<SiteCopy> | undefined): SiteCo
   return copy;
 }
 
+function legacyPhilosophyCopy(value: unknown): Partial<SiteCopy> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const source = value as Record<string, unknown>;
+  const fields = {
+    heroTitle: "philosophyTitle",
+    openingStatement: "philosophyStatement",
+    openingBody: "philosophyIntroduction",
+    statementBody: "philosophyBody",
+  } as const;
+  const result: Partial<SiteCopy> = {};
+  for (const [oldKey, newKey] of Object.entries(fields)) {
+    if (typeof source[oldKey] === "string") result[newKey as CopyKey] = source[oldKey] as string;
+  }
+  return result;
+}
+
+function readLegacyPhilosophyDraft(): { en: Partial<SiteCopy>; ja: Partial<SiteCopy> } {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LEGACY_PHILOSOPHY_KEY) ?? "null") as { en?: unknown; ja?: unknown } | null;
+    return { en: legacyPhilosophyCopy(saved?.en), ja: legacyPhilosophyCopy(saved?.ja) };
+  } catch { return { en: {}, ja: {} }; }
+}
+
 function readSettings(): PreviewSettings {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") as Partial<PreviewSettings> | null;
-    if (!saved || typeof saved !== "object") return defaults;
+    const legacy = readLegacyPhilosophyDraft();
     return {
       // The original `copy` object remains English, preserving earlier preview edits.
-      copy: mergeCopy(DEFAULT_COPY, saved.copy),
-      copyJa: mergeCopy(DEFAULT_COPY_JA, saved.copyJa),
-      displayFont: fonts.includes(saved.displayFont as Font) ? saved.displayFont as Font : defaults.displayFont,
-      bodyFont: fonts.includes(saved.bodyFont as Font) ? saved.bodyFont as Font : defaults.bodyFont,
-      accent: typeof saved.accent === "string" && /^#[0-9a-f]{6}$/i.test(saved.accent) ? saved.accent : defaults.accent,
-      imageScale: typeof saved.imageScale === "number" && Number.isFinite(saved.imageScale)
+      copy: mergeCopy(mergeCopy(DEFAULT_COPY, legacy.en), saved?.copy),
+      copyJa: mergeCopy(mergeCopy(DEFAULT_COPY_JA, legacy.ja), saved?.copyJa),
+      displayFont: fonts.includes(saved?.displayFont as Font) ? saved?.displayFont as Font : defaults.displayFont,
+      bodyFont: fonts.includes(saved?.bodyFont as Font) ? saved?.bodyFont as Font : defaults.bodyFont,
+      accent: typeof saved?.accent === "string" && /^#[0-9a-f]{6}$/i.test(saved.accent) ? saved.accent : defaults.accent,
+      imageScale: typeof saved?.imageScale === "number" && Number.isFinite(saved.imageScale)
         ? Math.min(108, Math.max(80, saved.imageScale)) : defaults.imageScale,
     };
   } catch {
@@ -72,15 +96,16 @@ export function useSitePreview() {
 
   useEffect(() => {
     let active = true;
-    void loadPublishedPage("home").then((published) => {
+    void Promise.all([loadPublishedPage("home"), loadPublishedPage("philosophy")]).then(([published, formerPhilosophy]) => {
       if (!active || hadDraft.current) return;
+      const legacyDraft = enabled ? readLegacyPhilosophyDraft() : { en: {}, ja: {} };
       setSettings((current) => ({ ...current,
-        copy: mergeCopy(DEFAULT_COPY, published.en),
-        copyJa: mergeCopy(DEFAULT_COPY_JA, published.ja),
+        copy: mergeCopy(mergeCopy(mergeCopy(DEFAULT_COPY, legacyPhilosophyCopy(formerPhilosophy.en)), published.en), legacyDraft.en),
+        copyJa: mergeCopy(mergeCopy(mergeCopy(DEFAULT_COPY_JA, legacyPhilosophyCopy(formerPhilosophy.ja)), published.ja), legacyDraft.ja),
       }));
     }).catch(() => { /* Built-in text remains available offline. */ });
     return () => { active = false; };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -170,7 +195,7 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
           {groups.map((group, groupIndex) => <details key={group.label} open={Boolean(query) || groupIndex === 0}>
             <summary>{group.label}</summary>
             {group.fields.map(([key, label]) => <label key={key}>{label}
-              <textarea rows={key.endsWith("Title") ? 2 : 3} maxLength={COPY_MAX_LENGTH} value={activeCopy[key]} onFocus={() => setFocusedKey(key)} onBlur={() => setFocusedKey(null)} onChange={(event) => updateCopy(key, event.target.value)} />
+              <textarea rows={key === "philosophyBody" ? 10 : key.endsWith("Title") ? 2 : 3} maxLength={COPY_MAX_LENGTH} value={activeCopy[key]} onFocus={() => setFocusedKey(key)} onBlur={() => setFocusedKey(null)} onChange={(event) => updateCopy(key, event.target.value)} />
             </label>)}
           </details>)}
         </div>

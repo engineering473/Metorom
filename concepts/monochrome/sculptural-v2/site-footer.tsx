@@ -23,7 +23,7 @@ export default function SiteFooter(props: FooterProps) {
     <div>
       <span>{copy.footerTag}</span>
       <nav className="sc-footer__links" aria-label={copy.footerNavigationAria}>
-        <a href={previewHref("./philosophy.html")}>{copy.footerPhilosophy} <ArrowUpRight size={15} aria-hidden="true" /></a>
+        <a href={props.backToStudy ? previewHref("./index.html#philosophy") : "#philosophy"}>{copy.footerPhilosophy} <ArrowUpRight size={15} aria-hidden="true" /></a>
         <a href={editUrl.pathname + editUrl.search + editUrl.hash}>{copy.footerEdit}</a>
         {props.backToStudy
           ? <a href={previewHref("./index.html")}>{props.copy.footerBack} <ArrowUpRight size={15} aria-hidden="true" /></a>
