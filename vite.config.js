@@ -30,6 +30,7 @@ export default defineConfig({
         conceptGallery: resolve(import.meta.dirname, 'concepts/index.html'),
         conceptColourTasteV2: resolve(import.meta.dirname, 'concepts/colour/taste-v2/index.html'),
         conceptColourTasteV2Contact: resolve(import.meta.dirname, 'concepts/colour/taste-v2/contact.html'),
+        conceptColourTasteV2Philosophy: resolve(import.meta.dirname, 'concepts/colour/taste-v2/philosophy.html'),
         conceptSculpturalV2: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/index.html'),
         conceptSculpturalV2Contact: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/contact.html'),
         conceptSculpturalV2Event: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/event.html'),

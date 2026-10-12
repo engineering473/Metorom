@@ -1,6 +1,7 @@
 import { createRoot, type Root } from "react-dom/client";
 import SiteChrome from "@/components/ui/site-chrome";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
+import LiveCopyEditor, { editHref } from "./live-copy";
 import "./styles.css";
 import "./contact.css";
 
@@ -86,10 +87,11 @@ function ContactApp() {
           <a className="site-footer__wordmark" href="./index.html" aria-label="Metorom home">METOROM</a>
           <div className="site-footer__bottom">
             <p>Independent audio design.<br />Kyoto, Japan.</p>
-            <div><a href="./index.html">Back to the study ↗</a><a href={`mailto:${EMAIL}`}>Email us ↗</a></div>
+            <div><a href={editHref("./philosophy.html")}>Philosophy ↗</a><a href="?edit=1">Edit text ↗</a><a href={editHref("./index.html")}>Back to the study ↗</a><a href={`mailto:${EMAIL}`}>Email us ↗</a></div>
           </div>
         </div>
       </footer>
+      <LiveCopyEditor />
     </>
   );
 }
