@@ -1,6 +1,6 @@
-.sc-section-index{position:fixed;z-index:45;top:clamp(155px,23vh,230px);left:max(3.7vw,24px);width:clamp(175px,18vw,260px);color:#263029;opacity:0;visibility:hidden;transform:translateY(12px);pointer-events:none;transition:opacity .3s ease,transform .3s ease,visibility .3s ease,color .3s ease}
+.sc-section-index{position:fixed;z-index:45;top:clamp(155px,23vh,230px);left:calc(max(3.7vw,24px) - 14px);width:clamp(175px,18vw,260px);border-radius:12px;padding:14px;color:#263029;background:#f6f6f3f5;box-shadow:0 10px 30px #1420191f;opacity:0;visibility:hidden;transform:translateY(12px);pointer-events:none;transition:opacity .3s ease,transform .3s ease,visibility .3s ease,color .3s ease,background-color .3s ease}
 .sc-section-index.is-visible{opacity:1;visibility:visible;transform:none;pointer-events:auto}
-.sc-section-index.is-dark{color:#edf3ed}
+.sc-section-index.is-dark{color:#edf3ed;background:#19231ef7}
 .sc-section-index>p{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid currentColor;padding-bottom:13px;font-size:10px;font-weight:700;letter-spacing:.11em;line-height:1.3}
 .sc-section-index>p span{opacity:.55}
 .sc-section-index ol{list-style:none;margin:0;padding:18px 0 0}
