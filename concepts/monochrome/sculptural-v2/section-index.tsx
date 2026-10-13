@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 import "./section-index.css";
 
-const chapterIds = ["architecture", "measurements", "listening", "conversation", "philosophy"] as const;
+const chapterIds = ["architecture", "measurements", "listening", "conversation", "philosophy", "gallery"] as const;
 
 type IndexState = {
   visible: boolean;
@@ -17,6 +17,7 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
     { id: "listening", label: copy.indexListening },
     { id: "conversation", label: copy.indexConversation },
     { id: "philosophy", label: copy.indexPhilosophy },
+    { id: "gallery", label: copy.indexGallery },
   ] as const;
   const [state, setState] = useState<IndexState>({ visible: false, active: "architecture", dark: false });
   const indexRef = useRef<HTMLElement>(null);

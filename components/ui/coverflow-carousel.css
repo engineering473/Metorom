@@ -1,0 +1,26 @@
+.cf-root{width:100%;min-width:0}
+.cf-viewer{position:relative}
+.cf-frame{overflow:hidden;padding:28px 0;cursor:grab;touch-action:pan-y;outline:none}
+.cf-frame:active{cursor:grabbing}
+.cf-frame:focus-visible{outline:2px solid var(--sc-accent,#004225);outline-offset:3px}
+.cf-stage{position:relative;height:var(--cf-card);transform-style:preserve-3d;user-select:none}
+.cf-card{position:absolute;top:0;left:50%;width:var(--cf-card);height:var(--cf-card);overflow:hidden;border-radius:12px;background:#dfe5de;box-shadow:0 20px 45px #182b1c30;will-change:transform,opacity;backface-visibility:hidden}
+.cf-card img{display:block;width:100%;height:100%;object-fit:cover;user-select:none}
+.cf-placeholder{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;width:100%;height:100%;padding:18px;background:#dfe5de;color:#263c2e}
+.cf-placeholder>span{font-size:10px;font-weight:700;letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.cf-placeholder svg{align-self:center}
+.cf-placeholder p{max-width:15ch;font-size:13px;font-weight:600;line-height:1.4}
+.cf-nav{position:absolute;z-index:150;top:50%;display:grid;place-items:center;width:43px;height:43px;transform:translateY(-50%);border:1px solid #607467;border-radius:50%;background:#f6f6f3;color:#193422;cursor:pointer;transition:background .2s ease,color .2s ease}
+.cf-nav:hover{background:#193422;color:#f6f6f3}
+.cf-nav--previous{left:4px}.cf-nav--next{right:4px}
+.cf-caption{min-height:65px;padding-top:6px;text-align:center}
+.cf-caption p{font-size:15px;font-weight:600;line-height:1.4}
+.cf-caption>span{display:block;margin-top:4px;color:#46594c;font-size:12px}
+.cf-caption dl{max-width:260px;margin:20px auto 0;font-size:12px}
+.cf-caption dl>div{display:flex;justify-content:space-between;gap:15px;padding:5px 0}.cf-caption dd{font-weight:600}
+.cf-pagination{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:14px}
+.cf-pagination button{width:10px;height:10px;border:0;border-radius:50%;padding:0;background:#315f3f;opacity:.34;cursor:pointer;transition:opacity .2s ease,transform .2s ease}
+.cf-pagination button[aria-current="true"]{opacity:1;transform:scale(1.18)}
+.cf-nav:focus-visible,.cf-pagination button:focus-visible{outline:2px solid var(--sc-accent,#004225);outline-offset:4px}
+@media(max-width:760px){.cf-nav{width:38px;height:38px}.cf-placeholder{padding:13px}.cf-placeholder p{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.cf-nav,.cf-pagination button{transition:none}}

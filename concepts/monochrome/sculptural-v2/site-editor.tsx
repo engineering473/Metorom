@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "./language";
 import { COPY_GROUPS, DEFAULT_COPY, DEFAULT_COPY_JA, type CopyKey, type SiteCopy } from "./site-copy";
 import EditorPageSelect from "./editor-page-select";
-import { loadPublishedPage, mergePublished, PublishControls } from "./published-copy";
+import { loadPublishedPage, mergePublished, PublishControls, validateSpeakerImage } from "./published-copy";
 
 const STORAGE_KEY = "metorom-sculptural-preview-v1";
 const LEGACY_PHILOSOPHY_KEY = "metorom-sculptural-preview-philosophy-v1";
@@ -42,7 +42,7 @@ function mergeCopy(base: SiteCopy, saved: Partial<SiteCopy> | undefined): SiteCo
   const copy = { ...base };
   for (const key of Object.keys(base) as CopyKey[]) {
     const value = saved?.[key];
-    if (key === "indexRange" && value === "01 — 04") continue;
+    if (key === "indexRange" && (value === "01 — 04" || value === "01 — 05")) continue;
     if (typeof value === "string") copy[key] = value;
   }
   return copy;
@@ -122,7 +122,7 @@ export function useSitePreview() {
   return [settings, setSettings] as const;
 }
 
-export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; onChange: (value: PreviewSettings) => void }) {
+export function SiteEditor({ settings, onChange, galleryFiles, onGalleryFileChange }: { settings: PreviewSettings; onChange: (value: PreviewSettings) => void; galleryFiles: Record<number, File>; onGalleryFileChange: (slot: number, file: File) => void }) {
   const enabled = new URLSearchParams(window.location.search).get("edit") === "1";
   const [language, setLanguage] = useLanguage();
   const [open, setOpen] = useState(enabled);
@@ -144,6 +144,7 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
   const groups = COPY_GROUPS.map((group) => ({ ...group, fields: group.fields.filter(([key, label]) =>
     key === focusedKey || `${group.label} ${key} ${label} ${activeCopy[key]}`.toLowerCase().includes(query)) })).filter((group) => group.fields.length > 0);
   const fieldCount = groups.reduce((count, group) => count + group.fields.length, 0);
+  const galleryUploads = Object.entries(galleryFiles).map(([slot, file]) => ({ slot: Number(slot), file }));
   const updateCopy = (key: CopyKey, value: string) => onChange(language === "ja"
     ? { ...settings, copyJa: { ...settings.copyJa, [key]: value } }
     : { ...settings, copy: { ...settings.copy, [key]: value } });
@@ -200,12 +201,27 @@ export function SiteEditor({ settings, onChange }: { settings: PreviewSettings; 
             </label>)}
           </details>)}
         </div>
+        <div className="sc-editor__gallery">
+          <h3>Speaker photos</h3>
+          <p>Choose an image for each gallery position. Your selection previews here and stays in this tab until you publish with your GitHub token. JPG, PNG, WebP, or AVIF, up to 8 MB each.</p>
+          {([1, 2, 3, 4, 5] as const).map((slot) => <label key={slot}>Speaker image {slot}
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const error = validateSpeakerImage(file);
+              if (error) { setMessage(`Image ${slot}: ${error}`); event.target.value = ""; return; }
+              onGalleryFileChange(slot, file);
+              setMessage(`Image ${slot} is ready to publish.`);
+            }} />
+            {galleryFiles[slot] && <span>{galleryFiles[slot].name}</span>}
+          </label>)}
+        </div>
         <div className="sc-editor__actions">
           <button type="button" onClick={() => void copySettings()}>Copy settings</button>
           <button type="button" onClick={() => { downloadPreviewJson("metorom-home-preview.json", settings); setMessage("Preview settings exported as JSON."); }}>Export JSON</button>
           <button type="button" onClick={() => { onChange(defaults); setMessage("Preview reset to the published design."); }}>Reset</button>
         </div>
-        <PublishControls page="home" settings={{ version: 1, en: settings.copy, ja: settings.copyJa }} onSuccess={() => localStorage.removeItem(STORAGE_KEY)} />
+        <PublishControls page="home" settings={{ version: 1, en: settings.copy, ja: settings.copyJa }} uploads={galleryUploads} onSuccess={() => localStorage.removeItem(STORAGE_KEY)} />
         <a className="sc-editor__exit" href={window.location.pathname + window.location.hash}>Exit preview and view the published design</a>
         {message && <p className="sc-editor__message" role="status">{message}</p>}
       </aside>}

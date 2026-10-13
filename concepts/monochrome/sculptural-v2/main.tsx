@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import HalftoneFlow from "@/components/ui/halftone-flow";
 import { Navbar1 } from "@/components/ui/navbar-1";
 import FrequencyResponseCards from "@/components/ui/frequency-response-cards";
+import { CoverflowCarousel } from "@/components/ui/coverflow-carousel";
 import RenderedObject from "./rendered-object";
 import SectionIndex from "./section-index";
 import { SiteEditor, useSitePreview } from "./site-editor";
@@ -11,15 +12,38 @@ import { previewHref, useLanguage } from "./language";
 import SiteFooter from "./site-footer";
 import "./styles.css";
 import "./philosophy.css";
+import "./gallery.css";
 import "./site-editor.css";
 
 const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render-front.png`;
 
 function App() {
   const [settings, setSettings] = useSitePreview();
+  const [galleryFiles, setGalleryFiles] = useState<Record<number, File>>({});
+  const [galleryPreviews, setGalleryPreviews] = useState<Record<number, string>>({});
+  const galleryPreviewUrls = useRef<Record<number, string>>({});
   const [language] = useLanguage();
   const copy = language === "ja" ? settings.copyJa : settings.copy;
   const philosophyParagraphs = copy.philosophyBody.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const gallerySlides = ([1, 2, 3, 4, 5] as const).map((slot) => ({
+    src: galleryPreviews[slot] || copy[`galleryImage${slot}`],
+    alt: copy[`galleryAlt${slot}`],
+    title: copy[`galleryTitle${slot}`],
+    subtitle: copy[`gallerySubtitle${slot}`],
+    placeholder: copy.galleryPlaceholder,
+  }));
+  const selectGalleryFile = (slot: number, file: File) => {
+    const previous = galleryPreviewUrls.current[slot];
+    if (previous) URL.revokeObjectURL(previous);
+    const url = URL.createObjectURL(file);
+    galleryPreviewUrls.current[slot] = url;
+    setGalleryPreviews({ ...galleryPreviewUrls.current });
+    setGalleryFiles((current) => ({ ...current, [slot]: file }));
+  };
+
+  useEffect(() => () => {
+    Object.values(galleryPreviewUrls.current).forEach((url) => URL.revokeObjectURL(url));
+  }, []);
   const paths = [
     { id: "high", title: copy.pathHighTitle, part: copy.pathHighPart, body: copy.pathHighBody },
     { id: "mid", title: copy.pathMidTitle, part: copy.pathMidPart, body: copy.pathMidBody },
@@ -135,9 +159,17 @@ function App() {
             </div>}
           </div>
         </section>
+
+        <section className="sc-gallery sc-shell" id="gallery" aria-labelledby="sc-gallery-title">
+          <span className="sc-rail-label">{copy.galleryRail}</span>
+          <div className="sc-gallery__body">
+            <div className="sc-gallery__intro"><h2 id="sc-gallery-title">{copy.galleryTitle}</h2><p>{copy.galleryIntroduction}</p></div>
+            <CoverflowCarousel slides={gallerySlides} label={copy.galleryLabel} previousLabel={copy.galleryPrevious} nextLabel={copy.galleryNext} paginationLabel={copy.galleryGoTo} showNavigation showPagination showCaption />
+          </div>
+        </section>
       </main>
       <SiteFooter copy={copy} />
-      <SiteEditor settings={settings} onChange={setSettings} />
+      <SiteEditor settings={settings} onChange={setSettings} galleryFiles={galleryFiles} onGalleryFileChange={selectGalleryFile} />
     </>
   );
 }

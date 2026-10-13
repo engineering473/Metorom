@@ -5,7 +5,7 @@
 @import "@fontsource/newsreader/latin-400.css";
 
 body{font-family:var(--sc-body-font,"Manrope",sans-serif)}
-.sc-hero h1,.sc-intro h2,.sc-object h2,.sc-architecture h2,.sc-measure h2,.sc-listening h2,.sc-conversation h2,.sc-footer__wordmark{font-family:var(--sc-display-font,"Manrope",sans-serif);white-space:pre-line}
+.sc-hero h1,.sc-intro h2,.sc-object h2,.sc-architecture h2,.sc-measure h2,.sc-listening h2,.sc-conversation h2,.sc-philosophy h2,.sc-gallery h2,.sc-footer__wordmark{font-family:var(--sc-display-font,"Manrope",sans-serif);white-space:pre-line}
 .sc-hero__render{transform:scale(var(--sc-hero-scale,1));transform-origin:center}
 
 .sc-editor{position:fixed;z-index:500;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));font-family:"Manrope",sans-serif;color:#171a18}
@@ -34,6 +34,12 @@ body{font-family:var(--sc-body-font,"Manrope",sans-serif)}
 .sc-editor__copy summary::after{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);content:""}
 .sc-editor__copy details[open] summary::after{transform:rotate(225deg)}
 .sc-editor__copy label{margin:10px 0 15px}
+.sc-editor__gallery{margin-top:22px;border-top:1px solid #cad5cb;padding-top:18px}
+.sc-editor__gallery h3{margin:0 0 8px;color:#1f3225;font-size:15px;font-weight:600}
+.sc-editor__gallery p{margin:0 0 16px;color:#475a4c;font-size:11px;line-height:1.55}
+.sc-editor__gallery label{margin:12px 0 17px}
+.sc-editor__gallery input[type="file"]{width:100%;border:1px solid #bdcabe;border-radius:9px;padding:10px;background:#fff;color:#17221a;font-size:11px}
+.sc-editor__gallery label span{color:#475a4c;font-size:11px;font-weight:400;overflow-wrap:anywhere}
 .sc-editor__actions{display:flex;gap:8px;margin-top:20px}
 .sc-editor__actions button{min-height:42px;flex:1;border:1px solid #263e2d;border-radius:999px;padding:0 12px;background:#263e2d;color:#fff;font-size:12px;font-weight:600}
 .sc-editor__actions button+button{background:transparent;color:#263e2d}
