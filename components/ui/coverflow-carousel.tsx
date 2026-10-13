@@ -133,10 +133,13 @@ export function CoverflowCarousel({
     if (!frame || !wheelNavigation) return;
     const onWheel = (event: WheelEvent) => {
       if (count < 2 || event.ctrlKey || dialogRef.current?.open || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-      if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable]")) return;
-      const bounds = frame.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      if (bounds.top > viewportHeight * 0.7 || bounds.bottom < viewportHeight * 0.3) return;
+      if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable], [data-site-editor], dialog")) return;
+      if (event.deltaY < 0) {
+        wheelRef.current = { last: 0, distance: 0, direction: 0, used: false };
+        return;
+      }
+      const pageHeight = document.scrollingElement?.scrollHeight ?? document.documentElement.scrollHeight;
+      if (window.scrollY + window.innerHeight < pageHeight - 2) return;
       const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? window.innerHeight : 1;
       const delta = event.deltaY * multiplier;
       const direction = Math.sign(delta);
@@ -149,8 +152,6 @@ export function CoverflowCarousel({
       gesture.last = now;
       gesture.direction = direction;
       if (gesture.used) { event.preventDefault(); return; }
-      const current = indexAt(targetRef.current);
-      if ((current === 0 && direction < 0) || (current === count - 1 && direction > 0)) return;
       event.preventDefault();
       gesture.distance += Math.abs(delta);
       if (gesture.distance >= 90) {
@@ -160,7 +161,7 @@ export function CoverflowCarousel({
     };
     window.addEventListener("wheel", onWheel, { passive: false });
     return () => window.removeEventListener("wheel", onWheel);
-  }, [count, indexAt, nudge, wheelNavigation]);
+  }, [count, nudge, wheelNavigation]);
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
