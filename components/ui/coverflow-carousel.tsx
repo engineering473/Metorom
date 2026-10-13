@@ -132,7 +132,11 @@ export function CoverflowCarousel({
     const frame = frameRef.current;
     if (!frame || !wheelNavigation) return;
     const onWheel = (event: WheelEvent) => {
-      if (count < 2 || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (count < 2 || event.ctrlKey || dialogRef.current?.open || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable]")) return;
+      const bounds = frame.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      if (bounds.top > viewportHeight * 0.7 || bounds.bottom < viewportHeight * 0.3) return;
       const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? window.innerHeight : 1;
       const delta = event.deltaY * multiplier;
       const direction = Math.sign(delta);
@@ -154,8 +158,8 @@ export function CoverflowCarousel({
         nudge(direction);
       }
     };
-    frame.addEventListener("wheel", onWheel, { passive: false });
-    return () => frame.removeEventListener("wheel", onWheel);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
   }, [count, indexAt, nudge, wheelNavigation]);
 
   React.useEffect(() => {
