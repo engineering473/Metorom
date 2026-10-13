@@ -1,15 +1,16 @@
 .cf-root{width:100%;min-width:0}
 .cf-viewer{position:relative}
-.cf-frame{overflow:hidden;padding:28px 0;cursor:grab;touch-action:pan-y;outline:none}
+.cf-frame{overflow:hidden;padding:38px 0;cursor:grab;touch-action:pan-y;outline:none}
 .cf-frame:active{cursor:grabbing}
 .cf-frame:focus-visible{outline:2px solid var(--sc-accent,#004225);outline-offset:3px}
 .cf-stage{position:relative;height:var(--cf-card);transform-style:preserve-3d;user-select:none}
-.cf-card{position:absolute;top:0;left:50%;width:var(--cf-card);height:var(--cf-card);overflow:hidden;border-radius:12px;background:#dfe5de;box-shadow:0 20px 45px #182b1c30;will-change:transform,opacity;backface-visibility:hidden}
+.cf-card{position:absolute;top:0;left:50%;width:var(--cf-card);height:var(--cf-card);overflow:hidden;border-radius:12px;background:#dfe5de;box-shadow:0 20px 45px #182b1c30;will-change:transform,opacity;backface-visibility:hidden;cursor:zoom-in}
+.cf-frame:active .cf-card{cursor:grabbing}
 .cf-card img{display:block;width:100%;height:100%;object-fit:cover;user-select:none}
-.cf-placeholder{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;width:100%;height:100%;padding:18px;background:#dfe5de;color:#263c2e}
+.cf-placeholder{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;width:100%;height:100%;padding:clamp(18px,3vw,34px);background:#dfe5de;color:#263c2e}
 .cf-placeholder>span{font-size:10px;font-weight:700;letter-spacing:.12em;font-variant-numeric:tabular-nums}
-.cf-placeholder svg{align-self:center}
-.cf-placeholder p{max-width:15ch;font-size:13px;font-weight:600;line-height:1.4}
+.cf-placeholder svg{align-self:center;width:clamp(36px,5vw,68px);height:auto}
+.cf-placeholder p{max-width:15ch;font-size:clamp(13px,1.2vw,18px);font-weight:600;line-height:1.4}
 .cf-nav{position:absolute;z-index:150;top:50%;display:grid;place-items:center;width:43px;height:43px;transform:translateY(-50%);border:1px solid #607467;border-radius:50%;background:#f6f6f3;color:#193422;cursor:pointer;transition:background .2s ease,color .2s ease}
 .cf-nav:hover{background:#193422;color:#f6f6f3}
 .cf-nav--previous{left:4px}.cf-nav--next{right:4px}
@@ -22,5 +23,14 @@
 .cf-pagination button{width:10px;height:10px;border:0;border-radius:50%;padding:0;background:#315f3f;opacity:.34;cursor:pointer;transition:opacity .2s ease,transform .2s ease}
 .cf-pagination button[aria-current="true"]{opacity:1;transform:scale(1.18)}
 .cf-nav:focus-visible,.cf-pagination button:focus-visible{outline:2px solid var(--sc-accent,#004225);outline-offset:4px}
-@media(max-width:760px){.cf-nav{width:38px;height:38px}.cf-placeholder{padding:13px}.cf-placeholder p{font-size:11px}}
+.cf-lightbox{position:fixed;top:50%;left:50%;width:min(88vw,80vh,1000px);max-width:none;max-height:calc(100dvh - 24px);margin:0;transform:translate(-50%,-50%);border:0;padding:0;overflow:visible;background:transparent;color:#f6f6f3}
+.cf-lightbox::backdrop{background:#101a14b8;backdrop-filter:blur(16px)}
+.cf-lightbox__figure{position:relative;margin:0}
+.cf-lightbox__media{width:100%;aspect-ratio:1;overflow:hidden;border-radius:14px;background:#101713;box-shadow:0 24px 70px #07100b80}
+.cf-lightbox__media img{display:block;width:100%;height:100%;object-fit:contain}
+.cf-lightbox__figure figcaption{display:flex;justify-content:center;gap:12px;margin-top:15px;text-align:center;font-size:13px;line-height:1.4}
+.cf-lightbox__figure figcaption strong{font-weight:600}.cf-lightbox__figure figcaption span{opacity:.8}
+.cf-lightbox__close{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:42px;height:42px;border:0;border-radius:50%;background:#f6f6f3;color:#19231e;cursor:pointer}
+.cf-lightbox__close:focus-visible{outline:2px solid #f6f6f3;outline-offset:4px}
+@media(max-width:760px){.cf-frame{padding:27px 0}.cf-nav{width:38px;height:38px}.cf-placeholder{padding:15px}.cf-placeholder p{font-size:12px}.cf-lightbox{width:min(calc(100vw - 24px),calc(100dvh - 115px))}.cf-lightbox__figure figcaption{flex-direction:column;gap:2px}}
 @media(prefers-reduced-motion:reduce){.cf-nav,.cf-pagination button{transition:none}}
