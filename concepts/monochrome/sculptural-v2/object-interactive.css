@@ -115,7 +115,7 @@
 
 .sc-object__front {
   object-fit: cover;
-  object-position: 50% 54%;
+  object-position: 50% 50%;
 }
 
 .sc-object__film {
@@ -123,6 +123,9 @@
   object-fit: cover;
   opacity: 0;
   pointer-events: none;
+  /* The square render was fitted inside each wide MP4. Restore its original scale. */
+  transform: scale(1.77778);
+  transform-origin: center;
   transition: opacity .12s ease;
 }
 
@@ -146,13 +149,13 @@
 }
 
 .sc-object__hotspot--sub {
-  top: 63%;
+  top: 66%;
   left: 50%;
   width: 31%;
 }
 
 .sc-object__hotspot--mid {
-  top: 13%;
+  top: 16%;
   left: 22%;
   width: 18%;
 }
