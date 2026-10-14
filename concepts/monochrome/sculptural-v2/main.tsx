@@ -14,6 +14,7 @@ import "./styles.css";
 import "./philosophy.css";
 import "./gallery.css";
 import "./site-editor.css";
+import "./object-interactive.css";
 
 const RENDER = `${import.meta.env.BASE_URL}images/concepts/speaker-render-front.png`;
 

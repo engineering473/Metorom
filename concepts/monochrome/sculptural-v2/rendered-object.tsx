@@ -1,137 +1,144 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 
-const POSTER = `${import.meta.env.BASE_URL}images/concepts/speaker-wireframe-poster.png`;
-const FILM = `${import.meta.env.BASE_URL}videos/speaker-scroll.mp4`;
-const FRAMES = `${import.meta.env.BASE_URL}images/concepts/speaker-turntable.webp`;
-const FRAME_COUNT = 25;
-const FRAME_COLUMNS = 5;
+type Driver = "sub" | "mid";
 
-type Position = { percent: number; view: "Front" | "Back" | "Top" };
-
-function viewAt(progress: number): Position["view"] {
-  if (progress < 0.25) return "Front";
-  if (progress < 0.75) return "Back";
-  return "Top";
-}
+const POSTER = `${import.meta.env.BASE_URL}images/concepts/speaker-interactive-front.png`;
+const FILMS: Record<Driver, string> = {
+  sub: `${import.meta.env.BASE_URL}videos/speaker-sub.mp4`,
+  mid: `${import.meta.env.BASE_URL}videos/speaker-mid-left.mp4`,
+};
 
 export default function RenderedObject({ copy }: { copy: SiteCopy }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const progressRef = useRef(0);
-  const [position, setPosition] = useState<Position>({ percent: 0, view: "Front" });
-  const [frameMode, setFrameMode] = useState(() => window.matchMedia("(max-width: 760px), (pointer: coarse)").matches);
-  const [framesReady, setFramesReady] = useState(false);
-  const [framesError, setFramesError] = useState(false);
-  const [filmReady, setFilmReady] = useState(false);
-  const [filmError, setFilmError] = useState(false);
-  const frame = Math.min(FRAME_COUNT - 1, Math.round(position.percent / 100 * (FRAME_COUNT - 1)));
-  const frameColumn = frame % FRAME_COLUMNS;
-  const frameRow = Math.floor(frame / FRAME_COLUMNS);
-  const showFilm = !frameMode && !filmError;
-  const showingFilm = showFilm && filmReady;
-  const ready = showingFilm || framesReady;
-  const view = position.view === "Front" ? copy.viewFront : position.view === "Back" ? copy.viewBack : copy.viewTop;
+  const videos = useRef<Record<Driver, HTMLVideoElement | null>>({ sub: null, mid: null });
+  const requestedDriver = useRef<Driver | null>(null);
+  const playbackGeneration = useRef(0);
+  const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
+  const [visibleVideo, setVisibleVideo] = useState<Driver | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [failedDrivers, setFailedDrivers] = useState<Set<Driver>>(() => new Set());
+  const [playbackError, setPlaybackError] = useState(false);
 
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 760px), (pointer: coarse)");
-    const update = () => { setFrameMode(query.matches); setFilmReady(false); };
-    if (query.addEventListener) {
-      query.addEventListener("change", update);
-      return () => query.removeEventListener("change", update);
+  const drivers = [
+    { id: "sub" as const, label: copy.objectSubLabel },
+    { id: "mid" as const, label: copy.objectMidLeftLabel },
+  ];
+  const activeLabel = activeDriver === "sub" ? copy.objectSubLabel : activeDriver === "mid" ? copy.objectMidLeftLabel : null;
+
+  function stopVideos() {
+    for (const video of Object.values(videos.current)) {
+      if (!video) continue;
+      video.pause();
+      video.loop = false;
+      try { video.currentTime = 0; } catch { /* The still image remains visible. */ }
     }
-    query.addListener(update);
-    return () => query.removeListener(update);
-  }, []);
+  }
 
-  useEffect(() => {
-    const image = new Image();
-    image.onload = () => setFramesReady(true);
-    image.onerror = () => setFramesError(true);
-    image.src = FRAMES;
-    return () => { image.onload = null; image.onerror = null; };
-  }, []);
+  function reset() {
+    playbackGeneration.current += 1;
+    requestedDriver.current = null;
+    stopVideos();
+    setActiveDriver(null);
+    setVisibleVideo(null);
+    setLocked(false);
+    setPlaybackError(false);
+  }
 
-  const seekToScroll = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0 || video.seeking) return;
-    const lastFrame = Math.max(0, video.duration - 1 / 24);
-    const target = Math.min(lastFrame, Math.max(0, progressRef.current * lastFrame));
-    if (Math.abs(video.currentTime - target) > 1 / 40) {
-      try { video.currentTime = target; } catch { /* The poster remains visible until the browser can seek. */ }
+  function playDriver(driver: Driver, pin: boolean) {
+    if (failedDrivers.has(driver)) return;
+    const video = videos.current[driver];
+    if (!video) return;
+    const generation = ++playbackGeneration.current;
+    requestedDriver.current = driver;
+    stopVideos();
+    video.loop = false;
+    setActiveDriver(driver);
+    setVisibleVideo(null);
+    setLocked(pin);
+    setPlaybackError(false);
+    void video.play().catch(() => {
+      // Muted hover playback can be restricted in some browsers. Click remains available.
+      if (playbackGeneration.current !== generation) return;
+      reset();
+      if (pin) setPlaybackError(true);
+    });
+  }
+
+  function preview(driver: Driver, pointerType: string) {
+    if ((pointerType === "mouse" || pointerType === "pen") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !locked && activeDriver !== driver) {
+      playDriver(driver, false);
     }
-  }, []);
+  }
 
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const section = sectionRef.current;
-      const sticky = stickyRef.current;
-      if (!section || !sticky) return;
-      const rect = section.getBoundingClientRect();
-      // Use the pinned element's own height: svh can differ from innerHeight
-      // when mobile browser chrome opens, and the desktop layout has a floor.
-      const range = Math.max(1, rect.height - sticky.getBoundingClientRect().height);
-      const progress = Math.min(1, Math.max(0, -rect.top / range));
-      progressRef.current = progress;
-      const next = { percent: Math.round(progress * 100), view: viewAt(progress) };
-      setPosition((previous) => previous.percent === next.percent && previous.view === next.view ? previous : next);
-      seekToScroll();
-    };
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    window.visualViewport?.addEventListener("resize", schedule);
-    const resizeObserver = new ResizeObserver(schedule);
-    if (sectionRef.current) resizeObserver.observe(sectionRef.current);
-    if (stickyRef.current) resizeObserver.observe(stickyRef.current);
-    return () => {
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      window.visualViewport?.removeEventListener("resize", schedule);
-      resizeObserver.disconnect();
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [seekToScroll]);
+  function leavePreview(driver: Driver) {
+    if (!locked && activeDriver === driver) reset();
+  }
 
   return (
-    <section ref={sectionRef} className="sc-object" id="object" aria-labelledby="sc-object-title">
-      <div ref={stickyRef} className="sc-object__sticky">
+    <section className="sc-object" id="object" aria-labelledby="sc-object-title">
+      <div className="sc-object__sticky">
         <div className="sc-object__copy">
           <p className="sc-overline">{copy.objectOverline}</p>
           <h2 id="sc-object-title">{copy.objectTitle}</h2>
           <p className="sc-object__intro">{copy.objectBody}</p>
-          <div className="sc-object__view">
-            <span>{copy.viewLabel} / {view}</span>
-            <span>{position.percent.toString().padStart(2, "0")}%</span>
+          <div className="sc-object__controls" role="group" aria-label={copy.objectPlayLabel}>
+            {drivers.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`sc-object__control${activeDriver === id ? " is-active" : ""}`}
+                aria-label={`${copy.objectPlayLabel}: ${label}`}
+                aria-pressed={locked && activeDriver === id}
+                disabled={failedDrivers.has(id)}
+                onPointerEnter={(event) => preview(id, event.pointerType)}
+                onPointerLeave={() => leavePreview(id)}
+                onClick={() => playDriver(id, true)}
+              >
+                <span className="sc-object__control-dot" aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+            <button type="button" className="sc-object__reset" disabled={!activeDriver} onClick={reset}>{copy.objectResetLabel}</button>
           </div>
-          <div className="sc-object__track" role="progressbar" aria-label={copy.objectProgressAria} aria-valuemin={0} aria-valuemax={100} aria-valuenow={position.percent} aria-valuetext={`${copy.viewLabel} / ${view}, ${position.percent}%`}><span style={{ transform: `scaleX(${position.percent / 100})` }} /></div>
           <p className="sc-object__hint">{copy.objectHint}</p>
         </div>
-        <div className="sc-object__stage" aria-busy={!ready && !framesError}>
-          {!ready && <img className="sc-object__poster" src={POSTER} alt={copy.objectPosterAlt} width="640" height="760" loading="lazy" decoding="async" />}
-          <div className={`sc-object__sprite${framesReady && !showingFilm ? " is-ready" : ""}`} aria-hidden="true">
-            <div className="sc-object__sprite-frame" style={{ backgroundImage: `url("${FRAMES}")`, backgroundPosition: `${frameColumn * 25}% ${frameRow * 25}%` }} />
+        <div className="sc-object__stage">
+          <div className="sc-object__media">
+            <img className="sc-object__front" src={POSTER} alt={copy.objectPosterAlt} width="1920" height="1920" loading="lazy" decoding="async" />
+            {drivers.map(({ id }) => (
+              <video
+                key={id}
+                ref={(element) => { videos.current[id] = element; }}
+                className={`sc-object__film${visibleVideo === id ? " is-visible" : ""}`}
+                src={FILMS[id]}
+                preload="auto"
+                muted
+                playsInline
+                disablePictureInPicture
+                aria-hidden="true"
+                onPlaying={() => { if (requestedDriver.current === id) setVisibleVideo(id); }}
+                onError={() => { setFailedDrivers((current) => new Set(current).add(id)); if (requestedDriver.current === id) reset(); setPlaybackError(true); }}
+              />
+            ))}
+            {drivers.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`sc-object__hotspot sc-object__hotspot--${id}${activeDriver === id ? " is-active" : ""}`}
+                aria-label={`${copy.objectPlayLabel}: ${label}`}
+                aria-pressed={locked && activeDriver === id}
+                disabled={failedDrivers.has(id)}
+                onPointerEnter={(event) => preview(id, event.pointerType)}
+                onPointerLeave={() => leavePreview(id)}
+                onClick={() => playDriver(id, true)}
+              ><span>{label}</span></button>
+            ))}
           </div>
-          {showFilm && <video
-            ref={videoRef}
-            className={`sc-object__video${filmReady ? " is-ready" : ""}`}
-            src={FILM}
-            preload="auto"
-            muted
-            playsInline
-            disablePictureInPicture
-            aria-label={copy.objectVideoAlt}
-            onLoadedMetadata={seekToScroll}
-            onLoadedData={() => { setFilmReady(true); seekToScroll(); }}
-            onSeeked={seekToScroll}
-            onError={() => setFilmError(true)}
-          />}
-          <div className="sc-object__stage-label"><span>{copy.objectBrand} / {copy.objectStageModel}</span><span>{showingFilm ? copy.objectStageFilm : framesReady ? copy.objectStageStudy : copy.objectStageModel}</span></div>
-          {framesError && !showingFilm && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
+          <div className="sc-object__stage-label">
+            <span>{copy.objectBrand} / {copy.objectStageModel}</span>
+            <span aria-live="polite">{activeLabel ? `${copy.objectStageFilm} / ${activeLabel}` : copy.objectStageStudy}</span>
+          </div>
+          {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
       </div>
     </section>
