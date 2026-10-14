@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 
-type Driver = "sub" | "mid";
+type Driver = "sub" | "mid" | "right" | "tweeter";
 type Direction = "forward" | "reverse";
 type Film = `${Driver}-${Direction}`;
 type Playback = { driver: Driver; direction: Direction };
@@ -13,6 +13,10 @@ const FILMS: Record<Film, string> = {
   "sub-reverse": `${import.meta.env.BASE_URL}videos/speaker-sub-reverse.mp4`,
   "mid-forward": `${import.meta.env.BASE_URL}videos/speaker-mid-left.mp4`,
   "mid-reverse": `${import.meta.env.BASE_URL}videos/speaker-mid-left-reverse.mp4`,
+  "right-forward": `${import.meta.env.BASE_URL}videos/speaker-mid-right.mp4`,
+  "right-reverse": `${import.meta.env.BASE_URL}videos/speaker-mid-right-reverse.mp4`,
+  "tweeter-forward": `${import.meta.env.BASE_URL}videos/speaker-tweeter.mp4`,
+  "tweeter-reverse": `${import.meta.env.BASE_URL}videos/speaker-tweeter-reverse.mp4`,
 };
 
 function lastFrameTime(video: HTMLVideoElement) {
@@ -52,8 +56,10 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const drivers = [
     { id: "sub" as const, label: copy.objectSubLabel },
     { id: "mid" as const, label: copy.objectMidLeftLabel },
+    { id: "right" as const, label: copy.objectMidRightLabel },
+    { id: "tweeter" as const, label: copy.objectTweeterLabel },
   ];
-  const activeLabel = activeDriver === "sub" ? copy.objectSubLabel : activeDriver === "mid" ? copy.objectMidLeftLabel : null;
+  const activeLabel = drivers.find(({ id }) => id === activeDriver)?.label;
 
   useEffect(() => () => {
     pendingPlayback.current?.abort();
