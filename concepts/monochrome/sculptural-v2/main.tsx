@@ -164,7 +164,7 @@ function App() {
           <span className="sc-rail-label">{copy.galleryRail}</span>
           <div className="sc-gallery__body">
             <div className="sc-gallery__intro"><h2 id="sc-gallery-title">{copy.galleryTitle}</h2><p>{copy.galleryIntroduction}</p></div>
-            <CoverflowCarousel slides={gallerySlides} label={copy.galleryLabel} paginationLabel={copy.galleryGoTo} closeLabel={copy.galleryClose} cardWidth="clamp(220px, min(50vw, calc(100dvh - 450px)), 600px)" wheelNavigation showPagination showCaption />
+            <CoverflowCarousel slides={gallerySlides} label={copy.galleryLabel} paginationLabel={copy.galleryGoTo} closeLabel={copy.galleryClose} cardWidth="var(--sc-gallery-card-size)" wheelNavigation showPagination showCaption />
           </div>
         </section>
       </main>
