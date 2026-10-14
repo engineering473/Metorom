@@ -51,13 +51,6 @@
   color: #fff;
 }
 
-.sc-object__control-dot {
-  width: 7px;
-  height: 7px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-}
-
 .sc-object__reset {
   border-color: transparent;
   padding-inline: 10px;
@@ -126,7 +119,6 @@
   /* The square render was fitted inside each wide MP4. Restore its original scale. */
   transform: scale(1.77778);
   transform-origin: center;
-  transition: opacity .12s ease;
 }
 
 .sc-object__film.is-visible {
@@ -139,13 +131,12 @@
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 50%;
   padding: 0;
   background: transparent;
   color: #fff;
   transform: translate(-50%, -50%);
-  transition: border-color .2s ease, background .2s ease;
 }
 
 .sc-object__hotspot--sub {
@@ -161,28 +152,35 @@
 }
 
 .sc-object__hotspot::before {
-  width: 21px;
-  height: 21px;
-  border: 1px solid #fff;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #152419a8;
-  box-shadow: 0 0 0 4px #fff2;
-  content: "";
-  transition: transform .2s ease, background .2s ease;
-}
-
-.sc-object__hotspot:hover,
-.sc-object__hotspot.is-active,
-.sc-object__hotspot:focus-visible {
-  border-color: #ffffffe0;
-  background: #ffffff0d;
-}
-
-.sc-object__hotspot:hover::before,
-.sc-object__hotspot.is-active::before,
-.sc-object__hotspot:focus-visible::before {
-  transform: scale(.68);
   background: #fff;
+  opacity: 0;
+  transform: scale(.6);
+  content: "";
+  transition: opacity .18s ease-out, transform .18s ease-out;
+}
+
+.sc-object__hotspot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.sc-object__hotspot:focus-visible::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (hover: hover) {
+  .sc-object__hotspot:hover:not(:disabled)::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .sc-object__hotspot:hover:not(:disabled) span {
+    opacity: 1;
+  }
 }
 
 .sc-object__hotspot span {
@@ -203,7 +201,6 @@
   transition: opacity .2s ease;
 }
 
-.sc-object__hotspot:hover span,
 .sc-object__hotspot:focus-visible span {
   opacity: 1;
 }

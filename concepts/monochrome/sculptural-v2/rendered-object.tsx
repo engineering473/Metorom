@@ -1,20 +1,50 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 
 type Driver = "sub" | "mid";
+type Direction = "forward" | "reverse";
+type Film = `${Driver}-${Direction}`;
+type Playback = { driver: Driver; direction: Direction };
 
 const POSTER = `${import.meta.env.BASE_URL}images/concepts/speaker-interactive-front.png`;
-const FILMS: Record<Driver, string> = {
-  sub: `${import.meta.env.BASE_URL}videos/speaker-sub.mp4`,
-  mid: `${import.meta.env.BASE_URL}videos/speaker-mid-left.mp4`,
+const FRAME_RATE = 24;
+const FILMS: Record<Film, string> = {
+  "sub-forward": `${import.meta.env.BASE_URL}videos/speaker-sub.mp4`,
+  "sub-reverse": `${import.meta.env.BASE_URL}videos/speaker-sub-reverse.mp4`,
+  "mid-forward": `${import.meta.env.BASE_URL}videos/speaker-mid-left.mp4`,
+  "mid-reverse": `${import.meta.env.BASE_URL}videos/speaker-mid-left-reverse.mp4`,
 };
 
+function lastFrameTime(video: HTMLVideoElement) {
+  return Math.max(0, video.duration - 1 / FRAME_RATE);
+}
+
+function waitForVideo(video: HTMLVideoElement, event: "loadedmetadata" | "loadeddata" | "seeked", signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const cleanUp = () => {
+      video.removeEventListener(event, ready);
+      video.removeEventListener("error", failed);
+      signal.removeEventListener("abort", aborted);
+    };
+    const ready = () => { cleanUp(); resolve(); };
+    const failed = () => { cleanUp(); reject(new Error("Video unavailable")); };
+    const aborted = () => { cleanUp(); reject(new Error("Playback interrupted")); };
+    video.addEventListener(event, ready, { once: true });
+    video.addEventListener("error", failed, { once: true });
+    signal.addEventListener("abort", aborted, { once: true });
+    if (signal.aborted) aborted();
+    else if (video.error) failed();
+  });
+}
+
 export default function RenderedObject({ copy }: { copy: SiteCopy }) {
-  const videos = useRef<Record<Driver, HTMLVideoElement | null>>({ sub: null, mid: null });
-  const requestedDriver = useRef<Driver | null>(null);
-  const playbackGeneration = useRef(0);
+  const videos = useRef<Partial<Record<Film, HTMLVideoElement>>>({});
+  const requestedPlayback = useRef<Playback | null>(null);
+  const pendingPlayback = useRef<AbortController | null>(null);
+  const visibleFilm = useRef<Film | null>(null);
+  const pinned = useRef(false);
   const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
-  const [visibleVideo, setVisibleVideo] = useState<Driver | null>(null);
+  const [visibleVideo, setVisibleVideo] = useState<Film | null>(null);
   const [locked, setLocked] = useState(false);
   const [failedDrivers, setFailedDrivers] = useState<Set<Driver>>(() => new Set());
   const [playbackError, setPlaybackError] = useState(false);
@@ -25,18 +55,23 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   ];
   const activeLabel = activeDriver === "sub" ? copy.objectSubLabel : activeDriver === "mid" ? copy.objectMidLeftLabel : null;
 
+  useEffect(() => () => {
+    pendingPlayback.current?.abort();
+    for (const video of Object.values(videos.current)) video?.pause();
+  }, []);
+
   function stopVideos() {
     for (const video of Object.values(videos.current)) {
       if (!video) continue;
       video.pause();
-      video.loop = false;
-      try { video.currentTime = 0; } catch { /* The still image remains visible. */ }
     }
   }
 
   function reset() {
-    playbackGeneration.current += 1;
-    requestedDriver.current = null;
+    pendingPlayback.current?.abort();
+    requestedPlayback.current = null;
+    visibleFilm.current = null;
+    pinned.current = false;
     stopVideos();
     setActiveDriver(null);
     setVisibleVideo(null);
@@ -44,34 +79,77 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     setPlaybackError(false);
   }
 
-  function playDriver(driver: Driver, pin: boolean) {
-    if (failedDrivers.has(driver)) return;
-    const video = videos.current[driver];
+  function progressFor(driver: Driver) {
+    const film = visibleFilm.current;
+    const video = film && videos.current[film];
+    if (!film?.startsWith(`${driver}-`) || !video || !Number.isFinite(video.duration)) return 0;
+    // Reverse clips contain the same frames in the opposite order. Their last
+    // frame is one frame interval before duration, so duration - time is offset.
+    const time = Math.floor(Math.min(video.currentTime, lastFrameTime(video)) * FRAME_RATE + 0.0001) / FRAME_RATE;
+    return film.endsWith("forward") ? time : lastFrameTime(video) - time;
+  }
+
+  async function playFrom(driver: Driver, direction: Direction, time: number, pin: boolean) {
+    const film: Film = `${driver}-${direction}`;
+    const video = videos.current[film];
     if (!video) return;
-    const generation = ++playbackGeneration.current;
-    requestedDriver.current = driver;
+    pendingPlayback.current?.abort();
+    const controller = new AbortController();
+    pendingPlayback.current = controller;
+    requestedPlayback.current = { driver, direction };
+    pinned.current = pin;
     stopVideos();
-    video.loop = false;
     setActiveDriver(driver);
-    setVisibleVideo(null);
     setLocked(pin);
     setPlaybackError(false);
-    void video.play().catch(() => {
-      // Muted hover playback can be restricted in some browsers. Click remains available.
-      if (playbackGeneration.current !== generation) return;
+    try {
+      if (video.readyState < 1) await waitForVideo(video, "loadedmetadata", controller.signal);
+      if (controller.signal.aborted) return;
+      if (video.error) throw new Error("Video unavailable");
+      const target = Math.max(0, Math.min(time, lastFrameTime(video)));
+      const needsSeek = Math.abs(video.currentTime - target) > 0.0001;
+      if (video.seeking || needsSeek) {
+        const sought = waitForVideo(video, "seeked", controller.signal);
+        if (needsSeek) video.currentTime = target;
+        await sought;
+      } else if (video.readyState < 2) {
+        await waitForVideo(video, "loadeddata", controller.signal);
+      }
+      if (controller.signal.aborted) return;
+      // Keep the old frame on screen until its counterpart has finished seeking.
+      visibleFilm.current = film;
+      setVisibleVideo(film);
+      await video.play();
+    } catch {
+      if (controller.signal.aborted) return;
       reset();
-      if (pin) setPlaybackError(true);
-    });
+      if (pin || direction === "reverse") setPlaybackError(true);
+    }
+  }
+
+  function playDriver(driver: Driver, pin: boolean) {
+    if (failedDrivers.has(driver)) return;
+    const current = requestedPlayback.current;
+    if (current?.driver === driver && current.direction === "forward") {
+      if (pin) { pinned.current = true; setLocked(true); }
+      return;
+    }
+    void playFrom(driver, "forward", progressFor(driver), pin);
   }
 
   function preview(driver: Driver, pointerType: string) {
-    if ((pointerType === "mouse" || pointerType === "pen") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !locked && activeDriver !== driver) {
+    if ((pointerType === "mouse" || pointerType === "pen") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !pinned.current) {
       playDriver(driver, false);
     }
   }
 
   function leavePreview(driver: Driver) {
-    if (!locked && activeDriver === driver) reset();
+    const current = requestedPlayback.current;
+    if (pinned.current || current?.driver !== driver || current.direction !== "forward") return;
+    const progress = progressFor(driver);
+    const video = videos.current[`${driver}-forward`];
+    if (!video || progress <= 0) { reset(); return; }
+    void playFrom(driver, "reverse", lastFrameTime(video) - progress, false);
   }
 
   return (
@@ -94,7 +172,6 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 onPointerLeave={() => leavePreview(id)}
                 onClick={() => playDriver(id, true)}
               >
-                <span className="sc-object__control-dot" aria-hidden="true" />
                 {label}
               </button>
             ))}
@@ -105,19 +182,29 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
         <div className="sc-object__stage">
           <div className="sc-object__media">
             <img className="sc-object__front" src={POSTER} alt={copy.objectPosterAlt} width="1920" height="1920" loading="lazy" decoding="async" />
-            {drivers.map(({ id }) => (
+            {(Object.entries(FILMS) as [Film, string][]).map(([film, source]) => (
               <video
-                key={id}
-                ref={(element) => { videos.current[id] = element; }}
-                className={`sc-object__film${visibleVideo === id ? " is-visible" : ""}`}
-                src={FILMS[id]}
+                key={film}
+                ref={(element) => { if (element) videos.current[film] = element; else delete videos.current[film]; }}
+                className={`sc-object__film${visibleVideo === film ? " is-visible" : ""}`}
+                data-driver={film.split("-")[0]}
+                data-direction={film.split("-")[1]}
+                src={source}
                 preload="auto"
                 muted
                 playsInline
                 disablePictureInPicture
                 aria-hidden="true"
-                onPlaying={() => { if (requestedDriver.current === id) setVisibleVideo(id); }}
-                onError={() => { setFailedDrivers((current) => new Set(current).add(id)); if (requestedDriver.current === id) reset(); setPlaybackError(true); }}
+                onEnded={() => {
+                  const current = requestedPlayback.current;
+                  if (current && `${current.driver}-${current.direction}` === film && current.direction === "reverse") reset();
+                }}
+                onError={() => {
+                  const [driver, direction] = film.split("-") as [Driver, Direction];
+                  if (direction === "forward") setFailedDrivers((current) => new Set(current).add(driver));
+                  const current = requestedPlayback.current;
+                  if (current && `${current.driver}-${current.direction}` === film) { reset(); setPlaybackError(true); }
+                }}
               />
             ))}
             {drivers.map(({ id, label }) => (
