@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { SiteCopy } from "./site-copy";
 
 type Driver = "sub" | "mid" | "right" | "tweeter";
@@ -46,10 +46,9 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const requestedPlayback = useRef<Playback | null>(null);
   const pendingPlayback = useRef<AbortController | null>(null);
   const visibleFilm = useRef<Film | null>(null);
-  const pinned = useRef(false);
+  const keyboardPreview = useRef<Driver | null>(null);
   const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
   const [visibleVideo, setVisibleVideo] = useState<Film | null>(null);
-  const [locked, setLocked] = useState(false);
   const [failedDrivers, setFailedDrivers] = useState<Set<Driver>>(() => new Set());
   const [playbackError, setPlaybackError] = useState(false);
 
@@ -77,11 +76,10 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     pendingPlayback.current?.abort();
     requestedPlayback.current = null;
     visibleFilm.current = null;
-    pinned.current = false;
+    keyboardPreview.current = null;
     stopVideos();
     setActiveDriver(null);
     setVisibleVideo(null);
-    setLocked(false);
     setPlaybackError(false);
   }
 
@@ -95,7 +93,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     return film.endsWith("forward") ? time : lastFrameTime(video) - time;
   }
 
-  async function playFrom(driver: Driver, direction: Direction, time: number, pin: boolean) {
+  async function playFrom(driver: Driver, direction: Direction, time: number) {
     const film: Film = `${driver}-${direction}`;
     const video = videos.current[film];
     if (!video) return;
@@ -103,10 +101,8 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     const controller = new AbortController();
     pendingPlayback.current = controller;
     requestedPlayback.current = { driver, direction };
-    pinned.current = pin;
     stopVideos();
     setActiveDriver(driver);
-    setLocked(pin);
     setPlaybackError(false);
     try {
       if (video.readyState < 1) await waitForVideo(video, "loadedmetadata", controller.signal);
@@ -129,33 +125,69 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     } catch {
       if (controller.signal.aborted) return;
       reset();
-      if (pin || direction === "reverse") setPlaybackError(true);
+      setPlaybackError(true);
     }
   }
 
-  function playDriver(driver: Driver, pin: boolean) {
+  function playDriver(driver: Driver) {
     if (failedDrivers.has(driver)) return;
     const current = requestedPlayback.current;
-    if (current?.driver === driver && current.direction === "forward") {
-      if (pin) { pinned.current = true; setLocked(true); }
-      return;
-    }
-    void playFrom(driver, "forward", progressFor(driver), pin);
+    if (current?.driver === driver && current.direction === "forward") return;
+    void playFrom(driver, "forward", progressFor(driver));
   }
 
   function preview(driver: Driver, pointerType: string) {
-    if ((pointerType === "mouse" || pointerType === "pen") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !pinned.current) {
-      playDriver(driver, false);
+    if ((pointerType === "mouse" || pointerType === "pen") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      playDriver(driver);
     }
   }
 
   function leavePreview(driver: Driver) {
     const current = requestedPlayback.current;
-    if (pinned.current || current?.driver !== driver || current.direction !== "forward") return;
+    if (current?.driver !== driver || current.direction !== "forward") return;
     const progress = progressFor(driver);
     const video = videos.current[`${driver}-forward`];
     if (!video || progress <= 0) { reset(); return; }
-    void playFrom(driver, "reverse", lastFrameTime(video) - progress, false);
+    void playFrom(driver, "reverse", lastFrameTime(video) - progress);
+  }
+
+  function previewEvents(driver: Driver) {
+    const isPreviewKey = (event: KeyboardEvent<HTMLButtonElement>) => event.key === "Enter" || event.key === " ";
+    return {
+      onPointerEnter: (event: PointerEvent<HTMLButtonElement>) => preview(driver, event.pointerType),
+      onPointerLeave: () => leavePreview(driver),
+      onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
+        if (event.pointerType !== "touch") return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        playDriver(driver);
+      },
+      onPointerUp: (event: PointerEvent<HTMLButtonElement>) => {
+        if (event.pointerType === "touch") leavePreview(driver);
+      },
+      onPointerCancel: () => leavePreview(driver),
+      onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => {
+        if (!isPreviewKey(event)) return;
+        event.preventDefault();
+        if (!event.repeat) {
+          keyboardPreview.current = driver;
+          playDriver(driver);
+        }
+      },
+      onKeyUp: (event: KeyboardEvent<HTMLButtonElement>) => {
+        if (!isPreviewKey(event)) return;
+        event.preventDefault();
+        if (keyboardPreview.current === driver) {
+          keyboardPreview.current = null;
+          leavePreview(driver);
+        }
+      },
+      onBlur: () => {
+        if (keyboardPreview.current === driver) {
+          keyboardPreview.current = null;
+          leavePreview(driver);
+        }
+      },
+    };
   }
 
   return (
@@ -172,18 +204,16 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 type="button"
                 className={`sc-object__control${activeDriver === id ? " is-active" : ""}`}
                 aria-label={`${copy.objectPlayLabel}: ${label}`}
-                aria-pressed={locked && activeDriver === id}
+                aria-describedby="sc-object-hint"
                 disabled={failedDrivers.has(id)}
-                onPointerEnter={(event) => preview(id, event.pointerType)}
-                onPointerLeave={() => leavePreview(id)}
-                onClick={() => playDriver(id, true)}
+                {...previewEvents(id)}
               >
                 {label}
               </button>
             ))}
             <button type="button" className="sc-object__reset" disabled={!activeDriver} onClick={reset}>{copy.objectResetLabel}</button>
           </div>
-          <p className="sc-object__hint">{copy.objectHint}</p>
+          <p className="sc-object__hint" id="sc-object-hint">{copy.objectHint}</p>
         </div>
         <div className="sc-object__stage">
           <div className="sc-object__media">
@@ -219,11 +249,9 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 type="button"
                 className={`sc-object__hotspot sc-object__hotspot--${id}${activeDriver === id ? " is-active" : ""}`}
                 aria-label={`${copy.objectPlayLabel}: ${label}`}
-                aria-pressed={locked && activeDriver === id}
                 disabled={failedDrivers.has(id)}
-                onPointerEnter={(event) => preview(id, event.pointerType)}
-                onPointerLeave={() => leavePreview(id)}
-                onClick={() => playDriver(id, true)}
+                aria-describedby="sc-object-hint"
+                {...previewEvents(id)}
               ><span>{label}</span></button>
             ))}
           </div>
