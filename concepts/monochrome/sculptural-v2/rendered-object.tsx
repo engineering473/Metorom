@@ -9,6 +9,7 @@ type Playback = { driver: Driver; direction: Direction } | { driver: "mid"; dire
 
 const POSTER = `${import.meta.env.BASE_URL}images/concepts/speaker-interactive-front.png`;
 const FRAME_RATE = 24;
+const STARTUP_TIMEOUT = 15000;
 const FILMS: Record<Film, string> = {
   "mid-explode": `${import.meta.env.BASE_URL}videos/speaker-mid-left-explode-go.mp4`,
   "mid-return": `${import.meta.env.BASE_URL}videos/speaker-mid-left-explode-return.mp4`,
@@ -45,6 +46,7 @@ function waitForVideo(video: HTMLVideoElement, event: "loadedmetadata" | "loaded
 }
 
 export default function RenderedObject({ copy }: { copy: SiteCopy }) {
+  const [preloadMode] = useState<"metadata" | "auto">(() => window.matchMedia("(pointer: coarse)").matches ? "metadata" : "auto");
   const videos = useRef<Partial<Record<Film, HTMLVideoElement>>>({});
   const requestedPlayback = useRef<Playback | null>(null);
   const pendingPlayback = useRef<AbortController | null>(null);
@@ -160,8 +162,21 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     setActiveDriver(playback.driver);
     setPlaybackError(false);
     setIsLoading(true);
+    let rejectStartup: (error: Error) => void = () => {};
+    const startupFailure = new Promise<never>((_, reject) => { rejectStartup = reject; });
+    const timeout = window.setTimeout(() => rejectStartup(new Error("Video loading timed out")), STARTUP_TIMEOUT);
+    const cancelled = () => rejectStartup(new Error("Playback interrupted"));
+    controller.signal.addEventListener("abort", cancelled, { once: true });
     try {
-      if (video.readyState < 1) await waitForVideo(video, "loadedmetadata", controller.signal);
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      if (video.error) video.load();
+      // iPhone can defer preload entirely. Start playback inside the tap handler
+      // before waiting for metadata or frames, or loading may never begin.
+      const started = video.play();
+      void started.catch(rejectStartup);
+      if (video.readyState < 1) await Promise.race([waitForVideo(video, "loadedmetadata", controller.signal), startupFailure]);
       if (controller.signal.aborted) return;
       if (video.error) throw new Error("Video unavailable");
       const target = Math.max(0, Math.min(time, lastFrameTime(video)));
@@ -169,21 +184,24 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
       if (video.seeking || needsSeek) {
         const sought = waitForVideo(video, "seeked", controller.signal);
         if (needsSeek) video.currentTime = target;
-        await sought;
+        await Promise.race([sought, startupFailure]);
       } else if (video.readyState < 2) {
-        await waitForVideo(video, "loadeddata", controller.signal);
+        await Promise.race([waitForVideo(video, "loadeddata", controller.signal), startupFailure]);
       }
+      await Promise.race([started, startupFailure]);
       if (controller.signal.aborted) return;
       // Keep the old frame on screen until its counterpart has finished seeking.
       visibleFilm.current = film;
       if (film === "mid-explode" || film === "mid-return") setShowFullFrame(true);
       setVisibleVideo(film);
       setIsLoading(false);
-      await video.play();
     } catch {
       if (controller.signal.aborted) return;
       reset();
       setPlaybackError(true);
+    } finally {
+      window.clearTimeout(timeout);
+      controller.signal.removeEventListener("abort", cancelled);
     }
   }
 
@@ -335,7 +353,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 data-driver={film.split("-")[0]}
                 data-direction={film.split("-")[1]}
                 src={source}
-                preload="auto"
+                preload={preloadMode}
                 muted
                 playsInline
                 disablePictureInPicture
