@@ -108,10 +108,12 @@
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #000;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 16px;
 }
 
 .sc-object__media.is-exploding {
-  width: min(100cqw, 100cqh);
+  width: min(100cqw, 100cqh, calc(100svh - 116px));
   aspect-ratio: 1;
 }
 
@@ -125,6 +127,48 @@
 
 .sc-object__film.sc-object__explosion {
   object-fit: contain;
+}
+
+.sc-object__close {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #a4ada3;
+  border-radius: 50%;
+  padding: 0;
+  background: #122118ed;
+  color: #f5f8f2;
+  touch-action: manipulation;
+}
+
+.sc-object__close:hover:not(:disabled) {
+  background: #254f38;
+}
+
+.sc-object__close:focus-visible {
+  outline: 2px solid #f5f8f2;
+  outline-offset: 3px;
+}
+
+.sc-object__close:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.sc-object__loading-status {
+  position: absolute;
+  z-index: 3;
+  top: 20px;
+  right: 72px;
+  left: 16px;
+  color: #f5f8f2;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .sc-object__front,
