@@ -1,22 +1,7 @@
-.sc-system-specs{margin-top:clamp(65px,7vw,105px);color:var(--ink,#12244c)}
-.sc-system-specs__group{scroll-margin-top:110px}
-.sc-system-specs__group h3{margin:0 0 30px;font-size:clamp(1.65rem,2.6vw,2.3rem);font-weight:400;line-height:1.2;letter-spacing:-.025em;text-wrap:balance}
-.sc-system-specs__list{display:grid;gap:22px;margin:0}
-.sc-system-specs__row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:18px 36px;align-items:baseline;border:0;padding:0;font-size:14px;line-height:1.65}
-.sc-system-specs__row dt{min-width:0;margin:0;color:var(--muted,#52617b);font-weight:400}
-.sc-system-specs__row dt span{display:block;margin-top:3px;color:var(--muted,#52617b);font-size:11px;line-height:1.55}
+.sc-system-specs{max-width:850px;margin-top:clamp(50px,5vw,72px);color:var(--ink,#12244c);scroll-margin-top:110px}
+.sc-system-specs h3{margin:0 0 24px;font-size:clamp(1.5rem,2.4vw,2rem);font-weight:400;line-height:1.2;letter-spacing:-.025em}
+.sc-system-specs__list{display:grid;gap:14px;margin:0}
+.sc-system-specs__row{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:16px 30px;align-items:baseline;border:0;padding:0;font-size:14px;line-height:1.6}
+.sc-system-specs__row dt{min-width:0;margin:0;color:var(--muted,#52617b)}
 .sc-system-specs__row dd{min-width:0;margin:0;color:var(--ink,#12244c);font-weight:500;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.sc-system-specs__electronics{margin-top:clamp(65px,8vw,110px)}
-.sc-system-specs__context{max-width:65ch;margin:0 0 44px;color:var(--muted,#52617b);font-size:13px;line-height:1.8}
-.sc-system-specs__electronics .sc-system-specs__group+.sc-system-specs__group{margin-top:clamp(60px,7vw,90px)}
-@media(min-width:1500px){.sc-system-specs__row{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);font-size:15px}}
-@media(max-width:760px){
-  .sc-system-specs{margin-top:55px}
-  .sc-system-specs__group h3{margin-bottom:27px;font-size:1.8rem}
-  .sc-system-specs__list{gap:23px}
-  .sc-system-specs__row{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;font-size:12px;line-height:1.7}
-  .sc-system-specs__row dt span{font-size:10px}
-  .sc-system-specs__electronics{margin-top:65px}
-  .sc-system-specs__context{margin-bottom:34px;font-size:12px}
-}
-@media(max-width:380px){.sc-system-specs__row{grid-template-columns:1fr;gap:5px}.sc-system-specs__row dt span{display:inline;margin-left:5px}}
+@media(max-width:760px){.sc-system-specs{margin-top:44px}.sc-system-specs h3{font-size:1.6rem}.sc-system-specs__list{gap:15px}.sc-system-specs__row{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:16px;font-size:12px}}

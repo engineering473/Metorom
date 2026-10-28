@@ -59,7 +59,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const lastPointerType = useRef("");
   const media = useRef<HTMLDivElement | null>(null);
   const closeControl = useRef<HTMLButtonElement | null>(null);
-  const driverControls = useRef<Partial<Record<Driver, HTMLButtonElement>>>({});
+  const hotspotControls = useRef<Partial<Record<Driver, HTMLButtonElement>>>({});
   const returnFocus = useRef<HTMLButtonElement | null>(null);
   const focusFrame = useRef<number | null>(null);
   const [explosionPhase, setExplosionPhase] = useState<ExplosionPhase | null>(null);
@@ -223,8 +223,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   function playExplodedView(driver: ExplosionDriver) {
     if (explosionPhaseRef.current || showFullFrame) return;
     if (focusFrame.current !== null) cancelAnimationFrame(focusFrame.current);
-    const focused = document.activeElement;
-    returnFocus.current = focused instanceof HTMLButtonElement && focused.closest(".sc-object") ? focused : driverControls.current[driver] ?? null;
+    returnFocus.current = hotspotControls.current[driver] ?? null;
     keyboardPreview.current = null;
     autoReturnDriver.current = null;
     returnQueued.current = false;
@@ -394,10 +393,10 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
               <button
                 key={id}
                 type="button"
+                ref={(element) => { if (element) hotspotControls.current[id] = element; else delete hotspotControls.current[id]; }}
                 className={`sc-object__hotspot sc-object__hotspot--${id}${activeDriver === id ? " is-active" : ""}`}
                 aria-label={`${canExplode(id) ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
                 disabled={!!explosionPhase || showFullFrame || (!canExplode(id) && failedDrivers.has(id))}
-                aria-describedby="sc-object-hint"
                 {...previewEvents(id)}
               ><span>{label}</span></button>
             ))}
@@ -407,26 +406,6 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
             <span aria-live="polite">{activeLabel ? `${explosionPhase ? copy.objectStageExploded : copy.objectStageFilm} / ${activeLabel}` : copy.objectStageStudy}</span>
           </div>
           {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
-        </div>
-        <div className="sc-object__interaction">
-          <div className="sc-object__controls" role="group" aria-label={copy.objectPlayLabel}>
-            {drivers.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                ref={(element) => { if (element) driverControls.current[id] = element; else delete driverControls.current[id]; }}
-                className={`sc-object__control${activeDriver === id ? " is-active" : ""}`}
-                aria-label={`${canExplode(id) ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
-                aria-describedby="sc-object-hint"
-                disabled={!!explosionPhase || showFullFrame || (!canExplode(id) && failedDrivers.has(id))}
-                {...previewEvents(id)}
-              >
-                {label}
-              </button>
-            ))}
-            <button type="button" className="sc-object__reset" disabled={!activeDriver} onClick={() => { touchGesture.current = null; reset(); }}>{copy.objectResetLabel}</button>
-          </div>
-          <p className="sc-object__hint" id="sc-object-hint">{copy.objectHint}</p>
         </div>
       </div>
     </section>

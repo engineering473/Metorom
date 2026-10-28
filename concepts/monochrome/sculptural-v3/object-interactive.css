@@ -7,7 +7,7 @@
   position: relative;
   top: auto;
   grid-template-columns: minmax(310px, 38%) minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-rows: auto;
   height: auto;
   min-height: 0;
   align-items: start;
@@ -20,82 +20,14 @@
   padding: 42px max(3.7vw, 24px) 0;
 }
 
-.sc-object__interaction {
-  grid-column: 1;
-  grid-row: 2;
-  min-width: 0;
-  padding: 0 max(3.7vw, 24px) 32px;
-}
-
 .sc-object__copy h2 {
   margin: 28px 0 18px;
   font-size: clamp(2.5rem, 4vw, 4.5rem);
 }
 
-.sc-object__controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.sc-object__control,
-.sc-object__reset {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  border: 1px solid #a8b8ab;
-  border-radius: 999px;
-  padding: 0 16px;
-  background: transparent;
-  color: #17241b;
-  font-size: 12px;
-  font-weight: 600;
-  transition: background .2s ease, border-color .2s ease, color .2s ease;
-  touch-action: manipulation;
-}
-
-.sc-object__control:hover,
-.sc-object__control.is-active {
-  border-color: #254f38;
-  background: #254f38;
-  color: #fff;
-}
-
-.sc-object__reset {
-  border-color: transparent;
-  padding-inline: 10px;
-}
-
-.sc-object__reset:hover:not(:disabled) {
-  color: #254f38;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.sc-object__reset:disabled {
-  opacity: .42;
-  cursor: default;
-}
-
-.sc-object__control:disabled {
-  opacity: .42;
-  cursor: not-allowed;
-}
-
-.sc-object__hint {
-  max-width: 46ch;
-  margin-top: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
 .sc-object__stage {
   grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   display: grid;
   align-self: stretch;
   align-content: start;
@@ -327,9 +259,7 @@
     opacity: 1;
   }
 
-  .sc-object__hotspot,
-  .sc-object__control,
-  .sc-object__reset {
+  .sc-object__hotspot {
     min-width: 44px;
     min-height: 44px;
   }
@@ -354,18 +284,6 @@
 
   .sc-object__copy h2 {
     margin: 35px 0 14px;
-  }
-
-  .sc-object__controls {
-    margin-top: 18px;
-  }
-
-  .sc-object__interaction {
-    padding: 0 20px 32px;
-  }
-
-  .sc-object__hint {
-    display: block;
   }
 
   .sc-object__stage {
@@ -395,9 +313,7 @@
   .sc-object__film,
   .sc-object__hotspot,
   .sc-object__hotspot::before,
-  .sc-object__hotspot span,
-  .sc-object__control,
-  .sc-object__reset {
+  .sc-object__hotspot span {
     transition: none;
   }
 }
