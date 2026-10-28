@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Philosophy — Metorom</title>
+  </head>
+  <body>
+    <p>Philosophy is now on the <a href="./index.html#philosophy">main page</a>.</p>
+    <script>
+      const destination = new URL("./index.html", window.location.href);
+      destination.search = window.location.search;
+      destination.hash = "philosophy";
+      window.location.replace(destination.href);
+    </script>
+  </body>
+</html>
+
