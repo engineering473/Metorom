@@ -3,10 +3,19 @@ import type { SiteCopy } from "./site-copy";
 import { OBJECT_POSTER, VIDEO_SOURCES, usePreparedMediaSources } from "./media-assets";
 
 type Driver = "sub" | "mid" | "right" | "tweeter";
+type ExplosionDriver = "sub" | "mid";
 type Direction = "forward" | "reverse";
 type ExplosionPhase = "opening" | "open" | "closing";
-type Film = `${Driver}-${Direction}` | "mid-explode" | "mid-return";
-type Playback = { driver: Driver; direction: Direction } | { driver: "mid"; direction: "explode" | "return" };
+type Film = `${Driver}-${Direction}` | `${ExplosionDriver}-${"explode" | "return"}`;
+type Playback = { driver: Driver; direction: Direction } | { driver: ExplosionDriver; direction: "explode" | "return" };
+
+function canExplode(driver: Driver): driver is ExplosionDriver {
+  return driver === "sub" || driver === "mid";
+}
+
+function isExplosionFilm(film: Film) {
+  return film.endsWith("-explode") || film.endsWith("-return");
+}
 
 const POSTER = OBJECT_POSTER;
 const FRAME_RATE = 24;
@@ -45,11 +54,12 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const touchGesture = useRef<{ driver: Driver; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
   const autoReturnDriver = useRef<Driver | null>(null);
   const explosionPhaseRef = useRef<ExplosionPhase | null>(null);
+  const explosionDriverRef = useRef<ExplosionDriver | null>(null);
   const returnQueued = useRef(false);
   const lastPointerType = useRef("");
   const media = useRef<HTMLDivElement | null>(null);
   const closeControl = useRef<HTMLButtonElement | null>(null);
-  const midControl = useRef<HTMLButtonElement | null>(null);
+  const driverControls = useRef<Partial<Record<Driver, HTMLButtonElement>>>({});
   const returnFocus = useRef<HTMLButtonElement | null>(null);
   const focusFrame = useRef<number | null>(null);
   const [explosionPhase, setExplosionPhase] = useState<ExplosionPhase | null>(null);
@@ -118,6 +128,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     keyboardPreview.current = null;
     autoReturnDriver.current = null;
     returnQueued.current = false;
+    explosionDriverRef.current = null;
     changeExplosionPhase(null);
     stopVideos();
     setActiveDriver(null);
@@ -136,7 +147,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   function progressFor(driver: Driver) {
     const film = visibleFilm.current;
     const video = film && videos.current[film];
-    if (film === "mid-explode" || film === "mid-return" || !film?.startsWith(`${driver}-`) || !video || !Number.isFinite(video.duration)) return 0;
+    if (!film || isExplosionFilm(film) || !film.startsWith(`${driver}-`) || !video || !Number.isFinite(video.duration)) return 0;
     // Reverse clips contain the same frames in the opposite order. Their last
     // frame is one frame interval before duration, so duration - time is offset.
     const time = Math.floor(Math.min(video.currentTime, lastFrameTime(video)) * FRAME_RATE + 0.0001) / FRAME_RATE;
@@ -184,7 +195,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
       if (controller.signal.aborted) return;
       // Keep the old frame on screen until its counterpart has finished seeking.
       visibleFilm.current = film;
-      if (film === "mid-explode" || film === "mid-return") setShowFullFrame(true);
+      if (isExplosionFilm(film)) setShowFullFrame(true);
       setVisibleVideo(film);
       setIsLoading(false);
     } catch {
@@ -202,29 +213,33 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   }
 
   function startReturn() {
+    const driver = explosionDriverRef.current;
+    if (!driver) return;
     returnQueued.current = false;
     changeExplosionPhase("closing");
-    void playFilm("mid-return", { driver: "mid", direction: "return" }, 0);
+    void playFilm(`${driver}-return`, { driver, direction: "return" }, 0);
   }
 
-  function playExplodedView() {
+  function playExplodedView(driver: ExplosionDriver) {
     if (explosionPhaseRef.current || showFullFrame) return;
     if (focusFrame.current !== null) cancelAnimationFrame(focusFrame.current);
     const focused = document.activeElement;
-    returnFocus.current = focused instanceof HTMLButtonElement && focused.closest(".sc-object") ? focused : midControl.current;
+    returnFocus.current = focused instanceof HTMLButtonElement && focused.closest(".sc-object") ? focused : driverControls.current[driver] ?? null;
     keyboardPreview.current = null;
     autoReturnDriver.current = null;
     returnQueued.current = false;
+    explosionDriverRef.current = driver;
     changeExplosionPhase("opening");
-    // Start the supplied Go clip directly; the light preview added a 2.4s wait.
-    void playFilm("mid-explode", { driver: "mid", direction: "explode" }, 0);
+    // Start the supplied opening clip directly, without waiting for a preview.
+    void playFilm(`${driver}-explode`, { driver, direction: "explode" }, 0);
   }
 
   function closeExplodedView() {
     const phase = explosionPhaseRef.current;
-    if (!phase || phase === "closing") return;
+    const driver = explosionDriverRef.current;
+    if (!phase || phase === "closing" || !driver) return;
     changeExplosionPhase("closing");
-    const go = videos.current["mid-explode"];
+    const go = videos.current[`${driver}-explode`];
     if (phase === "open" || go?.ended) startReturn();
     // The two clips have different motion timing. Join their matching endpoints
     // if close is pressed midflight instead of cutting to different geometry.
@@ -232,7 +247,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   }
 
   function activate(driver: Driver) {
-    if (driver === "mid") playExplodedView();
+    if (canExplode(driver)) playExplodedView(driver);
     else playDriver(driver, true);
   }
 
@@ -267,7 +282,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     return {
       onClick: (event: MouseEvent<HTMLButtonElement>) => {
         // Assistive technology can activate a button without a pointer gesture.
-        if (event.detail === 0 || (driver === "mid" && lastPointerType.current !== "touch")) activate(driver);
+        if (event.detail === 0 || (canExplode(driver) && lastPointerType.current !== "touch")) activate(driver);
       },
       onPointerEnter: (event: PointerEvent<HTMLButtonElement>) => preview(driver, event.pointerType),
       onPointerLeave: (event: PointerEvent<HTMLButtonElement>) => {
@@ -302,7 +317,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
         if (!isPreviewKey(event)) return;
         event.preventDefault();
         if (!event.repeat) {
-          if (driver === "mid") playExplodedView();
+          if (canExplode(driver)) playExplodedView(driver);
           else {
             keyboardPreview.current = driver;
             playDriver(driver);
@@ -335,13 +350,13 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
           <p className="sc-object__intro">{copy.objectBody}</p>
         </div>
         <div className="sc-object__stage">
-          <div ref={media} className={`sc-object__media${showFullFrame ? " is-exploding" : ""}`} data-explosion-state={explosionPhase ?? undefined} aria-busy={explosionPhase ? isLoading : undefined}>
+          <div ref={media} className={`sc-object__media${showFullFrame ? " is-exploding" : ""}`} data-explosion-state={explosionPhase ?? undefined} data-explosion-driver={explosionPhase ? activeDriver ?? undefined : undefined} aria-busy={explosionPhase ? isLoading : undefined}>
             <img className="sc-object__front" src={POSTER} alt={copy.objectPosterAlt} width="1920" height="1920" loading="lazy" decoding="async" />
             {(Object.entries(films) as [Film, string][]).map(([film, source]) => (
               <video
                 key={film}
                 ref={(element) => { if (element) videos.current[film] = element; else delete videos.current[film]; }}
-                className={`sc-object__film${film === "mid-explode" || film === "mid-return" ? " sc-object__explosion" : ""}${visibleVideo === film ? " is-visible" : ""}`}
+                className={`sc-object__film${isExplosionFilm(film) ? " sc-object__explosion" : ""}${visibleVideo === film ? " is-visible" : ""}`}
                 data-driver={film.split("-")[0]}
                 data-direction={film.split("-")[1]}
                 src={source || undefined}
@@ -358,7 +373,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                     if (returnQueued.current) startReturn();
                     else changeExplosionPhase("open");
                   }
-                  else if (current.direction === "return") void playFrom("mid", "reverse", 0);
+                  else if (current.direction === "return") void playFrom(current.driver, "reverse", 0);
                   else if (autoReturnDriver.current === current.driver) leavePreview(current.driver);
                 }}
                 onError={() => {
@@ -380,8 +395,8 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 key={id}
                 type="button"
                 className={`sc-object__hotspot sc-object__hotspot--${id}${activeDriver === id ? " is-active" : ""}`}
-                aria-label={`${id === "mid" ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
-                disabled={!!explosionPhase || showFullFrame || (id !== "mid" && failedDrivers.has(id))}
+                aria-label={`${canExplode(id) ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
+                disabled={!!explosionPhase || showFullFrame || (!canExplode(id) && failedDrivers.has(id))}
                 aria-describedby="sc-object-hint"
                 {...previewEvents(id)}
               ><span>{label}</span></button>
@@ -399,11 +414,11 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
               <button
                 key={id}
                 type="button"
-                ref={id === "mid" ? midControl : undefined}
+                ref={(element) => { if (element) driverControls.current[id] = element; else delete driverControls.current[id]; }}
                 className={`sc-object__control${activeDriver === id ? " is-active" : ""}`}
-                aria-label={`${id === "mid" ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
+                aria-label={`${canExplode(id) ? copy.objectExplodeLabel : copy.objectPlayLabel}: ${label}`}
                 aria-describedby="sc-object-hint"
-                disabled={id !== "mid" && (failedDrivers.has(id) || !!explosionPhase || showFullFrame)}
+                disabled={!!explosionPhase || showFullFrame || (!canExplode(id) && failedDrivers.has(id))}
                 {...previewEvents(id)}
               >
                 {label}

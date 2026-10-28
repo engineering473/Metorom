@@ -6,6 +6,8 @@ export const HERO_IMAGE = `${base}images/concepts/speaker-render-front-v3.webp`;
 export const OBJECT_POSTER = `${base}images/concepts/speaker-interactive-front-v3.webp`;
 export const BRAND_IMAGE = `${base}images/taste-v2/metorom-logo.webp`;
 export const VIDEO_SOURCES = {
+  "sub-explode": `${base}videos/speaker-sub-explode-go.mp4`,
+  "sub-return": `${base}videos/speaker-sub-explode-return.mp4`,
   "mid-explode": `${base}videos/speaker-mid-left-explode-go.mp4`,
   "mid-return": `${base}videos/speaker-mid-left-explode-return.mp4`,
   "sub-forward": `${base}videos/speaker-sub.mp4`,
