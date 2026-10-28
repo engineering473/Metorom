@@ -1,0 +1,402 @@
+.sc-object {
+  min-height: 0;
+}
+
+.sc-object__sticky {
+  position: relative;
+  top: auto;
+  grid-template-columns: minmax(310px, 38%) minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  height: auto;
+  min-height: max(700px, 100svh);
+}
+
+.sc-object__copy {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  padding-bottom: 0;
+}
+
+.sc-object__interaction {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  padding: 0 max(3.7vw, 24px) 52px;
+}
+
+.sc-object__copy h2 {
+  margin: auto 0 24px;
+}
+
+.sc-object__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 38px;
+}
+
+.sc-object__control,
+.sc-object__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #a8b8ab;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: transparent;
+  color: #17241b;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+  touch-action: manipulation;
+}
+
+.sc-object__control:hover,
+.sc-object__control.is-active {
+  border-color: #254f38;
+  background: #254f38;
+  color: #fff;
+}
+
+.sc-object__reset {
+  border-color: transparent;
+  padding-inline: 10px;
+}
+
+.sc-object__reset:hover:not(:disabled) {
+  color: #254f38;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sc-object__reset:disabled {
+  opacity: .42;
+  cursor: default;
+}
+
+.sc-object__control:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.sc-object__hint {
+  max-width: 46ch;
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sc-object__stage {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  container-type: size;
+}
+
+.sc-object__media {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  width: min(100cqw, 177.78cqh);
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 16px;
+}
+
+.sc-object__media.is-exploding .sc-object__film {
+  transform: none;
+}
+
+.sc-object__media.is-exploding .sc-object__hotspot {
+  visibility: hidden;
+}
+
+.sc-object__film.sc-object__explosion {
+  object-fit: contain;
+  background: #000;
+}
+
+.sc-object__close {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #a4ada3;
+  border-radius: 50%;
+  padding: 0;
+  background: #122118ed;
+  color: #f5f8f2;
+  touch-action: manipulation;
+}
+
+.sc-object__close:hover:not(:disabled) {
+  background: #254f38;
+}
+
+.sc-object__close:focus-visible {
+  outline: 2px solid #f5f8f2;
+  outline-offset: 3px;
+}
+
+.sc-object__close:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.sc-object__loading-status {
+  position: absolute;
+  z-index: 3;
+  top: 20px;
+  right: 72px;
+  left: 16px;
+  color: #f5f8f2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sc-object__front,
+.sc-object__film {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sc-object__front {
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.sc-object__film {
+  z-index: 1;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  /* The square render was fitted inside each wide MP4. Restore its original scale. */
+  transform: scale(1.77778);
+  transform-origin: center;
+}
+
+.sc-object__film.is-visible {
+  opacity: 1;
+}
+
+.sc-object__film[data-driver="right"],
+.sc-object__film[data-driver="tweeter"] {
+  /* These renders are square, like the poster, without the earlier clips' side bars. */
+  transform: none;
+}
+
+.sc-object__hotspot {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  transform: translate(-50%, -50%);
+  touch-action: manipulation;
+}
+
+.sc-object__hotspot--sub {
+  top: 66%;
+  left: 50%;
+  width: 31%;
+}
+
+.sc-object__hotspot--mid {
+  top: 16%;
+  left: 22%;
+  width: 18%;
+}
+
+.sc-object__hotspot--right {
+  top: 16%;
+  left: 78%;
+  width: 18%;
+}
+
+.sc-object__hotspot--tweeter {
+  top: 16%;
+  left: 50%;
+  width: 34%;
+  height: 20%;
+  aspect-ratio: auto;
+  border-radius: 12px;
+}
+
+.sc-object__hotspot::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transform: scale(.6);
+  content: "";
+  transition: opacity .18s ease-out, transform .18s ease-out;
+}
+
+.sc-object__hotspot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.sc-object__hotspot:focus-visible::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (hover: hover) {
+  .sc-object__hotspot:hover:not(:disabled)::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .sc-object__hotspot:hover:not(:disabled) span {
+    opacity: 1;
+  }
+}
+
+.sc-object__hotspot span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 90%;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #122118de;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 22px);
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+
+.sc-object__hotspot:focus-visible span {
+  opacity: 1;
+}
+
+.sc-object__hotspot:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.sc-object__stage-label {
+  color: #f5f8f2;
+  border-color: #a4ada3;
+  pointer-events: none;
+}
+
+.sc-object__fallback {
+  color: #f5f8f2;
+  background: #142219d9;
+  padding: 8px 10px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .sc-object__hotspot::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .sc-object__hotspot.is-active span {
+    opacity: 1;
+  }
+
+  .sc-object__hotspot,
+  .sc-object__control,
+  .sc-object__reset {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 760px), (hover: none) and (pointer: coarse) and (max-width: 1024px) {
+  .sc-object__sticky {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+
+  .sc-object__copy {
+    min-height: 0;
+    padding: 105px 20px 32px;
+  }
+
+  .sc-object__copy h2 {
+    margin: 35px 0 14px;
+  }
+
+  .sc-object__controls {
+    margin-top: 18px;
+  }
+
+  .sc-object__interaction {
+    padding: 0 20px 32px;
+  }
+
+  .sc-object__hint {
+    display: block;
+  }
+
+  .sc-object__stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+    padding: 18px 0 62px;
+    container-type: normal;
+  }
+
+  .sc-object__media {
+    width: 100%;
+    scroll-margin-top: 100px;
+    scroll-margin-bottom: 16px;
+  }
+
+  .sc-object__stage-label {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    font-size: 9px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+  .sc-object__media {
+    width: min(100%, calc((100svh - 116px) * 16 / 9));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-object__film,
+  .sc-object__hotspot,
+  .sc-object__hotspot::before,
+  .sc-object__hotspot span,
+  .sc-object__control,
+  .sc-object__reset {
+    transition: none;
+  }
+}

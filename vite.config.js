@@ -1,42 +1,37 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-
-const conceptInputs = Object.fromEntries(
-  ['monochrome', 'warm', 'colour', 'haze', 'dark'].flatMap((family) =>
-    ['impeccable', 'taste'].map((variant) => [
-      `concept-${family}-${variant}`,
-      resolve(import.meta.dirname, `concepts/${family}/${variant}/index.html`)
-    ])
-  )
-);
-
-export default defineConfig({
-  base: '/Metorom/',
-  plugins: [react(), tailwindcss()],
-  resolve: { alias: { '@': import.meta.dirname } },
-  server: { port: 5173 },
-  build: {
-    rollupOptions: {
-      input: {
-        gallery: resolve(import.meta.dirname, 'index.html'),
-        atelier: resolve(import.meta.dirname, 'versions/atelier/index.html'),
-        atelierEvent: resolve(import.meta.dirname, 'versions/atelier/event.html'),
-        signal: resolve(import.meta.dirname, 'versions/signal/index.html'),
-        signalEvent: resolve(import.meta.dirname, 'versions/signal/event.html'),
-        journey: resolve(import.meta.dirname, 'versions/journey/index.html'),
-        journeyEvent: resolve(import.meta.dirname, 'versions/journey/event.html'),
-        conceptGallery: resolve(import.meta.dirname, 'concepts/index.html'),
-        conceptColourTasteV2: resolve(import.meta.dirname, 'concepts/colour/taste-v2/index.html'),
-        conceptColourTasteV2Contact: resolve(import.meta.dirname, 'concepts/colour/taste-v2/contact.html'),
-        conceptSculpturalV2: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/index.html'),
-        conceptSculpturalV2Contact: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/contact.html'),
-        conceptSculpturalV2Event: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/event.html'),
-        conceptSculpturalV2Future: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/future.html'),
-        conceptSculpturalV2Philosophy: resolve(import.meta.dirname, 'concepts/monochrome/sculptural-v2/philosophy.html'),
-        ...conceptInputs
-      }
+const root = import.meta.dirname;
+const site = 'concepts/monochrome/sculptural-v3';
+const pages = ['index', 'contact', 'event', 'philosophy'];
+// Preserve all studies in source; publish only the selected site and its assets.
+function selectedSiteAssets() {
+  return { name: 'metorom-selected-site', closeBundle() {
+    const files = [
+      'images/concepts/speaker-render-front-v3.webp', 'images/concepts/speaker-interactive-front-v3.webp',
+      'images/concepts/speaker-wireframe-poster.png', 'images/taste-v2/metorom-logo.webp',
+      'images/spl.png', 'images/directivity.png',
+      ...['home','contact','event','philosophy'].map(page => `content/sculptural-v3-${page}.json`),
+      ...['speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
+    ];
+    const content = JSON.parse(readFileSync(resolve(root,'public/content/sculptural-v3-home.json'),'utf8'));
+    for (const copy of [content.en,content.ja]) for(let slot=1;slot<=5;slot++) {
+      const source=copy?.[`galleryImage${slot}`];
+      if(typeof source==='string' && source.startsWith('/Metorom/images/')) files.push(source.slice('/Metorom/'.length));
     }
-  }
-});
+    for(const file of new Set(files)) {
+      const target=resolve(root,'dist',file);
+      mkdirSync(dirname(target),{recursive:true});copyFileSync(resolve(root,'public',file),target);
+    }
+    writeFileSync(resolve(root,'dist/.nojekyll'),'');
+    for(const page of pages) {
+      const target=resolve(root,`dist/concepts/monochrome/sculptural-v2/${page}.html`);
+      const destination=`../sculptural-v3/${page}.html`;
+      mkdirSync(dirname(target),{recursive:true});
+      writeFileSync(target,`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Metorom</title><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${destination}"><script>location.replace(${JSON.stringify(destination)}+location.search+location.hash)</script></head><body><a href="${destination}">Continue to Metorom</a></body></html>`);
+    }
+  }};
+}
+export default defineConfig(({command})=>({base:'/Metorom/',publicDir:command==='serve'?'public':false,plugins:[react(),tailwindcss(),selectedSiteAssets()],resolve:{alias:{'@':root}},server:{port:5173},build:{rollupOptions:{input:{home:resolve(root,'index.html'),...Object.fromEntries(pages.map(page=>[`metorom-${page}`,resolve(root,`${site}/${page}.html`)]))}}}}));
