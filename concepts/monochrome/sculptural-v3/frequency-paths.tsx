@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Pause, Play } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import type { SiteCopy } from "./site-copy";
 import type { Language } from "./language";
@@ -21,7 +20,6 @@ export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) 
   const id = useId();
   const reduceMotion = useReducedMotion();
   const [inView, setInView] = useState(false);
-  const [paused, setPaused] = useState(false);
   const japanese = language === "ja";
 
   useEffect(() => {
@@ -51,15 +49,11 @@ export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) 
     },
   ];
 
-  return <div ref={root} className={`sc-paths${inView && !paused && !reduceMotion ? " is-playing" : ""}`}>
+  return <div ref={root} className={`sc-paths${inView && !reduceMotion ? " is-playing" : ""}`}>
     <div className="sc-paths__explanation">
       <p>{japanese
         ? "周波数は、1秒間の振動の数です。単位はヘルツ（Hz）。同じ時間に波が多いほど音は高く、少ないほど低くなります。3つの波を見比べてください。"
         : "Frequency is the number of vibrations each second, measured in hertz (Hz). More waves in the same time means a higher pitch; fewer means a lower pitch. Compare the three below."}</p>
-      {!reduceMotion && <button type="button" className="sc-paths__motion" onClick={() => setPaused((current) => !current)} aria-pressed={paused}>
-        {paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
-        {japanese ? (paused ? "波の動きを再開" : "波の動きを停止") : (paused ? "Play waves" : "Pause waves")}
-      </button>}
     </div>
     {paths.map((path) => <article key={path.key} className={`sc-paths__row sc-paths__row--${path.key}`} aria-labelledby={`${id}-${path.key}`}>
       <div className="sc-paths__copy">
@@ -72,7 +66,6 @@ export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) 
         <svg viewBox="0 0 640 112" role="img" aria-labelledby={`${id}-${path.key}-title ${id}-${path.key}-description`}>
           <title id={`${id}-${path.key}-title`}>{path.title}</title>
           <desc id={`${id}-${path.key}-description`}>{path.rhythm}. {japanese ? "他の波と同じ振幅と時間幅で描いた模式図です。実測値や録音ではありません。" : "A schematic sine wave with the same amplitude and time window as the other two waves. This is not measured data or an audio recording."}</desc>
-          <line className="sc-paths__baseline" x1="0" x2="640" y1="56" y2="56" />
           <g className="sc-paths__wave"><path d={waves[path.key]} /></g>
         </svg>
         <figcaption><span>{path.rhythm}</span><span>{japanese ? "時間 →" : "Time →"}</span></figcaption>

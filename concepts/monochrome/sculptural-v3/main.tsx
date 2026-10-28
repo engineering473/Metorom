@@ -4,6 +4,7 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import HalftoneFlow from "@/components/ui/halftone-flow";
 import { Navbar1 } from "./navbar";
 import FrequencyResponseCards from "./frequency-response-cards";
+import SystemSpecifications from "./system-specifications";
 import CloserLook from "./closer-look";
 import FrequencyPaths from "./frequency-paths";
 import PagePreloader from "./media-preloader";
@@ -123,14 +124,7 @@ function App() {
           <div className="sc-measure__body">
             <div className="sc-measure__lead"><h2 id="sc-measure-title">{copy.measurementTitle}</h2><p>{copy.measurementBody}</p></div>
             <FrequencyResponseCards copy={copy} />
-            <dl className="sc-spec-table">
-              <div><dt>{copy.specSystemLabel}</dt><dd>{copy.specSystemValue}</dd></div>
-              <div><dt>{copy.specConstructionLabel}</dt><dd>{copy.specConstructionValue}</dd></div>
-              <div><dt>{copy.specSpacingLabel}</dt><dd>{copy.specSpacingValue}</dd></div>
-              <div><dt>{copy.specLatencyLabel}</dt><dd>{copy.specLatencyValue}</dd></div>
-              <div><dt>{copy.specMeasurementLabel}</dt><dd>{copy.specMeasurementValue}</dd></div>
-              <div><dt>{copy.specDevelopmentLabel}</dt><dd>{copy.specDevelopmentValue}</dd></div>
-            </dl>
+            <SystemSpecifications copy={copy} language={language} />
           </div>
         </section>
 

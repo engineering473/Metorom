@@ -117,13 +117,12 @@ function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false 
     <div className="frc-plot" role="img" tabIndex={0} aria-label={`${label}. ${copy.chartPlotInstructions}`} onPointerMove={setIndexFromPointer} onPointerLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(plottedIndex)} onBlur={() => setActiveIndex(null)} onKeyDown={handleKeyDown}>
       <svg viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <pattern id={gridId} width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#8c9c91" opacity=".35" /></pattern>
-          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#789a87" stopOpacity=".25" /><stop offset="100%" stopColor="#789a87" stopOpacity="0" /></linearGradient>
+          <pattern id={gridId} width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#8397bc" opacity=".35" /></pattern>
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6b8fd4" stopOpacity=".25" /><stop offset="100%" stopColor="#6b8fd4" stopOpacity="0" /></linearGradient>
           <clipPath id={clipId}><rect x={PLOT.left} y={PLOT.top} width={PLOT.right - PLOT.left} height={PLOT.bottom - PLOT.top} /></clipPath>
         </defs>
         <rect width="600" height="300" fill={`url(#${gridId})`} opacity=".68" />
         {[20, 100, 1000, 10000, 20000].map((hz) => <line key={hz} x1={logX(hz)} x2={logX(hz)} y1={PLOT.top} y2={PLOT.bottom} className="frc-plot__grid-line" />)}
-        {yTicks.map((db) => <line key={db} x1={PLOT.left} x2={PLOT.right} y1={yFor(db, yMin, yMax)} y2={yFor(db, yMin, yMax)} className="frc-plot__grid-line" />)}
         {filled && <path d={`${pathFor(series[0].data, yMin, yMax)} L${PLOT.right},${PLOT.bottom} L${PLOT.left},${PLOT.bottom} Z`} fill={`url(#${fillId})`} clipPath={`url(#${clipId})`} />}
         {series.map((item) => <path key={item.shortName} d={pathFor(item.data, yMin, yMax)} className="frc-plot__series" pathLength={1} stroke={item.color} strokeWidth={filled ? 3.1 : 2.5} clipPath={`url(#${clipId})`} />)}
         {activeIndex !== null && <g className="frc-plot__cursor"><line x1={logX(activeHz)} x2={logX(activeHz)} y1={PLOT.top} y2={PLOT.bottom} /><circle cx={logX(activeHz)} cy={yFor(series[0].data[activeIndex].db, yMin, yMax)} r="4.5" fill={series[0].color} /></g>}
@@ -151,7 +150,6 @@ function ResponseCard({ kind, copy }: ResponseCardProps) {
       <div className="frc-card__main">
         <header className="frc-card__header"><h3>{drivers ? copy.chartDriversTitle : copy.chartSystemTitle}</h3><span>{copy.chartRange}</span></header>
         {drivers ? <div className="frc-card__legend">{series.map((item) => <span key={item.shortName}><i style={{ background: item.color }} />{item.name}</span>)}</div> : <div className="frc-card__legend"><span><i style={{ background: series[0].color }} />{copy.chartCombinedLegend}</span></div>}
-        <div className="frc-card__metric"><strong>{drivers ? copy.chartDriversCount : copy.chartSystemCount}</strong><span>{drivers ? copy.chartPathsMetric : copy.chartSpeakerMetric}</span></div>
       </div>
       <div className="frc-card__chart"><ResponsePlot series={series} yMin={drivers ? 38 : 72} yMax={drivers ? 92 : 88} yTicks={drivers ? [40, 60, 80] : [74, 80, 86]} label={drivers ? copy.chartDriversAria : copy.chartSystemAria} copy={copy} filled={!drivers} /></div>
       <footer className="frc-card__footer"><span>{copy.chartDataNote}</span><span className="frc-card__variance" title={drivers ? copy.chartDriversVarianceTitle : copy.chartSystemVarianceTitle}>{copy.chartVarianceLabel} <strong>± {(drivers ? DRIVER_VARIANCE : SYSTEM_VARIANCE).toFixed(1)} {copy.chartDecibelUnit} <small>{drivers ? copy.chartInBand : copy.chartSystemBand}</small></strong></span></footer>
