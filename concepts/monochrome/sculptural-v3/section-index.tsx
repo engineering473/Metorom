@@ -8,7 +8,6 @@ type IndexState = {
   visible: boolean;
   active: string;
   dark: boolean;
-  gallery: boolean;
 };
 
 export default function SectionIndex({ copy }: { copy: SiteCopy }) {
@@ -20,7 +19,7 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
     { id: "philosophy", label: copy.indexPhilosophy },
     { id: "gallery", label: copy.indexGallery },
   ] as const;
-  const [state, setState] = useState<IndexState>({ visible: false, active: "architecture", dark: false, gallery: false });
+  const [state, setState] = useState<IndexState>({ visible: false, active: "architecture", dark: false });
   const indexRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -37,17 +36,15 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
       const indexBottom = indexBounds?.bottom ?? threshold;
       const indexCenter = (indexTop + indexBottom) / 2;
       const conversationBounds = conversation.getBoundingClientRect();
-      const galleryBounds = last.getBoundingClientRect();
-      const gallery = galleryBounds.top <= threshold && galleryBounds.bottom > window.innerHeight - 12;
       const visible = first.getBoundingClientRect().top <= threshold
-        && (gallery || galleryBounds.bottom > window.innerHeight * .7);
+        && last.getBoundingClientRect().bottom > indexBottom + 80;
       let active: string = chapters[0].id;
       for (const id of chapterIds) {
         if ((document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= threshold) active = id;
       }
       const dark = conversationBounds.top <= indexCenter && conversationBounds.bottom > indexCenter;
-      setState((previous) => previous.visible === visible && previous.active === active && previous.dark === dark && previous.gallery === gallery
-        ? previous : { visible, active, dark, gallery });
+      setState((previous) => previous.visible === visible && previous.active === active && previous.dark === dark
+        ? previous : { visible, active, dark });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     update();
@@ -61,7 +58,7 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
   }, []);
 
   return (
-    <nav ref={indexRef} className={`sc-section-index${state.visible ? " is-visible" : ""}${state.dark ? " is-dark" : ""}${state.gallery ? " is-gallery" : ""}`} aria-label={copy.indexLabel} aria-hidden={!state.visible}>
+    <nav ref={indexRef} className={`sc-section-index${state.visible ? " is-visible" : ""}${state.dark ? " is-dark" : ""}`} aria-label={copy.indexLabel} aria-hidden={!state.visible}>
       <p>{copy.indexLabel} <span>{copy.indexRange}</span></p>
       <ol>
         {chapters.map((chapter, index) => (

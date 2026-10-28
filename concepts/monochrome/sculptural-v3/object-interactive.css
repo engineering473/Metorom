@@ -1,32 +1,35 @@
 .sc-object {
   min-height: 0;
+  scroll-margin-top: 100px;
 }
 
 .sc-object__sticky {
   position: relative;
   top: auto;
   grid-template-columns: minmax(310px, 38%) minmax(0, 1fr);
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto auto;
   height: auto;
-  min-height: max(700px, 100svh);
+  min-height: 0;
+  align-items: start;
 }
 
 .sc-object__copy {
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
-  padding-bottom: 0;
+  padding: 42px max(3.7vw, 24px) 0;
 }
 
 .sc-object__interaction {
   grid-column: 1;
   grid-row: 2;
   min-width: 0;
-  padding: 0 max(3.7vw, 24px) 52px;
+  padding: 0 max(3.7vw, 24px) 32px;
 }
 
 .sc-object__copy h2 {
-  margin: auto 0 24px;
+  margin: 28px 0 18px;
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
 }
 
 .sc-object__controls {
@@ -34,7 +37,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-top: 38px;
+  margin-top: 24px;
 }
 
 .sc-object__control,
@@ -94,26 +97,24 @@
   grid-column: 2;
   grid-row: 1 / span 2;
   display: grid;
-  place-items: center;
+  align-self: stretch;
+  align-content: start;
   min-width: 0;
-  container-type: size;
+  container-type: inline-size;
+  padding: 0 0 55px;
 }
 
 .sc-object__media {
   position: relative;
   isolation: isolate;
-  width: 100%;
-  width: min(100cqw, 177.78cqh);
+  width: min(100%, 640px, calc(100svh - 160px));
   max-width: 100%;
-  aspect-ratio: 16 / 9;
+  justify-self: center;
+  aspect-ratio: 1;
   overflow: hidden;
   background: #000;
   scroll-margin-top: 100px;
   scroll-margin-bottom: 16px;
-}
-
-.sc-object__media.is-exploding .sc-object__film {
-  transform: none;
 }
 
 .sc-object__media.is-exploding .sc-object__hotspot {
@@ -122,6 +123,7 @@
 
 .sc-object__film.sc-object__explosion {
   object-fit: contain;
+  transform: none;
   background: #000;
 }
 
@@ -177,16 +179,17 @@
 }
 
 .sc-object__front {
-  object-fit: cover;
+  object-fit: contain;
   object-position: 50% 50%;
 }
 
 .sc-object__film {
   z-index: 1;
-  object-fit: cover;
+  object-fit: contain;
   opacity: 0;
   pointer-events: none;
-  /* The square render was fitted inside each wide MP4. Restore its original scale. */
+  /* Wide clips contain a fitted square render. Undo only that encoded
+     letterboxing; square poster/explosion clips use the same unscaled frame. */
   transform: scale(1.77778);
   transform-origin: center;
 }
@@ -217,28 +220,28 @@
 }
 
 .sc-object__hotspot--sub {
-  top: 66%;
+  top: 59%;
   left: 50%;
   width: 31%;
 }
 
 .sc-object__hotspot--mid {
-  top: 16%;
+  top: 30.875%;
   left: 22%;
   width: 18%;
 }
 
 .sc-object__hotspot--right {
-  top: 16%;
+  top: 30.875%;
   left: 78%;
   width: 18%;
 }
 
 .sc-object__hotspot--tweeter {
-  top: 16%;
+  top: 30.875%;
   left: 50%;
   width: 34%;
-  height: 20%;
+  height: 11.25%;
   aspect-ratio: auto;
   border-radius: 12px;
 }
@@ -333,6 +336,10 @@
 }
 
 @media (max-width: 760px), (hover: none) and (pointer: coarse) and (max-width: 1024px) {
+  .sc-object {
+    scroll-margin-top: 88px;
+  }
+
   .sc-object__sticky {
     display: flex;
     flex-direction: column;
@@ -366,7 +373,7 @@
     flex-direction: column;
     justify-content: center;
     min-height: 0;
-    padding: 18px 0 62px;
+    padding: 0 0 55px;
     container-type: normal;
   }
 
@@ -381,12 +388,6 @@
     bottom: 16px;
     left: 16px;
     font-size: 9px;
-  }
-}
-
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
-  .sc-object__media {
-    width: min(100%, calc((100svh - 116px) * 16 / 9));
   }
 }
 

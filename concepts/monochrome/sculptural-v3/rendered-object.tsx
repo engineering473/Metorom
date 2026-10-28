@@ -76,6 +76,9 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
 
   useEffect(() => {
     if (!showFullFrame) return;
+    // Keep the complete movie and its close control below the floating header.
+    // scroll-margin applies only when the expanded frame is partly obscured.
+    media.current?.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     const frame = requestAnimationFrame(() => {
       if (explosionPhaseRef.current !== "closing") closeControl.current?.focus({ preventScroll: true });
     });

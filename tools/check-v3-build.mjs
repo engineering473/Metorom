@@ -12,6 +12,7 @@ assert.deepEqual(files.filter(path => path.endsWith('.html')).sort(), expected, 
 for (const page of pages) assert.match(readFileSync(`dist/concepts/monochrome/sculptural-v2/${page}.html`, 'utf8'), /location\.replace/, 'Old URLs must redirect rather than serve the archived site');
 assert.equal(files.filter(path => path.startsWith('videos/')).length, 10, 'All ten interactive clips must ship');
 assert.equal(files.filter(path => path.startsWith('content/')).length, 4, 'Only v3 published copy must ship');
+assert.ok(!files.includes('images/spl.png') && !files.includes('images/directivity.png'), 'Removed measurement images must not ship');
 for (const file of files.filter(path => path.endsWith('.html'))) {
   const html = readFileSync(join('dist', file), 'utf8');
   for (const match of html.matchAll(/(?:src|href)="\/Metorom\/([^"?#]+)"/g)) assert.ok(files.includes(match[1]), `Missing ${match[1]} referenced by ${file}`);

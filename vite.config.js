@@ -12,7 +12,6 @@ function selectedSiteAssets() {
     const files = [
       'images/concepts/speaker-render-front-v3.webp', 'images/concepts/speaker-interactive-front-v3.webp',
       'images/concepts/speaker-wireframe-poster.png', 'images/taste-v2/metorom-logo.webp',
-      'images/spl.png', 'images/directivity.png',
       ...['home','contact','event','philosophy'].map(page => `content/sculptural-v3-${page}.json`),
       ...['speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
     ];

@@ -80,7 +80,7 @@ function App() {
 
   return (
     <>
-      <PagePreloader language={language} images={[...gallerySlides.map((slide) => slide.src).filter(Boolean), `${import.meta.env.BASE_URL}images/spl.png`, `${import.meta.env.BASE_URL}images/directivity.png`]} onReady={() => { const id = decodeURIComponent(window.location.hash.slice(1)); if (id) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "instant", block: "start" })); }} />
+      <PagePreloader language={language} images={gallerySlides.map((slide) => slide.src).filter(Boolean)} onReady={() => { const id = decodeURIComponent(window.location.hash.slice(1)); if (id) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "instant", block: "start" })); }} />
       <Navbar1 copy={copy} />
       <SectionIndex copy={copy} />
       <main id="main">
@@ -131,11 +131,6 @@ function App() {
               <div><dt>{copy.specMeasurementLabel}</dt><dd>{copy.specMeasurementValue}</dd></div>
               <div><dt>{copy.specDevelopmentLabel}</dt><dd>{copy.specDevelopmentValue}</dd></div>
             </dl>
-            <div id="measurement-plots" className="sc-measured-plots">
-              <figure><img src={`${import.meta.env.BASE_URL}images/spl.png`} alt={language === "ja" ? "既存の周波数特性測定グラフ" : "Existing frequency response measurement plot"} loading="lazy" /><figcaption>{language === "ja" ? "周波数特性 / REW" : "Frequency response / REW"}</figcaption></figure>
-              <figure><img src={`${import.meta.env.BASE_URL}images/directivity.png`} alt={language === "ja" ? "既存の水平指向性測定グラフ" : "Existing horizontal directivity measurement plot"} loading="lazy" /><figcaption>{language === "ja" ? "水平指向性 / REW" : "Horizontal directivity / REW"}</figcaption></figure>
-            </div>
-            <a className="sc-text-link" href="#measurement-plots">{copy.measurementLink} <ArrowUpRight size={16} aria-hidden="true" /></a>
           </div>
         </section>
 

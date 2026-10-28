@@ -38,7 +38,7 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
   const progressPaths = useMemo(() => {
     const inset = 1.5;
     const middle = navSize.width / 2;
-    const radius = 0;
+    const radius = (navSize.height - inset * 2) / 2;
     const bottom = navSize.height - inset;
     const leftCurve = inset + radius;
     const rightCurve = navSize.width - inset - radius;
@@ -142,7 +142,7 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
         <div className="sc-nav-slot flex justify-center w-full py-6 px-4">
           <div ref={navShell} className="sc-nav-shell flex items-center justify-between px-6 py-3 bg-white rounded-full shadow-lg w-full max-w-5xl relative z-10">
             <svg className="sc-progress-outline" viewBox={`0 0 ${navSize.width} ${navSize.height}`} aria-hidden="true">
-              <rect x="1.5" y="1.5" width={navSize.width - 3} height={navSize.height - 3} rx="0" pathLength="100" />
+              <rect x="1.5" y="1.5" width={navSize.width - 3} height={navSize.height - 3} rx={(navSize.height - 3) / 2} pathLength="100" />
               <path ref={progressLeft} className="sc-progress-outline__active" d={progressPaths.left} pathLength="100" strokeDasharray="0 100" opacity="0" />
               <path ref={progressRight} className="sc-progress-outline__active" d={progressPaths.right} pathLength="100" strokeDasharray="0 100" opacity="0" />
             </svg>

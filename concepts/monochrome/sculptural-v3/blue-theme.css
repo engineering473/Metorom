@@ -1,20 +1,7 @@
-/* Uninterrupted editorial surfaces; rounded panels belong to audio data. */
+/* Blue editorial surfaces with the original floating navbar and gallery cards. */
 :root{--paper:#fff;--ink:#12244c;--muted:#52617b;--line:#ccd5e6;--sc-accent:#101d8f;--sc-soft:#eef2fa;--sc-navy:#091c49;color:var(--ink);background:var(--paper)}
 html{scrollbar-color:#7d91c4 #f1f4fb}body input,body textarea{caret-color:var(--sc-accent)}
 ::selection{background:#101d8f;color:#fff}
-body .sc-nav-slot{padding:0!important}
-body .sc-nav-shell{height:86px;max-width:none;padding:0 max(3.7vw,24px)!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}
-body .sc-progress-outline rect{stroke:#dce2ef;stroke-width:1}
-body .sc-progress-outline__active{stroke-width:2!important}
-body .sc-nav-cta{border-radius:0!important;background:var(--sc-accent)!important}
-body .sc-nav-cta:hover{background:#071957!important}
-body .sc-desktop-nav a,body .sc-language-toggle,body .sc-mobile-language,body .sc-menu-button{color:var(--ink)}
-body .sc-language-toggle,body .sc-mobile-language{border-radius:0;border-color:var(--line)}
-body .sc-language-toggle:hover{background:var(--sc-soft)}
-body .sc-mobile-menu{background:#fff!important;color:var(--ink)}
-body .sc-mobile-menu__brand,body .sc-mobile-menu__links>a{border-color:var(--line)}
-body .sc-mobile-menu__links>a.sc-mobile-menu__cta{border-color:var(--sc-accent);background:var(--sc-accent);color:#fff}
-body .sc-brand{letter-spacing:-.03em}
 body .sc-opening{background:#fff}
 body .sc-opening::before{background:linear-gradient(90deg,#fff 0%,#fffffff5 27%,#ffffffc9 44%,#ffffff25 70%,#ffffff00 100%)}
 body .sc-opening>.sc-intro{background:linear-gradient(to bottom,#ffffff00 0%,#fff 75%)}
@@ -58,10 +45,6 @@ body .frc-card__metric strong{letter-spacing:-.04em}
 body .frc-plot__grid-line{stroke:#93a7ce}
 body .frc-plot__unit,body .frc-plot__tick{fill:#52688e}
 body .frc-plot__tooltip{border:0;border-radius:8px;color:#193766;box-shadow:0 8px 22px #122e6030}
-body .sc-measured-plots{display:grid;gap:30px;margin-top:60px;scroll-margin-top:110px}
-body .sc-measured-plots figure{margin:0}
-body .sc-measured-plots img{display:block;width:100%;height:auto;background:#fff}
-body .sc-measured-plots figcaption{margin-top:12px;font-size:12px;color:var(--muted)}
 body .sc-contact-hero__globe{background:var(--sc-navy)}
 body .sc-contact-hero__globe-top,body .sc-contact-hero__globe-bottom{border-color:#a6bbdf64}
 body .sc-contact-form{border:0;border-radius:0;background:var(--sc-soft);padding:clamp(28px,4vw,64px)}
@@ -82,14 +65,7 @@ body .sc-section-index.is-dark{background:transparent;color:#e8eeff}
 body .sc-section-index a{border-left:0;padding-left:0}
 body .sc-section-index .is-active a{border:0;padding-left:0;color:var(--sc-accent)}
 body .sc-section-index.is-dark .is-active a{color:#fff}
-body .sc-section-index.is-gallery{top:auto;right:max(3.7vw,24px);bottom:18px;left:max(3.7vw,24px);width:auto;padding:14px 0;background:transparent;color:#fff;border-top:1px solid #ffffff55}
-body .sc-section-index.is-gallery>p{display:none}
-body .sc-section-index.is-gallery ol{display:flex;justify-content:space-between;gap:18px;padding:0}
-body .sc-section-index.is-gallery li+li{margin:0}
-body .sc-section-index.is-gallery a{min-height:32px;gap:10px;font-size:11px}
-body .sc-section-index.is-gallery .is-active a{color:#fff;text-decoration:underline;text-underline-offset:6px}
 @media(max-width:760px){
-  body .sc-nav-shell{height:74px;padding:0 20px!important}
   body .sc-opening::before{background:linear-gradient(to bottom,#fffffff0 0%,#ffffffe6 360px,#ffffff99 560px,#ffffff00 960px)}
   body .sc-hero__render figcaption{font-size:9px;padding-inline:0}
   body .sc-object__stage{margin:0;border-radius:0}
