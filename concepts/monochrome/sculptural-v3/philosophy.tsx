@@ -101,8 +101,8 @@ function Philosophy() {
       <section className="sc-philosophy-next" aria-labelledby="sc-philosophy-next-title">
         <h2 id="sc-philosophy-next-title">{copy.nextTitle}</h2>
         <div>
-          <a className="sc-outline-link" href={previewHref("./design.html")}>{copy.designLink} <ArrowUpRight size={17} aria-hidden="true" /></a>
-          <a className="sc-outline-link" href={previewHref("./specifications.html")}>{copy.specificationsLink} <ArrowUpRight size={17} aria-hidden="true" /></a>
+          <a className="sc-outline-link" href={previewHref("./index.html#object")}>{copy.designLink} <ArrowUpRight size={17} aria-hidden="true" /></a>
+          <a className="sc-outline-link" href={previewHref("./index.html#measurements")}>{copy.specificationsLink} <ArrowUpRight size={17} aria-hidden="true" /></a>
         </div>
       </section>
     </main>

@@ -5,7 +5,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 const root = import.meta.dirname;
 const site = 'concepts/monochrome/sculptural-v3';
-const pages = ['index', 'contact', 'event', 'philosophy', 'design', 'specifications'];
+const pages = ['index', 'contact', 'event', 'philosophy'];
+const inlinePages = { design: 'object', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
 // Preserve all studies in source; publish only the selected site and its assets.
 function selectedSiteAssets() {
@@ -15,7 +16,7 @@ function selectedSiteAssets() {
       'images/concepts/speaker-wireframe-poster.png', 'images/taste-v2/metorom-logo.webp',
       'images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp',
       'drawings/horn-design-proposal.pdf',
-      ...['home','contact','event','philosophy','design','specifications'].map(page => `content/sculptural-v3-${page}.json`),
+      ...['home','contact','event','philosophy','design'].map(page => `content/sculptural-v3-${page}.json`),
       ...['speaker-sub-explode-go','speaker-sub-explode-return','speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
     ];
     const content = JSON.parse(readFileSync(resolve(root,'public/content/sculptural-v3-home.json'),'utf8'));
@@ -28,6 +29,12 @@ function selectedSiteAssets() {
       mkdirSync(dirname(target),{recursive:true});copyFileSync(resolve(root,'public',file),target);
     }
     writeFileSync(resolve(root,'dist/.nojekyll'),'');
+    for(const [page,anchor] of Object.entries(inlinePages)) {
+      const target=resolve(root,`dist/${site}/${page}.html`);
+      const destination=`./index.html#${anchor}`;
+      mkdirSync(dirname(target),{recursive:true});
+      writeFileSync(target,`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Metorom</title><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=${destination}"><script>const next=new URL('./index.html',location.href);next.search=location.search;next.hash=${JSON.stringify(anchor)};location.replace(next.href)</script></head><body><a href="${destination}">Continue to Metorom</a></body></html>`);
+    }
     for(const page of legacyPages) {
       const target=resolve(root,`dist/concepts/monochrome/sculptural-v2/${page}.html`);
       const destination=`../sculptural-v3/${page}.html`;

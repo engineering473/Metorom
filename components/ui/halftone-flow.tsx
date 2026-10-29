@@ -32,6 +32,8 @@ const FRAGMENT_SHADER = `
   uniform float u_light;
   uniform float u_waves;
   uniform float u_dots;
+  uniform float u_compact;
+  uniform float u_pixel_ratio;
 
   mat2 rotate(float angle) {
     float s = sin(angle);
@@ -41,7 +43,9 @@ const FRAGMENT_SHADER = `
 
   void main() {
     float shortSide = min(u_resolution.x, u_resolution.y);
-    vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution) / shortSide;
+    // A portrait hero shows more of the same field, rather than magnifying a
+    // single crest across the phone's width.
+    vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution) / shortSide * mix(1.0, 1.45, u_compact);
     vec2 flow = p;
     float time = u_time * 0.34;
 
@@ -57,9 +61,12 @@ const FRAGMENT_SHADER = `
     float intensity = smoothstep(-0.56, 0.88, wave * 0.68 + current * 0.32);
 
     float cellSize = max(2.0, clamp(shortSide / 116.0, 4.0, 10.0) / u_dots);
+    // Preserve the desktop rendering. On compact screens, reserve a visible
+    // CSS-pixel gap around each dot instead of filtering subpixel stipples.
+    cellSize = mix(cellSize, max(cellSize, 4.5 * u_pixel_ratio), u_compact);
     vec2 grid = gl_FragCoord.xy / cellSize;
     float distanceToCenter = length(fract(grid) - 0.5);
-    float radius = 0.045 + intensity * 0.41;
+    float radius = 0.045 + intensity * mix(0.41, 0.345, u_compact);
     float dotMask = 1.0 - smoothstep(radius - 0.055, radius + 0.055, distanceToCenter);
 
     vec3 darkGround = vec3(0.040, 0.024, 0.020);
@@ -88,7 +95,7 @@ function compileShader(gl: WebGLRenderingContext, kind: number, source: string) 
   return null;
 }
 
-function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number, waveDensity: number, dotDensity: number) {
+function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number, height: number, waveDensity: number, dotDensity: number, compact: boolean, pixelRatio: number) {
   const context = canvas.getContext("2d");
   if (!context) return;
 
@@ -99,19 +106,20 @@ function drawFallback(canvas: HTMLCanvasElement, mode: EffectMode, width: number
   context.fillRect(0, 0, width, height);
 
   const shortSide = Math.min(width, height);
-  const cellSize = Math.max(2, clamp(shortSide / 116, 6, 11) / dotDensity);
+  const cellSize = Math.max(compact ? 4.5 * pixelRatio : 2, clamp(shortSide / 116, 6, 11) / dotDensity);
+  const fieldScale = compact ? 1.45 : 1;
   context.fillStyle = isLight ? "#8e321e" : "#e1743d";
 
   for (let y = cellSize / 2; y < height; y += cellSize) {
     for (let x = cellSize / 2; x < width; x += cellSize) {
-      const px = (x - width / 2) / shortSide;
-      const py = (y - height / 2) / shortSide;
+      const px = (x - width / 2) / shortSide * fieldScale;
+      const py = (y - height / 2) / shortSide * fieldScale;
       const flowX = px + Math.sin(py * 3.08 * waveDensity) * 0.16 + Math.sin(py * 3.76 * waveDensity) * 0.08;
       const flowY = py + Math.cos(flowX * 2.28 * waveDensity) * 0.15 + Math.cos(flowX * 2.76 * waveDensity) * 0.08;
       const wave = Math.sin((flowX * 5.2 + flowY * 2.6) * waveDensity + Math.sin(flowY * 4 * waveDensity) * 0.5);
       const current = Math.cos((flowY * 4.5 - flowX * 1.8) * waveDensity);
       const intensity = clamp((wave * 0.68 + current * 0.32 + 0.56) / 1.44, 0, 1);
-      const radius = cellSize * (0.045 + intensity * 0.41);
+      const radius = cellSize * (0.045 + intensity * (compact ? 0.345 : 0.41));
       context.globalAlpha = 0.15 + intensity * 0.82;
       context.beginPath();
       context.arc(x, y, radius, 0, Math.PI * 2);
@@ -178,6 +186,8 @@ export function HalftoneFlow({
     let light: WebGLUniformLocation | null = null;
     let waves: WebGLUniformLocation | null = null;
     let dots: WebGLUniformLocation | null = null;
+    let compact: WebGLUniformLocation | null = null;
+    let pixelRatioUniform: WebGLUniformLocation | null = null;
     let lost = false;
 
     if (ready && gl && program && buffer) {
@@ -195,6 +205,8 @@ export function HalftoneFlow({
       light = gl.getUniformLocation(program, "u_light");
       waves = gl.getUniformLocation(program, "u_waves");
       dots = gl.getUniformLocation(program, "u_dots");
+      compact = gl.getUniformLocation(program, "u_compact");
+      pixelRatioUniform = gl.getUniformLocation(program, "u_pixel_ratio");
     }
 
     let visible = false;
@@ -203,6 +215,8 @@ export function HalftoneFlow({
     let lastTick = 0;
     let elapsed = 0;
     let size = { width: 1, height: 1 };
+    let compactView = false;
+    let renderPixelRatio = 1;
 
     function draw() {
       if (!ready || !buffer || !gl || lost || !program) return;
@@ -211,6 +225,8 @@ export function HalftoneFlow({
       gl.uniform1f(light, safeMode === "light" ? 1 : 0);
       gl.uniform1f(waves, safeWaveDensity);
       gl.uniform1f(dots, safeDotDensity);
+      gl.uniform1f(compact, compactView ? 1 : 0);
+      gl.uniform1f(pixelRatioUniform, renderPixelRatio);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -239,11 +255,13 @@ export function HalftoneFlow({
 
     function resize() {
       const bounds = host!.getBoundingClientRect();
+      compactView = bounds.width <= 760;
       const pixelRatio = Math.min(
         window.devicePixelRatio || 1,
         lowPower ? 1 : 1.5,
         Math.sqrt(1_800_000 / Math.max(1, bounds.width * bounds.height)),
       );
+      renderPixelRatio = pixelRatio;
       size = {
         width: Math.max(1, Math.round(bounds.width * pixelRatio)),
         height: Math.max(1, Math.round(bounds.height * pixelRatio)),
@@ -256,7 +274,7 @@ export function HalftoneFlow({
         }
         draw();
       } else {
-        drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity);
+        drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity, compactView, renderPixelRatio);
       }
     }
 
@@ -268,7 +286,7 @@ export function HalftoneFlow({
       glCanvas.style.display = "none";
       fallback!.hidden = false;
       fallback!.style.display = "block";
-      drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity);
+      drawFallback(fallback!, safeMode, size.width, size.height, safeWaveDensity, safeDotDensity, compactView, renderPixelRatio);
     }
 
     const resizeObserver = new ResizeObserver(resize);

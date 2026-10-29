@@ -9,7 +9,7 @@ import CloserLook from "./closer-look";
 import FrequencyPaths from "./frequency-paths";
 import PagePreloader from "./media-preloader";
 import { HERO_IMAGE } from "./media-assets";
-import RenderedObject from "./rendered-object";
+import ObjectDesign from "./object-design";
 import SectionIndex from "./section-index";
 import { SiteEditor, useSitePreview } from "./site-editor";
 import { previewHref, useLanguage } from "./language";
@@ -110,16 +110,11 @@ function App() {
             <h2 id="sc-intro-title">{copy.ideaTitle}</h2>
             <p className="sc-intro__statement">{copy.ideaStatement}</p>
             <div className="sc-intro__text">{ideaParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
-            <nav className="sc-page-links" aria-label={language === "ja" ? "スピーカーについて詳しく" : "Explore the speaker in detail"}>
-              <a className="sc-outline-link" href={previewHref("./design.html")}>{copy.ideaDesignLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
-              <a className="sc-outline-link" href={previewHref("./specifications.html")}>{copy.ideaSpecsLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
-              <a className="sc-outline-link" href={previewHref("./philosophy.html")}>{copy.ideaPhilosophyLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
-            </nav>
           </div>
           </section>
         </div>
 
-        <RenderedObject copy={copy} />
+        <ObjectDesign copy={copy} />
 
         <section className="sc-architecture sc-shell" id="architecture" aria-labelledby="sc-architecture-title" data-section-reveal>
           <span className="sc-rail-label">{copy.architectureRail}</span>
@@ -135,8 +130,10 @@ function App() {
           <div className="sc-measure__body">
             <div className="sc-measure__lead"><h2 id="sc-measure-title">{copy.measurementTitle}</h2><p>{copy.measurementBody}</p></div>
             <FrequencyResponseCards copy={copy} />
-            <SystemSpecifications copy={copy} language={language} />
-            <a className="sc-outline-link sc-specifications-link" href={previewHref("./specifications.html")}>{copy.ideaSpecsLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
+            <SystemSpecifications copy={copy} language={language} materials={[
+              { label: copy.specMaterialsLabel, value: copy.specMaterialsValue },
+              { label: copy.specFinishLabel, value: copy.specFinishValue },
+            ]} />
           </div>
         </section>
 
@@ -162,14 +159,13 @@ function App() {
             {philosophyParagraphs.length > 0 && <div className="sc-philosophy__text">
               {philosophyParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
             </div>}
-            <a className="sc-outline-link sc-philosophy__link" href={previewHref("./philosophy.html")}>{copy.philosophyLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
 
         <CloserLook copy={copy} slides={gallerySlides} />
       </main>
       <div className="sc-gallery-end-footer"><SiteFooter copy={copy} /></div>
-      <SiteEditor settings={settings} onChange={setSettings} galleryFiles={galleryFiles} onGalleryFileChange={selectGalleryFile} />
+      {new URLSearchParams(window.location.search).get("editor") !== "design" && <SiteEditor settings={settings} onChange={setSettings} galleryFiles={galleryFiles} onGalleryFileChange={selectGalleryFile} />}
     </>
   );
 }

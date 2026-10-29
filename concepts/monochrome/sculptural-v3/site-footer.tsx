@@ -23,8 +23,8 @@ export default function SiteFooter(props: FooterProps) {
     <div>
       <span>{copy.footerTag}</span>
       <nav className="sc-footer__links" aria-label={copy.footerNavigationAria}>
-        <a href={previewHref("./design.html")}>{document.documentElement.lang === "ja" ? "デザインの詳細" : "Design details"} <ArrowUpRight size={15} aria-hidden="true" /></a>
-        <a href={previewHref("./specifications.html")}>{document.documentElement.lang === "ja" ? "仕様" : "Specifications"} <ArrowUpRight size={15} aria-hidden="true" /></a>
+        <a href={props.backToStudy ? previewHref("./index.html#object") : "#object"}>{document.documentElement.lang === "ja" ? "デザインの詳細" : "Design details"} <ArrowUpRight size={15} aria-hidden="true" /></a>
+        <a href={props.backToStudy ? previewHref("./index.html#measurements") : "#measurements"}>{document.documentElement.lang === "ja" ? "仕様" : "Specifications"} <ArrowUpRight size={15} aria-hidden="true" /></a>
         <a href={previewHref("./philosophy.html")}>{copy.footerPhilosophy} <ArrowUpRight size={15} aria-hidden="true" /></a>
         {new URLSearchParams(window.location.search).get("edit") === "1" && <a href={editUrl.pathname + editUrl.search + editUrl.hash}>{copy.footerEdit}</a>}
         {props.backToStudy

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import type { SiteCopy } from "./site-copy";
 import { OBJECT_POSTER, VIDEO_SOURCES, usePreparedMediaSources } from "./media-assets";
 
@@ -43,7 +43,7 @@ function waitForVideo(video: HTMLVideoElement, event: "loadedmetadata" | "loaded
   });
 }
 
-export default function RenderedObject({ copy }: { copy: SiteCopy }) {
+export default function RenderedObject({ copy, design, details }: { copy: SiteCopy; design?: ReactNode; details?: ReactNode }) {
   const films = usePreparedMediaSources(VIDEO_SOURCES);
   const [preloadMode] = useState<"metadata" | "auto">(() => window.matchMedia("(pointer: coarse)").matches ? "metadata" : "auto");
   const videos = useRef<Partial<Record<Film, HTMLVideoElement>>>({});
@@ -347,6 +347,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
           <p className="sc-overline">{copy.objectOverline}</p>
           <h2 id="sc-object-title">{copy.objectTitle}</h2>
           <p className="sc-object__intro">{copy.objectBody}</p>
+          {design}
         </div>
         <div className="sc-object__stage">
           <div ref={media} className={`sc-object__media${showFullFrame ? " is-exploding" : ""}`} data-explosion-state={explosionPhase ?? undefined} data-explosion-driver={explosionPhase ? activeDriver ?? undefined : undefined} aria-busy={explosionPhase ? isLoading : undefined}>
@@ -408,6 +409,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
           {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
       </div>
+      {details}
     </section>
   );
 }
