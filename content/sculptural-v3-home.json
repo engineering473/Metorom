@@ -180,7 +180,11 @@
     "philosophyLink": "Read our philosophy",
     "philosophyStatement": "Curiosity brings\nus together.",
     "philosophyIntroduction": "We are a collective exploring how things work and how people live. Engineering, culture, and the ways we gather shape the questions we ask—and the objects we make.",
-    "philosophyBody": ""
+    "philosophyBody": "",
+    "specMaterialsLabel": "Materials",
+    "specMaterialsValue": "MDF main and midrange structures · locally sourced Japanese wood horn",
+    "specFinishLabel": "Finish",
+    "specFinishValue": "Sealed, primed, painted, and clear-coated"
   },
   "ja": {
     "brandName": "METOROM",
@@ -362,6 +366,10 @@
     "philosophyLink": "設計思想を読む",
     "philosophyStatement": "好奇心が、\n私たちをつなぐ。",
     "philosophyIntroduction": "私たちは、ものの仕組みと人々の暮らしを探究するコレクティブです。工学や文化、人の集まり方を手がかりに問いを重ね、ものづくりへとつなげています。",
-    "philosophyBody": ""
+    "philosophyBody": "",
+    "specMaterialsLabel": "素材",
+    "specMaterialsValue": "主構造と中域の構造：MDF · ホーン：日本で地元調達した木材",
+    "specFinishLabel": "仕上げ",
+    "specFinishValue": "シーラー処理、下塗り、塗装、クリアコート"
   }
 }
