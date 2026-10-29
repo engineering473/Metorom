@@ -4,15 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Metorom explores how people gather, how objects work, and how sound can bring us to the same level." />
     <title>Philosophy — Metorom</title>
   </head>
   <body>
-    <p>Philosophy is now on the <a href="./index.html#philosophy">main page</a>.</p>
-    <script>
-      const destination = new URL("./index.html", window.location.href);
-      destination.search = window.location.search;
-      destination.hash = "philosophy";
-      window.location.replace(destination.href);
-    </script>
+    <div id="root"></div>
+    <script type="module" src="./philosophy.tsx"></script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 # Metorom v3
 
-The October 28, 2026 revision of the sculptural site. The previous version and every earlier study remain in source. The production build includes only this site, its Contact, Event and Philosophy pages, the root redirect, and compatibility redirects from the old sculptural URLs.
+The October 28–29, 2026 revision of the sculptural site. The previous version and every earlier study remain in source. The production build includes only this site, its Design details, Specifications, Philosophy, Contact and Event pages, the root redirect, and compatibility redirects from the old sculptural URLs.
 
 The visual direction uses deep blue (`#101d8f`), white, pale blue instrument surfaces and flat editorial transitions. The original floating capsule navbar and rounded gallery cards are preserved; other editorial sections use flat transitions. The original supplied product imagery remains intact.
 
@@ -19,3 +19,7 @@ React, TypeScript, Tailwind, Motion, the `@/` alias and shadcn's `components/ui`
 Use `npm run dev` for development, `npm run typecheck`, `npm run build`, and `node tools/check-v3-build.mjs` for validation. Preview the production output with `npm run preview`. The base URL remains `/Metorom/`.
 
 Published copy is isolated in `public/content/sculptural-v3-*.json`. Preview editors use separate v3 browser storage. The owner can open `?edit=1` directly; visitors no longer see an editor or study chooser link in the footer.
+
+The home introduction explains leveled listening, independent driver enclosures, and room tuning in three brief paragraphs. Design details uses the supplied glass-folder component for function, design and material notes, with direct text links as an alternative. Supplied renders appear beside the actual exploded assembly and horn proposal drawings; the original horn PDF is available to view. The separate Specifications page reuses the six-row system sheet, adds two concise material/finish rows, and retains the explicitly illustrative response curves. Philosophy extends the introduction with the collective's curiosity about engineering, cultures, and how people gather. All three pages support English and Japanese and the existing preview editor.
+
+Confirmed materials are MDF for the main and midrange structures and locally sourced Japanese wood for the horn; both are sealed, primed, painted and clear-coated. No wood species or unverified performance rating is inferred. Page-copy loading shares only navigation and brand fields from home so each page keeps its own heading and introduction.

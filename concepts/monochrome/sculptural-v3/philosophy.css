@@ -3,6 +3,94 @@
   padding-bottom: clamp(125px, 15vw, 220px);
   background: var(--paper);
 }
+
+/* The extended philosophy is a separate reading surface; home styles stay intact. */
+.sc-philosophy-page {
+  padding: clamp(150px, 16vw, 220px) max(3.7vw, 24px) clamp(100px, 12vw, 170px);
+  background: var(--paper);
+}
+.sc-philosophy-opening,
+.sc-philosophy-essays,
+.sc-philosophy-next {
+  max-width: 1300px;
+  margin-inline: auto;
+}
+.sc-philosophy-opening h1 {
+  font-size: clamp(3.5rem, 7.5vw, 6rem);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+.sc-philosophy-opening__body {
+  width: 69%;
+  margin: clamp(55px, 7vw, 100px) 0 0 auto;
+}
+.sc-philosophy-opening__statement {
+  max-width: 21ch;
+  font-size: clamp(2.4rem, 4.4vw, 4.4rem);
+  font-weight: 300;
+  letter-spacing: -.03em;
+  line-height: 1.14;
+  color: var(--sc-accent);
+  white-space: pre-line;
+  text-wrap: balance;
+}
+.sc-philosophy-opening__introduction,
+.sc-philosophy-statement {
+  max-width: 70ch;
+  font-size: 16px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.sc-philosophy-opening__introduction { margin-top: 35px; }
+.sc-philosophy-statement { margin-top: 24px; }
+.sc-philosophy-statement p { line-height: inherit; }
+.sc-philosophy-statement p + p { margin-top: 1.5em; }
+.sc-philosophy-essays { margin-top: clamp(100px, 12vw, 170px); }
+.sc-philosophy-essay {
+  display: grid;
+  grid-template-columns: minmax(0, 26%) minmax(0, 1fr);
+  gap: 5%;
+}
+.sc-philosophy-essay + .sc-philosophy-essay { margin-top: clamp(75px, 9vw, 125px); }
+.sc-philosophy-essay h2 {
+  max-width: 14ch;
+  font-size: clamp(1.8rem, 2.5vw, 2.5rem);
+  line-height: 1.2;
+  text-wrap: balance;
+  letter-spacing: -.03em;
+}
+.sc-philosophy-essay > div { max-width: 70ch; }
+.sc-philosophy-essay p {
+  font-size: 16px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.sc-philosophy-essay p + p { margin-top: 1.5em; }
+.sc-philosophy-next { margin-top: clamp(100px, 12vw, 170px); }
+.sc-philosophy-next h2 {
+  font-size: clamp(2.4rem, 4.4vw, 4.4rem);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.sc-philosophy-next > div { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+html:lang(ja) .sc-philosophy-page p { line-height: 1.95; }
+html:lang(ja) .sc-philosophy-opening__statement { line-height: 1.35; }
+html:lang(ja) .sc-philosophy-essay h2 { max-width: none; line-height: 1.4; }
+@media (max-width: 760px) {
+  .sc-philosophy-page { padding: 145px 20px 100px; }
+  .sc-philosophy-opening h1 { font-size: clamp(3.2rem, 12vw, 4.4rem); }
+  .sc-philosophy-opening__body { width: 100%; margin-top: 50px; }
+  .sc-philosophy-opening__statement { font-size: clamp(2.3rem, 8.5vw, 3.6rem); }
+  .sc-philosophy-opening__introduction,
+  .sc-philosophy-statement,
+  .sc-philosophy-essay p { font-size: 15px; }
+  .sc-philosophy-essays { margin-top: 85px; }
+  .sc-philosophy-essay { display: block; }
+  .sc-philosophy-essay h2 { max-width: 20ch; font-size: 2rem; margin-bottom: 22px; }
+  .sc-philosophy-essay + .sc-philosophy-essay { margin-top: 70px; }
+  .sc-philosophy-next { margin-top: 90px; }
+  .sc-philosophy-next h2 { font-size: clamp(2.3rem, 8.5vw, 3.6rem); }
+}
 .sc-philosophy__body { max-width: 1000px; }
 .sc-philosophy h2 {
   font-size: clamp(3.4rem, 5.9vw, 6rem);

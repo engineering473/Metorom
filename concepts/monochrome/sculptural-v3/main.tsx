@@ -20,6 +20,7 @@ import "./gallery.css";
 import "./site-editor.css";
 import "./object-interactive.css";
 import "./blue-theme.css";
+import "./page-extension.css";
 
 const RENDER = HERO_IMAGE;
 
@@ -31,6 +32,7 @@ function App() {
   const [language] = useLanguage();
   const copy = language === "ja" ? settings.copyJa : settings.copy;
   const philosophyParagraphs = copy.philosophyBody.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const ideaParagraphs = copy.ideaBody.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const configuredGallerySlides = ([1, 2, 3, 4, 5] as const).map((slot) => ({
     src: galleryPreviews[slot] || copy[`galleryImage${slot}`],
     alt: copy[`galleryAlt${slot}`],
@@ -104,7 +106,16 @@ function App() {
 
           <section className="sc-intro sc-shell" aria-labelledby="sc-intro-title">
           <span className="sc-rail-label">{copy.ideaRail}</span>
-          <div className="sc-intro__body"><h2 id="sc-intro-title">{copy.ideaTitle}</h2><p>{copy.ideaBody}</p></div>
+          <div className="sc-intro__body">
+            <h2 id="sc-intro-title">{copy.ideaTitle}</h2>
+            <p className="sc-intro__statement">{copy.ideaStatement}</p>
+            <div className="sc-intro__text">{ideaParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+            <nav className="sc-page-links" aria-label={language === "ja" ? "スピーカーについて詳しく" : "Explore the speaker in detail"}>
+              <a className="sc-outline-link" href={previewHref("./design.html")}>{copy.ideaDesignLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
+              <a className="sc-outline-link" href={previewHref("./specifications.html")}>{copy.ideaSpecsLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
+              <a className="sc-outline-link" href={previewHref("./philosophy.html")}>{copy.ideaPhilosophyLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
+            </nav>
+          </div>
           </section>
         </div>
 
@@ -125,6 +136,7 @@ function App() {
             <div className="sc-measure__lead"><h2 id="sc-measure-title">{copy.measurementTitle}</h2><p>{copy.measurementBody}</p></div>
             <FrequencyResponseCards copy={copy} />
             <SystemSpecifications copy={copy} language={language} />
+            <a className="sc-outline-link sc-specifications-link" href={previewHref("./specifications.html")}>{copy.ideaSpecsLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
 
@@ -150,6 +162,7 @@ function App() {
             {philosophyParagraphs.length > 0 && <div className="sc-philosophy__text">
               {philosophyParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
             </div>}
+            <a className="sc-outline-link sc-philosophy__link" href={previewHref("./philosophy.html")}>{copy.philosophyLink}<ArrowUpRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
 

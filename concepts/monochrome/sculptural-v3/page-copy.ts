@@ -17,6 +17,12 @@ function sharedCopy(copy: typeof DEFAULT_COPY): SharedPageCopy {
 export const SHARED_PAGE_COPY_EN = sharedCopy(DEFAULT_COPY);
 export const SHARED_PAGE_COPY_JA = sharedCopy(DEFAULT_COPY_JA);
 
+export function publishedSharedCopy(copy: unknown): Partial<SharedPageCopy> {
+  if (!copy || typeof copy !== "object") return {};
+  const source = copy as Record<string, unknown>;
+  return Object.fromEntries(sharedKeys.filter((key) => typeof source[key] === "string").map((key) => [key, source[key]]));
+}
+
 export function readSharedPreviewCopy(language: "en" | "ja"): Partial<SharedPageCopy> {
   try {
     const saved = JSON.parse(localStorage.getItem("metorom-sculptural-v3-preview-v1") ?? "null");

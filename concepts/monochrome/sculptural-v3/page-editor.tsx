@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useLanguage } from "./language";
-import { pageCopyGroup, readSharedPreviewCopy } from "./page-copy";
+import { pageCopyGroup, publishedSharedCopy, readSharedPreviewCopy } from "./page-copy";
 import { COPY_MAX_LENGTH, downloadPreviewJson } from "./site-editor";
 import EditorPageSelect from "./editor-page-select";
 import { loadPublishedPage, mergePublished, PublishControls } from "./published-copy";
@@ -47,8 +47,8 @@ export function usePagePreview<T extends TextCopy>(page: string, english: T, jap
     void Promise.all([loadPublishedPage("home"), loadPublishedPage(page)]).then(([home, published]) => {
       if (!active || hadDraft.current) return;
       setSettings({
-        en: mergePublished(mergePublished(english, home.en), published.en),
-        ja: mergePublished(mergePublished(japanese, home.ja), published.ja),
+        en: mergePublished(mergePublished(english, publishedSharedCopy(home.en)), published.en),
+        ja: mergePublished(mergePublished(japanese, publishedSharedCopy(home.ja)), published.ja),
       });
     }).catch(() => { /* Built-in text remains available offline. */ });
     return () => { active = false; };

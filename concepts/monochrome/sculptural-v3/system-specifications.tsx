@@ -2,10 +2,11 @@ import { useId } from "react";
 import type { SiteCopy } from "./site-copy";
 import "./system-specifications.css";
 
-type Props = { copy: SiteCopy; language: "en" | "ja" };
+type Props = { copy: SiteCopy; language: "en" | "ja"; materials?: { label: string; value: string }[]; headingLevel?: 2 | 3 };
 
-export default function SystemSpecifications({ copy, language }: Props) {
+export default function SystemSpecifications({ copy, language, materials = [], headingLevel = 3 }: Props) {
   const id = useId();
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const ja = language === "ja";
   const rows = [
     { label: copy.specSystemLabel, value: copy.specSystemValue },
@@ -14,9 +15,10 @@ export default function SystemSpecifications({ copy, language }: Props) {
     { label: copy.pathHighTitle, value: ja ? "BMS 4540ND × 1 + ホーン" : "1 × BMS 4540ND + horn" },
     { label: "DSP", value: ja ? "96 kHz · FIR + パラメトリック EQ" : "96 kHz · FIR + parametric EQ" },
     { label: ja ? "寸法（幅 × 高さ × 奥行）" : "Dimensions (W × H × D)", value: "798 × 600 × 340 mm" },
+    ...materials,
   ];
   return <section className="sc-system-specs" aria-labelledby={id}>
-    <h3 id={id}>{ja ? "仕様" : "Specifications"}</h3>
+    <Heading id={id}>{ja ? "仕様" : "Specifications"}</Heading>
     <dl className="sc-system-specs__list">
       {rows.map(({ label, value }) => <div key={label} className="sc-system-specs__row"><dt>{label}</dt><dd>{value}</dd></div>)}
     </dl>
