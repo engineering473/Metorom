@@ -1,0 +1,46 @@
+.sc-design-lightbox { position: fixed; inset: 50% auto auto 50%; width: min(1120px,calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); margin: 0; transform: translate(-50%,-50%); padding: 0; overflow: hidden; border: 0; background: #fff; color: var(--ink,#12244c); font: inherit; box-shadow: 0 24px 80px #030c2b66; }
+.sc-design-lightbox[open] { display: flex; flex-direction: column; }
+.sc-design-lightbox::backdrop { background: #091c49ad; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.sc-design-lightbox__header { flex: none; padding: 22px 26px 14px; background: #fff; }
+.sc-design-lightbox__title { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.sc-design-lightbox__title h2 { font-size: clamp(1.75rem,3vw,2.75rem); font-weight: 300; line-height: 1.15; letter-spacing: -.025em; }
+.sc-design-lightbox__close { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: var(--sc-accent,#101d8f); color: #fff; cursor: pointer; }
+.sc-design-lightbox__parts,.sc-design-lightbox__views { display: flex; flex-wrap: wrap; gap: 8px; }
+.sc-design-lightbox__parts { margin-top: 18px; }
+.sc-design-lightbox__parts button,.sc-design-lightbox__views button { display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: 10px 16px; border: 0; border-radius: 0; background: #eef2fa; color: #12244c; font: inherit; font-size: 13px; font-weight: 500; line-height: 1.4; cursor: pointer; }
+.sc-design-lightbox__parts button[aria-pressed="true"],.sc-design-lightbox__views button[aria-pressed="true"] { background: #101d8f; color: #fff; }
+.sc-design-lightbox button:hover { background: #071957; color: #fff; }
+.sc-design-lightbox button:focus-visible,.sc-design-lightbox a:focus-visible { outline: 2px solid #101d8f; outline-offset: 3px; }
+.sc-design-lightbox__body { min-height: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); align-items: start; gap: 32px; padding: 12px 26px 28px; }
+.sc-design-lightbox__visual { min-width: 0; }
+.sc-design-lightbox__visual figure { margin: 0; }
+.sc-design-lightbox__image { position: relative; width: 100%; height: min(50dvh,490px); min-height: 250px; overflow: hidden; background: #000; }
+.sc-design-lightbox__image--render img { position: absolute; max-width: none; width: 260%; height: auto; left: -80%; top: 50%; transform: translateY(-30.875%); }
+.sc-design-lightbox__image--render.sc-design-lightbox__image--midrange img { width: 350%; left: -22%; }
+.sc-design-lightbox__image--render.sc-design-lightbox__image--bass img { width: 155%; left: -27.5%; transform: translateY(-59%); }
+.sc-design-lightbox__image--drawing { background: #fff; }
+.sc-design-lightbox__image--drawing img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
+.sc-design-lightbox__visual figcaption { margin-top: 12px; color: #52617b; font-size: 12px; line-height: 1.5; }
+.sc-design-lightbox__views { margin-top: 14px; }
+.sc-design-lightbox__study-note { max-width: 65ch; margin-top: 13px; color: #52617b; font-size: 12px; line-height: 1.6; }
+.sc-design-lightbox__copy { min-width: 0; padding-top: 2px; }
+.sc-design-lightbox__model { color: #101d8f; font-size: 14px; font-weight: 500; line-height: 1.6; }
+.sc-design-lightbox__copy > div { margin-top: 24px; }
+.sc-design-lightbox__copy h3 { font-size: 13px; font-weight: 600; line-height: 1.5; }
+.sc-design-lightbox__copy h3 + p { max-width: 55ch; margin-top: 7px; font-size: 15px; line-height: 1.75; }
+.sc-design-lightbox__download { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 44px; margin-top: 22px; color: #101d8f; font-size: 13px; font-weight: 500; }
+.sc-design-lightbox__download span { color: #52617b; font-size: 11px; }
+html:lang(ja) .sc-design-lightbox p { line-height: 1.9; }
+@media (max-width: 760px) {
+  .sc-design-lightbox { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); }
+  .sc-design-lightbox__header { padding: 16px 16px 12px; }
+  .sc-design-lightbox__title h2 { font-size: clamp(1.65rem,7vw,2.2rem); }
+  .sc-design-lightbox__parts { margin-top: 14px; }
+  .sc-design-lightbox__parts button { flex: 1 1 0; padding-inline: 10px; }
+  .sc-design-lightbox__body { display: block; padding: 6px 16px 24px; }
+  .sc-design-lightbox__image { height: min(44dvh,380px); min-height: 220px; }
+  .sc-design-lightbox__views { gap: 6px; }
+  .sc-design-lightbox__views button { flex: 1 1 auto; padding-inline: 10px; font-size: 12px; }
+  .sc-design-lightbox__copy { margin-top: 28px; padding-top: 0; }
+  .sc-design-lightbox__copy h3 + p { font-size: 14px; }
+}

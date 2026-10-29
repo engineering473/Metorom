@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Download, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import GlassFolder from "@/components/ui/glass-folder-cards";
 import RenderedObject from "./rendered-object";
+import ObjectDesignDialog, { type DesignPart, type PartId } from "./object-design-dialog";
 import { DESIGN_COPY_EN, DESIGN_COPY_JA } from "./design-copy";
 import { PageEditor, usePagePreview } from "./page-editor";
 import { useLanguage } from "./language";
 import type { SiteCopy } from "./site-copy";
 import "./object-design.css";
 
-type PartId = "horn" | "midrange" | "bass";
 const assets = {
   render: `${import.meta.env.BASE_URL}images/concepts/speaker-interactive-front-v3.webp`,
   assembly: `${import.meta.env.BASE_URL}images/concepts/speaker-exploded-study-v3.webp`,
@@ -27,78 +26,50 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   const [selected, setSelected] = useState<PartId | null>(selectedFromHash);
   const [folderOpen, setFolderOpen] = useState(false);
   const folderRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const revealFrame = useRef<number | null>(null);
-  const parts = [
-    { id: "horn" as const, title: copy.hornTitle, part: copy.hornPart, body: copy.hornFunction, detail: copy.hornDetail, material: copy.hornMaterial, drawing: assets.horn, drawingAlt: copy.hornDrawingAlt, caption: copy.hornDrawing },
-    { id: "midrange" as const, title: copy.midTitle, part: copy.midPart, body: copy.midFunction, detail: copy.midDetail, material: copy.midMaterial, drawing: assets.assembly, drawingAlt: copy.drawingAlt, caption: copy.drawingLabel },
-    { id: "bass" as const, title: copy.bassTitle, part: copy.bassPart, body: copy.bassFunction, detail: copy.bassDetail, material: copy.bassMaterial, drawing: assets.assembly, drawingAlt: copy.drawingAlt, caption: copy.drawingLabel },
+  const initialDeepLink = useRef(selected !== null);
+  const parts: DesignPart[] = [
+    { id: "horn", title: copy.hornTitle, part: copy.hornPart, body: copy.hornFunction, detail: copy.hornDetail, material: copy.hornMaterial, drawing: assets.horn, drawingAlt: copy.hornDrawingAlt, caption: copy.hornDrawing },
+    { id: "midrange", title: copy.midTitle, part: copy.midPart, body: copy.midFunction, detail: copy.midDetail, material: copy.midMaterial, drawing: assets.assembly, drawingAlt: copy.drawingAlt, caption: copy.drawingLabel },
+    { id: "bass", title: copy.bassTitle, part: copy.bassPart, body: copy.bassFunction, detail: copy.bassDetail, material: copy.bassMaterial, drawing: assets.assembly, drawingAlt: copy.drawingAlt, caption: copy.drawingLabel },
   ];
-  const part = parts.find((entry) => entry.id === selected);
-  const closeLabel = language === "ja" ? "デザインの詳細を閉じる" : "Close design details";
 
   useEffect(() => {
-    const syncHash = () => {
-      const next = selectedFromHash();
-      if (next) setSelected(next);
-    };
+    const syncHash = () => setSelected(selectedFromHash());
     window.addEventListener("hashchange", syncHash);
     return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
-  useEffect(() => () => {
-    if (revealFrame.current !== null) cancelAnimationFrame(revealFrame.current);
+  const revealPart = useCallback((id: PartId) => {
+    setSelected(id);
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#object-design-${id}`);
   }, []);
 
-  const revealPart = (id: PartId) => {
-    setSelected(id);
-    setFolderOpen(false);
-    if (revealFrame.current !== null) cancelAnimationFrame(revealFrame.current);
-    revealFrame.current = requestAnimationFrame(() => {
-      revealFrame.current = null;
-      headingRef.current?.focus({ preventScroll: true });
-      headingRef.current?.closest<HTMLElement>(".sc-object-design")?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
-        block: "start",
-      });
-    });
-  };
-
-  const closeDetails = () => {
+  const closeDetails = useCallback(() => {
     setSelected(null);
     if (window.location.hash.startsWith("#object-design-")) {
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#object`);
     }
-    requestAnimationFrame(() => folderRef.current?.querySelector<HTMLButtonElement>(".gf-hit")?.focus());
-  };
+  }, []);
+
+  const restoreFolderFocus = useCallback(() => {
+    const opener = folderRef.current?.querySelector<HTMLButtonElement>(".gf-hit");
+    // A fresh deep link has no previous page position to return to.
+    if (initialDeepLink.current) {
+      initialDeepLink.current = false;
+      opener?.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+    opener?.focus({ preventScroll: true });
+  }, []);
 
   return <>
-    <RenderedObject copy={siteCopy}
-      design={<div className="sc-object-design-folder" ref={folderRef}>
-        <GlassFolder key={language} label={copy.detailLabel} meta={copy.folderMeta} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false} openHeadroom={130}
-          open={folderOpen} onOpenChange={setFolderOpen}
-          openLabel={`${copy.openFolder} ${copy.detailLabel}`} closeLabel={`${copy.closeFolder} ${copy.detailLabel}`} contentsLabel={`${copy.folderContents} ${copy.detailLabel}`}
-          files={parts.map((entry) => ({ name: entry.title, image: entry.drawing, href: `#object-design-${entry.id}` }))}
-          onFileSelect={(_, index) => revealPart(parts[index].id)} />
-      </div>}
-      details={part && <section className={`sc-object-design sc-object-design--${part.id}`} id={`object-design-${part.id}`} aria-labelledby="sc-object-design-heading">
-        <div className="sc-object-design__inner">
-          <div className="sc-object-design__copy">
-            <h3 ref={headingRef} tabIndex={-1} id="sc-object-design-heading">{part.title}</h3>
-            <p className="sc-object-design__model">{part.part}</p>
-            <div className="sc-object-design__note"><h4>{copy.functionLabel}</h4><p>{part.body}</p></div>
-            <div className="sc-object-design__note"><h4>{copy.detailLabel}</h4><p>{part.detail}</p></div>
-            <div className="sc-object-design__note"><h4>{copy.materialsLabel}</h4><p>{part.material}</p></div>
-            {part.id === "horn" && <a className="sc-object-design__download" href={assets.proposal} target="_blank" rel="noreferrer">{copy.hornDownload}<Download size={17} aria-hidden="true" /><span>PDF</span></a>}
-          </div>
-          <div className="sc-object-design__views">
-            <figure className={`sc-object-design__render sc-object-design__render--${part.id}`}><div><img src={assets.render} alt={`${part.title} / ${copy.renderLabel}`} width="1600" height="1600" /></div><figcaption>{copy.renderLabel}</figcaption></figure>
-            <figure className="sc-object-design__drawing"><a href={part.drawing} target="_blank" rel="noreferrer"><img src={part.drawing} alt={part.drawingAlt} width="849" height="1200" /></a><figcaption>{part.caption}</figcaption></figure>
-            <p className="sc-object-design__study-note">{copy.drawingNote}</p>
-          </div>
-          <button type="button" className="sc-object-design__close" onClick={closeDetails} aria-label={closeLabel}><X size={20} aria-hidden="true" /></button>
-        </div>
-      </section>} />
+    <RenderedObject copy={siteCopy} design={<div className="sc-object-design-folder" ref={folderRef}>
+      <GlassFolder key={language} label={copy.detailLabel} meta={copy.folderMeta} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false} openHeadroom={130}
+        open={folderOpen} onOpenChange={setFolderOpen}
+        openLabel={`${copy.openFolder} ${copy.detailLabel}`} closeLabel={`${copy.closeFolder} ${copy.detailLabel}`} contentsLabel={`${copy.folderContents} ${copy.detailLabel}`}
+        files={parts.map((entry) => ({ name: entry.title, image: entry.drawing }))}
+        onFileSelect={(_, index) => revealPart(parts[index].id)} />
+    </div>} />
+    <ObjectDesignDialog part={parts.find((entry) => entry.id === selected) ?? null} parts={parts} copy={copy} language={language} render={assets.render} proposal={assets.proposal} onSelect={revealPart} onClose={closeDetails} onRestoreFocus={restoreFolderFocus} />
     {new URLSearchParams(window.location.search).get("editor") === "design" && <PageEditor page="design" settings={settings} onChange={setSettings} english={DESIGN_COPY_EN} japanese={DESIGN_COPY_JA} />}
   </>;
 }

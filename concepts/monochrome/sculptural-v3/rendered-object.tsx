@@ -43,7 +43,7 @@ function waitForVideo(video: HTMLVideoElement, event: "loadedmetadata" | "loaded
   });
 }
 
-export default function RenderedObject({ copy, design, details }: { copy: SiteCopy; design?: ReactNode; details?: ReactNode }) {
+export default function RenderedObject({ copy, design }: { copy: SiteCopy; design?: ReactNode }) {
   const films = usePreparedMediaSources(VIDEO_SOURCES);
   const [preloadMode] = useState<"metadata" | "auto">(() => window.matchMedia("(pointer: coarse)").matches ? "metadata" : "auto");
   const videos = useRef<Partial<Record<Film, HTMLVideoElement>>>({});
@@ -347,7 +347,6 @@ export default function RenderedObject({ copy, design, details }: { copy: SiteCo
           <p className="sc-overline">{copy.objectOverline}</p>
           <h2 id="sc-object-title">{copy.objectTitle}</h2>
           <p className="sc-object__intro">{copy.objectBody}</p>
-          {design}
         </div>
         <div className="sc-object__stage">
           <div ref={media} className={`sc-object__media${showFullFrame ? " is-exploding" : ""}`} data-explosion-state={explosionPhase ?? undefined} data-explosion-driver={explosionPhase ? activeDriver ?? undefined : undefined} aria-busy={explosionPhase ? isLoading : undefined}>
@@ -408,8 +407,8 @@ export default function RenderedObject({ copy, design, details }: { copy: SiteCo
           </div>
           {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
+        {design && <div className="sc-object__design">{design}</div>}
       </div>
-      {details}
     </section>
   );
 }
