@@ -4,6 +4,7 @@ import { useLanguage } from "./language";
 import { COPY_GROUPS, DEFAULT_COPY, DEFAULT_COPY_JA, type CopyKey, type SiteCopy } from "./site-copy";
 import EditorPageSelect from "./editor-page-select";
 import { loadPublishedPage, mergePublished, PublishControls, validateSpeakerImage } from "./published-copy";
+import { EditorPortal } from "./editor-surface";
 
 const STORAGE_KEY = "metorom-sculptural-v3-preview-v1";
 const LEGACY_PHILOSOPHY_KEY = "metorom-sculptural-preview-philosophy-v1";
@@ -158,7 +159,7 @@ export function SiteEditor({ settings, onChange, galleryFiles, onGalleryFileChan
   };
 
   return (
-    <div className="sc-editor" data-site-editor>
+    <EditorPortal><div className="sc-editor" data-site-editor onKeyDown={(event) => { if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); } }}>
       <button className="sc-editor__toggle" type="button" aria-controls="sc-editor-panel" aria-expanded={open} onClick={() => setOpen(!open)}>
         {open ? "Close editor" : "Edit preview"}
       </button>
@@ -225,6 +226,6 @@ export function SiteEditor({ settings, onChange, galleryFiles, onGalleryFileChan
         <a className="sc-editor__exit" href={window.location.pathname + window.location.hash}>Exit preview and view the published design</a>
         {message && <p className="sc-editor__message" role="status">{message}</p>}
       </aside>}
-    </div>
+    </div></EditorPortal>
   );
 }

@@ -35,18 +35,18 @@ export default function FrequencyPaths({ copy, language, range }: FrequencyPaths
   const paths = [
     {
       key: "high" as const, title: copy.pathHighTitle, part: copy.pathHighPart, body: copy.pathHighBody,
-      sound: japanese ? "シンバルのきらめき、細かな音の輪郭。" : "Cymbal shimmer. Fine upper detail.",
-      rhythm: japanese ? "同じ時間に、多くの振動" : "More vibrations in the same time",
+      sound: copy.pathHighSound,
+      rhythm: copy.pathHighRhythm,
     },
     {
       key: "mid" as const, title: copy.pathMidTitle, part: copy.pathMidPart, body: copy.pathMidBody,
-      sound: japanese ? "人の声、楽器の響きの中心。" : "Voices. The body of an instrument.",
-      rhythm: japanese ? "高域と低域の間の振動" : "Between the high and low ranges",
+      sound: copy.pathMidSound,
+      rhythm: copy.pathMidRhythm,
     },
     {
       key: "low" as const, title: copy.pathLowTitle, part: copy.pathLowPart, body: copy.pathLowBody,
-      sound: japanese ? "ベースの音、キックドラムの重み。" : "Bass notes. The weight of a kick drum.",
-      rhythm: japanese ? "同じ時間に、少ない振動" : "Fewer vibrations in the same time",
+      sound: copy.pathLowSound,
+      rhythm: copy.pathLowRhythm,
     },
   ];
 
@@ -66,11 +66,9 @@ export default function FrequencyPaths({ copy, language, range }: FrequencyPaths
           <desc id={`${id}-${path.key}-description`}>{path.rhythm}. {japanese ? "他の波と同じ振幅と時間幅で描いた模式図です。実測値や録音ではありません。" : "A schematic sine wave with the same amplitude and time window as the other two waves. This is not measured data or an audio recording."}</desc>
           <g className="sc-paths__wave"><path d={waves[path.key]} /></g>
         </svg>
-        <figcaption><span>{path.rhythm}</span><span>{japanese ? "時間 →" : "Time →"}</span></figcaption>
+        <figcaption><span>{path.rhythm}</span><span>{copy.pathTimeLabel}</span></figcaption>
       </figure>
     </article>)}
-    <p className="sc-paths__note">{range
-      ? japanese ? "波は音の高さを説明する模式図です。ドライバーの実測値や音量を示すものではありません。" : "This schematic wave illustrates pitch, not measured driver response or loudness."
-      : japanese ? "波は説明用の模式図です。同じ時間幅・振幅で比較しています。ドライバーの実測値や音量を示すものではありません。" : "Schematic waves, shown over the same time window and at equal amplitude. They illustrate pitch, not measured driver response or loudness."}</p>
+    <p className="sc-paths__note">{range ? copy.pathSingleNote : copy.pathComparisonNote}</p>
   </div>;
 }

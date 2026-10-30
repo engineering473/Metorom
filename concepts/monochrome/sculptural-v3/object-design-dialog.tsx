@@ -4,6 +4,7 @@ import { Download, X } from "lucide-react";
 import type { DESIGN_COPY_EN } from "./design-copy";
 import type { SiteCopy } from "./site-copy";
 import FrequencyPaths from "./frequency-paths";
+import { useEditorSurface } from "./editor-surface";
 import "./object-design-dialog.css";
 
 export type PartId = "horn" | "midrange" | "bass";
@@ -27,6 +28,7 @@ export default function ObjectDesignDialog({ part, parts, copy, siteCopy, langua
   const contentRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<"render" | "drawing">("render");
   const titleId = useId();
+  const { setTarget } = useEditorSurface();
   const open = part !== null;
   const ja = language === "ja";
   const labels = ja ? { close: "デザインの詳細を閉じる", parts: "スピーカーの各部", views: "表示する画像", horn: "ホーン", midrange: "中域", bass: "低域" } : { close: "Close design details", parts: "Speaker parts", views: "Image view", horn: "Horn", midrange: "Midrange", bass: "Bass" };
@@ -54,8 +56,10 @@ export default function ObjectDesignDialog({ part, parts, copy, siteCopy, langua
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
       dialog.showModal();
+      if (new URLSearchParams(window.location.search).get("edit") === "1") setTarget(dialog);
       closeRef.current?.focus({ preventScroll: true });
       release = () => {
+        setTarget(null);
         if (dialog.open) dialog.close();
         document.body.style.overflow = bodyOverflow;
         document.documentElement.style.overflow = documentOverflow;
@@ -69,7 +73,7 @@ export default function ObjectDesignDialog({ part, parts, copy, siteCopy, langua
     }
     show();
     return () => { observer?.disconnect(); release?.(); };
-  }, [open, onRestoreFocus]);
+  }, [open, onRestoreFocus, setTarget]);
 
   return createPortal(<dialog ref={dialogRef} className="sc-design-lightbox" aria-labelledby={titleId}
     onCancel={(event) => { event.preventDefault(); onClose(); }}
@@ -77,7 +81,7 @@ export default function ObjectDesignDialog({ part, parts, copy, siteCopy, langua
     onKeyDown={(event) => {
       event.stopPropagation();
       if (event.key !== "Tab") return;
-      const focusable = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]')];
+      const focusable = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled])')].filter((element) => element.getClientRects().length > 0);
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (!first || !last) return;

@@ -1,6 +1,8 @@
 .sc-design-lightbox { position: fixed; inset: 50% auto auto 50%; width: min(1120px,calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); margin: 0; transform: translate(-50%,-50%); padding: 0; overflow: hidden; border: 0; background: #fff; color: var(--ink,#12244c); font: inherit; box-shadow: 0 24px 80px #030c2b66; }
 .sc-design-lightbox[open] { display: flex; flex-direction: column; }
 .sc-design-lightbox::backdrop { background: #091c49ad; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.sc-design-lightbox .sc-editor { right: 12px; bottom: 12px; }
+.sc-design-lightbox .sc-editor__panel { width: min(420px,calc(100vw - 64px)); max-height: min(70dvh,calc(100dvh - 132px)); }
 .sc-design-lightbox__header { flex: none; padding: 22px 26px 14px; background: #fff; }
 .sc-design-lightbox__title { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .sc-design-lightbox__title h2 { font-size: clamp(1.75rem,3vw,2.75rem); font-weight: 300; line-height: 1.15; letter-spacing: -.025em; }

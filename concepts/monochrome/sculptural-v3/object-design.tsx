@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import GlassFolder from "@/components/ui/glass-folder-cards";
 import ObjectDesignDialog, { type DesignPart, type PartId } from "./object-design-dialog";
 import { DESIGN_COPY_EN, DESIGN_COPY_JA } from "./design-copy";
@@ -43,25 +44,49 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     const folder = folderRef.current;
     if (!folder || selected) return;
     const mobile = window.matchMedia("(max-width: 760px)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const items = [...folder.querySelectorAll<HTMLElement>("[data-part]")];
+    const motion = items.map((element) => ({ element, value: Number(element.style.getPropertyValue("--sc-folder-pull")) || 0, target: 0 }));
     let visible = !("IntersectionObserver" in window);
     let frame = 0;
-    const update = () => {
+    let needsMeasure = true;
+    let previousTime = 0;
+    const update = (time: number) => {
       frame = 0;
-      if (!mobile.matches || !visible) { setBrowsing(null); return; }
-      const readingLine = window.innerHeight * .62;
-      // Stationary wrappers keep the lifted artwork from changing its own target.
-      const candidates = items.map((item) => {
-        const bounds = item.getBoundingClientRect();
-        return { id: item.dataset.part as PartId, distance: Math.abs(bounds.top + bounds.height * .84 - readingLine) };
+      if (needsMeasure) {
+        needsMeasure = false;
+        if (!mobile.matches || !visible) {
+          motion.forEach((entry) => { entry.target = 0; });
+          setBrowsing(null);
+        } else {
+          const readingLine = window.innerHeight * .62;
+          // Read stationary wrappers; lifting artwork cannot move its own target.
+          const candidates = motion.map((entry) => {
+            const bounds = entry.element.getBoundingClientRect();
+            const distance = Math.abs(bounds.top + bounds.height * .84 - readingLine);
+            const proximity = Math.max(0, 1 - distance / 165);
+            entry.target = proximity * proximity * (3 - 2 * proximity);
+            return { id: entry.element.dataset.part as PartId, distance };
+          });
+          const nearest = candidates.reduce((best, entry) => entry.distance < best.distance ? entry : best);
+          setBrowsing((previous) => {
+            const current = candidates.find((entry) => entry.id === previous);
+            return current && current.distance < nearest.distance + 18 ? previous : nearest.id;
+          });
+        }
+      }
+      const blend = 1 - Math.exp(-Math.min(previousTime ? time - previousTime : 16.7, 48) / 105);
+      let settling = false;
+      motion.forEach((entry) => {
+        entry.value = reduced.matches || !visible || !mobile.matches ? entry.target : entry.value + (entry.target - entry.value) * blend;
+        if (Math.abs(entry.target - entry.value) < .001) entry.value = entry.target;
+        else settling = true;
+        entry.element.style.setProperty("--sc-folder-pull", entry.value.toFixed(4));
       });
-      const nearest = candidates.reduce((best, entry) => entry.distance < best.distance ? entry : best);
-      setBrowsing((previous) => {
-        const current = candidates.find((entry) => entry.id === previous);
-        return current && current.distance < nearest.distance + 18 ? previous : nearest.id;
-      });
+      previousTime = settling ? time : 0;
+      if (settling) frame = window.requestAnimationFrame(update);
     };
-    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    const schedule = () => { needsMeasure = true; if (!frame) frame = window.requestAnimationFrame(update); };
     const onScroll = () => { if (visible && mobile.matches) schedule(); };
     const observer = "IntersectionObserver" in window ? new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
@@ -71,6 +96,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", schedule);
     mobile.addEventListener("change", schedule);
+    reduced.addEventListener("change", schedule);
     schedule();
     return () => {
       observer?.disconnect();
@@ -78,6 +104,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
       mobile.removeEventListener("change", schedule);
+      reduced.removeEventListener("change", schedule);
     };
   }, [selected, language]);
 
@@ -109,6 +136,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
         const frequency = entry.id === "horn" ? siteCopy.pathHighTitle : entry.id === "midrange" ? siteCopy.pathMidTitle : siteCopy.pathLowTitle;
         return <div className="sc-object-design-folder__item" data-part={entry.id} data-browsing={browsing === entry.id || undefined} key={`${language}-${entry.id}`}>
           <GlassFolder label={entry.title} meta={frequency} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false}
+            affordance={<>{copy.folderAction}<ArrowUpRight size={16} aria-hidden="true" /></>}
             open={selected === entry.id}
             onOpenChange={(open) => {
               if (open) { openerPart.current = entry.id; revealPart(entry.id); }

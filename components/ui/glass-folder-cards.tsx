@@ -72,6 +72,7 @@ export type GlassFolderProps = {
   /** The second line. Defaults to the number of files, which rolls as you add. */
   meta?: string
   /** `light` is milk glass, `dark` is smoked glass. */
+  affordance?: React.ReactNode
   tone?: "light" | "dark"
   /** What the back panel holds. A preset, your own recipe, or `none` for a plain frosted back. */
   art?: FolderArt
@@ -536,6 +537,7 @@ const SAMPLE_FILES: FolderFile[] = [
 export default function GlassFolder({
   label = "My Files",
   meta,
+  affordance,
   tone = "light",
   art = "aurora",
   seed = 3,
@@ -783,6 +785,7 @@ export default function GlassFolder({
                 {metaLine}
               </span>
             </div>
+            {affordance ? <span className="gf-affordance" aria-hidden="true">{affordance}</span> : null}
           </div>
 
           {/* the contents: after the glass in tab order, beneath it on screen */}

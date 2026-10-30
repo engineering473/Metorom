@@ -5,6 +5,7 @@ import { pageCopyGroup, publishedSharedCopy, readSharedPreviewCopy } from "./pag
 import { COPY_MAX_LENGTH, downloadPreviewJson } from "./site-editor";
 import EditorPageSelect from "./editor-page-select";
 import { loadPublishedPage, mergePublished, PublishControls } from "./published-copy";
+import { EditorPortal } from "./editor-surface";
 
 type TextCopy = Record<string, string>;
 type PageSettings<T extends TextCopy> = { en: T; ja: T };
@@ -95,7 +96,7 @@ export function PageEditor<T extends TextCopy>({ page, settings, onChange, engli
   const query = search.trim().toLowerCase();
   const groupedFields = new Map<string, string[]>();
   for (const key of Object.keys(english)) {
-    const group = pageCopyGroup(key);
+    const group = pageCopyGroup(key, page);
     if (key !== focusedKey && !`${group} ${key} ${fieldLabel(key)} ${copy[key]}`.toLowerCase().includes(query)) continue;
     groupedFields.set(group, [...(groupedFields.get(group) ?? []), key]);
   }
@@ -111,7 +112,7 @@ export function PageEditor<T extends TextCopy>({ page, settings, onChange, engli
     } catch { setMessage("Clipboard access was blocked. Your preview is still saved in this browser."); }
   };
 
-  return <div className="sc-editor" data-site-editor>
+  return <EditorPortal><div className="sc-editor" data-site-editor onKeyDown={(event) => { if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); } }}>
     <button className="sc-editor__toggle" type="button" aria-controls="sc-editor-panel" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Close editor" : "Edit preview"}</button>
     {open && <aside id="sc-editor-panel" className="sc-editor__panel" aria-label={`${page} preview editor`}>
       <div className="sc-editor__heading"><span>METOROM / {page.toUpperCase()}</span><button type="button" onClick={() => setOpen(false)} aria-label="Close editor"><X size={18} aria-hidden="true" /></button></div>
@@ -144,5 +145,5 @@ export function PageEditor<T extends TextCopy>({ page, settings, onChange, engli
       <a className="sc-editor__exit" href={window.location.pathname + window.location.hash}>Exit preview and view the published design</a>
       {message && <p className="sc-editor__message" role="status">{message}</p>}
     </aside>}
-  </div>;
+  </div></EditorPortal>;
 }

@@ -31,7 +31,14 @@ export function readSharedPreviewCopy(language: "en" | "ja"): Partial<SharedPage
   } catch { return {}; }
 }
 
-export function pageCopyGroup(key: string): string {
+export function pageCopyGroup(key: string, page?: string): string {
+  if (page === "design") {
+    if (/^horn/.test(key)) return "The horn";
+    if (/^mid/.test(key)) return "The midrange pair";
+    if (/^bass/.test(key)) return "The bass cabinet";
+    if (/^(folder|openFolder|closeFolder|contentsLabel)/.test(key)) return "Folder controls";
+    if (/^(render|drawing)/.test(key)) return "Images & drawings";
+  }
   if (key === "brandName" || key.startsWith("nav")) return "Brand & navigation";
   if (key.startsWith("page")) return "Page information";
   if (key.startsWith("globe")) return "Globe";
