@@ -25,7 +25,9 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   const [language] = useLanguage();
   const [selected, setSelected] = useState<PartId | null>(selectedFromHash);
   const [browsing, setBrowsing] = useState<PartId | null>(null);
+  const [deckMode, setDeckMode] = useState(() => window.matchMedia("(max-width: 760px) and (prefers-reduced-motion: no-preference)").matches);
   const folderRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
   const initialDeepLink = useRef(selected !== null);
   const openerPart = useRef<PartId>(selected ?? "horn");
   const parts: DesignPart[] = [
@@ -45,8 +47,9 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     if (!folder || selected) return;
     const mobile = window.matchMedia("(max-width: 760px)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const items = [...folder.querySelectorAll<HTMLElement>("[data-part]")];
-    const motion = items.map((element) => ({ element, value: Number(element.style.getPropertyValue("--sc-folder-pull")) || 0, target: 0 }));
+    const stage = folder.querySelector<HTMLElement>(".sc-object-design-folder__sticky");
+    const items = [...folder.querySelectorAll<HTMLElement>(".sc-object-design-folder__item")];
+    const motion = items.map((element) => ({ element, value: Number(element.style.getPropertyValue("--sc-folder-fold")) || 0, target: 0 }));
     let visible = !("IntersectionObserver" in window);
     let frame = 0;
     let needsMeasure = true;
@@ -55,24 +58,23 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
       frame = 0;
       if (needsMeasure) {
         needsMeasure = false;
-        if (!mobile.matches || !visible) {
+        const enabled = mobile.matches && !reduced.matches;
+        setDeckMode(enabled);
+        if (!enabled || !stage) {
           motion.forEach((entry) => { entry.target = 0; });
           setBrowsing(null);
         } else {
-          const readingLine = window.innerHeight * .62;
-          // Read stationary wrappers; lifting artwork cannot move its own target.
-          const candidates = motion.map((entry) => {
-            const bounds = entry.element.getBoundingClientRect();
-            const distance = Math.abs(bounds.top + bounds.height * .84 - readingLine);
-            const proximity = Math.max(0, 1 - distance / 165);
-            entry.target = proximity * proximity * (3 - 2 * proximity);
-            return { id: entry.element.dataset.part as PartId, distance };
+          // The fixed runway supplies progress independently of the folded art.
+          const top = Number.parseFloat(window.getComputedStyle(stage).top) || 0;
+          const travel = Math.max(1, folder.offsetHeight - stage.offsetHeight);
+          const progress = Math.min(1, Math.max(0, (top - folder.getBoundingClientRect().top) / travel));
+          const position = progress * motion.length;
+          motion.forEach((entry, index) => {
+            const turn = Math.min(1, Math.max(0, (position - index - .24) / .76));
+            entry.target = turn * turn * (3 - 2 * turn);
           });
-          const nearest = candidates.reduce((best, entry) => entry.distance < best.distance ? entry : best);
-          setBrowsing((previous) => {
-            const current = candidates.find((entry) => entry.id === previous);
-            return current && current.distance < nearest.distance + 18 ? previous : nearest.id;
-          });
+          const active = Math.min(motion.length - 1, Math.floor(position + .12));
+          setBrowsing(items[active].dataset.part as PartId);
         }
       }
       const blend = 1 - Math.exp(-Math.min(previousTime ? time - previousTime : 16.7, 48) / 105);
@@ -81,7 +83,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
         entry.value = reduced.matches || !visible || !mobile.matches ? entry.target : entry.value + (entry.target - entry.value) * blend;
         if (Math.abs(entry.target - entry.value) < .001) entry.value = entry.target;
         else settling = true;
-        entry.element.style.setProperty("--sc-folder-pull", entry.value.toFixed(4));
+        entry.element.style.setProperty("--sc-folder-fold", entry.value.toFixed(4));
       });
       previousTime = settling ? time : 0;
       if (settling) frame = window.requestAnimationFrame(update);
@@ -121,7 +123,10 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   const restoreFolderFocus = useCallback(() => {
-    const opener = folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${openerPart.current}"] .gf-hit`);
+    const direct = openerRef.current;
+    const choice = folderRef.current?.querySelector<HTMLButtonElement>(`[data-folder-choice="${openerPart.current}"]`);
+    const fallback = choice?.getClientRects().length ? choice : folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${openerPart.current}"] .gf-hit`);
+    const opener = direct?.isConnected && !direct.closest("[inert]") ? direct : fallback;
     // A fresh deep link has no previous page position to return to.
     if (initialDeepLink.current) {
       initialDeepLink.current = false;
@@ -132,14 +137,20 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
 
   return <>
     <div className="sc-object-design-folder" id="listening-design" ref={folderRef} role="group" aria-label={copy.contentsLabel}>
+      <div className="sc-object-design-folder__sticky">
+      <div className="sc-object-design-folder__deck">
       {parts.map((entry) => {
         const frequency = entry.id === "horn" ? siteCopy.pathHighTitle : entry.id === "midrange" ? siteCopy.pathMidTitle : siteCopy.pathLowTitle;
-        return <div className="sc-object-design-folder__item" data-part={entry.id} data-browsing={browsing === entry.id || undefined} key={`${language}-${entry.id}`}>
+        return <div className="sc-object-design-folder__item" data-part={entry.id} data-browsing={(browsing ?? "horn") === entry.id || undefined} inert={deckMode && (browsing ?? "horn") !== entry.id} aria-hidden={deckMode && (browsing ?? "horn") !== entry.id || undefined} key={`${language}-${entry.id}`}>
           <GlassFolder label={entry.title} meta={frequency} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false}
             affordance={<>{copy.folderAction}<ArrowUpRight size={16} aria-hidden="true" /></>}
             open={selected === entry.id}
             onOpenChange={(open) => {
-              if (open) { openerPart.current = entry.id; revealPart(entry.id); }
+              if (open) {
+                openerPart.current = entry.id;
+                openerRef.current = folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${entry.id}"] .gf-hit`) ?? null;
+                revealPart(entry.id);
+              }
               else closeDetails();
             }}
             openLabel={`${copy.openFolder} ${entry.title}`} closeLabel={`${copy.closeFolder} ${entry.title}`} contentsLabel={`${copy.folderContents} ${entry.title}`}
@@ -147,6 +158,17 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
             onFileSelect={() => revealPart(entry.id)} />
         </div>;
       })}
+      </div>
+      <p className="sc-object-design-folder__hint sc-object-design-folder__hint--scroll">{copy.folderScrollHint}</p>
+      <p className="sc-object-design-folder__hint sc-object-design-folder__hint--choose">{copy.folderChooseHint}</p>
+      <nav className="sc-object-design-folder__choices" aria-label={copy.contentsLabel}>
+        {parts.map((entry) => <button type="button" key={entry.id} data-folder-choice={entry.id} aria-pressed={(browsing ?? "horn") === entry.id} onClick={(event) => {
+          openerPart.current = entry.id;
+          openerRef.current = event.currentTarget;
+          revealPart(entry.id);
+        }}>{entry.title}</button>)}
+      </nav>
+      </div>
     </div>
     <ObjectDesignDialog part={parts.find((entry) => entry.id === selected) ?? null} parts={parts} copy={copy} siteCopy={siteCopy} language={language} render={assets.render} proposal={assets.proposal} onSelect={revealPart} onClose={closeDetails} onRestoreFocus={restoreFolderFocus} />
     {new URLSearchParams(window.location.search).get("editor") === "design" && <PageEditor page="design" settings={settings} onChange={setSettings} english={DESIGN_COPY_EN} japanese={DESIGN_COPY_JA} />}
