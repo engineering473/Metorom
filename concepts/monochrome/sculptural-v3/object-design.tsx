@@ -23,9 +23,9 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   const [copy, settings, setSettings] = usePagePreview("design", DESIGN_COPY_EN, DESIGN_COPY_JA);
   const [language] = useLanguage();
   const [selected, setSelected] = useState<PartId | null>(selectedFromHash);
-  const [folderOpen, setFolderOpen] = useState(false);
   const folderRef = useRef<HTMLDivElement>(null);
   const initialDeepLink = useRef(selected !== null);
+  const openerPart = useRef<PartId>(selected ?? "horn");
   const parts: DesignPart[] = [
     { id: "horn", title: copy.hornTitle, part: copy.hornPart, body: copy.hornFunction, detail: copy.hornDetail, material: copy.hornMaterial, drawing: assets.horn, drawingAlt: copy.hornDrawingAlt, caption: copy.hornDrawing },
     { id: "midrange", title: copy.midTitle, part: copy.midPart, body: copy.midFunction, detail: copy.midDetail, material: copy.midMaterial, drawing: assets.assembly, drawingAlt: copy.drawingAlt, caption: copy.drawingLabel },
@@ -51,7 +51,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   const restoreFolderFocus = useCallback(() => {
-    const opener = folderRef.current?.querySelector<HTMLButtonElement>(".gf-hit");
+    const opener = folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${openerPart.current}"] .gf-hit`);
     // A fresh deep link has no previous page position to return to.
     if (initialDeepLink.current) {
       initialDeepLink.current = false;
@@ -61,12 +61,21 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   return <>
-    <div className="sc-object-design-folder" id="listening-design" ref={folderRef}>
-      <GlassFolder key={language} label={copy.detailLabel} meta={copy.folderMeta} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false} openHeadroom={130}
-        open={folderOpen} onOpenChange={setFolderOpen}
-        openLabel={`${copy.openFolder} ${copy.detailLabel}`} closeLabel={`${copy.closeFolder} ${copy.detailLabel}`} contentsLabel={`${copy.folderContents} ${copy.detailLabel}`}
-        files={parts.map((entry) => ({ name: entry.title, image: entry.drawing }))}
-        onFileSelect={(_, index) => revealPart(parts[index].id)} />
+    <div className="sc-object-design-folder" id="listening-design" ref={folderRef} role="group" aria-label={copy.contentsLabel}>
+      {parts.map((entry) => {
+        const frequency = entry.id === "horn" ? siteCopy.pathHighTitle : entry.id === "midrange" ? siteCopy.pathMidTitle : siteCopy.pathLowTitle;
+        return <div className="sc-object-design-folder__item" data-part={entry.id} key={`${language}-${entry.id}`}>
+          <GlassFolder label={entry.title} meta={frequency} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false}
+            open={selected === entry.id}
+            onOpenChange={(open) => {
+              if (open) { openerPart.current = entry.id; revealPart(entry.id); }
+              else closeDetails();
+            }}
+            openLabel={`${copy.openFolder} ${entry.title}`} closeLabel={`${copy.closeFolder} ${entry.title}`} contentsLabel={`${copy.folderContents} ${entry.title}`}
+            files={[{ name: frequency, image: entry.drawing }]}
+            onFileSelect={() => revealPart(entry.id)} />
+        </div>;
+      })}
     </div>
     <ObjectDesignDialog part={parts.find((entry) => entry.id === selected) ?? null} parts={parts} copy={copy} siteCopy={siteCopy} language={language} render={assets.render} proposal={assets.proposal} onSelect={revealPart} onClose={closeDetails} onRestoreFocus={restoreFolderFocus} />
     {new URLSearchParams(window.location.search).get("editor") === "design" && <PageEditor page="design" settings={settings} onChange={setSettings} english={DESIGN_COPY_EN} japanese={DESIGN_COPY_JA} />}

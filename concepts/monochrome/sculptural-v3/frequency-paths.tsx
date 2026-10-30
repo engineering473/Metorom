@@ -16,15 +16,6 @@ function sinePath(cycles: number) {
 
 const waves = { high: sinePath(12), mid: sinePath(5), low: sinePath(2) };
 
-export function FrequencyIntroduction({ language }: { language: Language }) {
-  const japanese = language === "ja";
-  return <div className="sc-paths__explanation">
-    <p>{japanese
-      ? "周波数は、1秒間の振動の数です。単位はヘルツ（Hz）。同じ時間に波が多いほど音は高く、少ないほど低くなります。3つの波を見比べてください。"
-      : "Frequency is the number of vibrations each second, measured in hertz (Hz). More waves in the same time means a higher pitch; fewer means a lower pitch. Compare the three below."}</p>
-  </div>;
-}
-
 export default function FrequencyPaths({ copy, language, range }: FrequencyPathsProps) {
   const root = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -62,7 +53,6 @@ export default function FrequencyPaths({ copy, language, range }: FrequencyPaths
   const visiblePaths = range ? paths.filter((path) => path.key === range) : paths;
 
   return <div ref={root} className={`sc-paths${range ? " sc-paths--single" : ""}${inView && !reduceMotion ? " is-playing" : ""}`}>
-    {!range && <FrequencyIntroduction language={language} />}
     {visiblePaths.map((path) => <article key={path.key} className={`sc-paths__row sc-paths__row--${path.key}`} aria-labelledby={`${id}-${path.key}`}>
       <div className="sc-paths__copy">
         <h3 id={`${id}-${path.key}`}>{path.title}</h3>

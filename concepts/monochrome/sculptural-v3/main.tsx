@@ -6,7 +6,6 @@ import { Navbar1 } from "./navbar";
 import FrequencyResponseCards from "./frequency-response-cards";
 import SystemSpecifications from "./system-specifications";
 import CloserLook from "./closer-look";
-import { FrequencyIntroduction } from "./frequency-paths";
 import PagePreloader from "./media-preloader";
 import { HERO_IMAGE } from "./media-assets";
 import ObjectDesign from "./object-design";
@@ -121,8 +120,7 @@ function App() {
           <span className="sc-rail-label">{copy.architectureRail}</span>
           <div className="sc-architecture__body">
             <h2 id="sc-architecture-title">{copy.architectureTitle}</h2>
-            <p className="sc-architecture__intro">{copy.architectureBody}</p>
-            <FrequencyIntroduction language={language} />
+            {copy.architectureBody && <p className="sc-architecture__intro">{copy.architectureBody}</p>}
             <ObjectDesign copy={copy} />
           </div>
         </section>
