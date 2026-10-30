@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import GlassFolder from "@/components/ui/glass-folder-cards";
-import RenderedObject from "./rendered-object";
 import ObjectDesignDialog, { type DesignPart, type PartId } from "./object-design-dialog";
 import { DESIGN_COPY_EN, DESIGN_COPY_JA } from "./design-copy";
 import { PageEditor, usePagePreview } from "./page-editor";
@@ -47,7 +46,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   const closeDetails = useCallback(() => {
     setSelected(null);
     if (window.location.hash.startsWith("#object-design-")) {
-      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#object`);
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#architecture`);
     }
   }, []);
 
@@ -62,14 +61,14 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   return <>
-    <RenderedObject copy={siteCopy} design={<div className="sc-object-design-folder" ref={folderRef}>
+    <div className="sc-object-design-folder" id="listening-design" ref={folderRef}>
       <GlassFolder key={language} label={copy.detailLabel} meta={copy.folderMeta} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false} openHeadroom={130}
         open={folderOpen} onOpenChange={setFolderOpen}
         openLabel={`${copy.openFolder} ${copy.detailLabel}`} closeLabel={`${copy.closeFolder} ${copy.detailLabel}`} contentsLabel={`${copy.folderContents} ${copy.detailLabel}`}
         files={parts.map((entry) => ({ name: entry.title, image: entry.drawing }))}
         onFileSelect={(_, index) => revealPart(parts[index].id)} />
-    </div>} />
-    <ObjectDesignDialog part={parts.find((entry) => entry.id === selected) ?? null} parts={parts} copy={copy} language={language} render={assets.render} proposal={assets.proposal} onSelect={revealPart} onClose={closeDetails} onRestoreFocus={restoreFolderFocus} />
+    </div>
+    <ObjectDesignDialog part={parts.find((entry) => entry.id === selected) ?? null} parts={parts} copy={copy} siteCopy={siteCopy} language={language} render={assets.render} proposal={assets.proposal} onSelect={revealPart} onClose={closeDetails} onRestoreFocus={restoreFolderFocus} />
     {new URLSearchParams(window.location.search).get("editor") === "design" && <PageEditor page="design" settings={settings} onChange={setSettings} english={DESIGN_COPY_EN} japanese={DESIGN_COPY_JA} />}
   </>;
 }

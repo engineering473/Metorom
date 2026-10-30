@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Download, X } from "lucide-react";
 import type { DESIGN_COPY_EN } from "./design-copy";
+import type { SiteCopy } from "./site-copy";
+import FrequencyPaths from "./frequency-paths";
 import "./object-design-dialog.css";
 
 export type PartId = "horn" | "midrange" | "bass";
@@ -10,6 +12,7 @@ type Props = {
   part: DesignPart | null;
   parts: DesignPart[];
   copy: typeof DESIGN_COPY_EN;
+  siteCopy: SiteCopy;
   language: "en" | "ja";
   render: string;
   proposal: string;
@@ -18,7 +21,7 @@ type Props = {
   onRestoreFocus: () => void;
 };
 
-export default function ObjectDesignDialog({ part, parts, copy, language, render, proposal, onSelect, onClose, onRestoreFocus }: Props) {
+export default function ObjectDesignDialog({ part, parts, copy, siteCopy, language, render, proposal, onSelect, onClose, onRestoreFocus }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -112,8 +115,7 @@ export default function ObjectDesignDialog({ part, parts, copy, language, render
           {view === "drawing" && <p className="sc-design-lightbox__study-note">{copy.drawingNote}</p>}
         </div>
         <div className="sc-design-lightbox__copy">
-          <p className="sc-design-lightbox__model">{part.part}</p>
-          <div><h3>{copy.functionLabel}</h3><p>{part.body}</p></div>
+          <FrequencyPaths key={part.id} copy={siteCopy} language={language} range={part.id === "horn" ? "high" : part.id === "midrange" ? "mid" : "low"} />
           <div><h3>{copy.detailLabel}</h3><p>{part.detail}</p></div>
           <div><h3>{copy.materialsLabel}</h3><p>{part.material}</p></div>
           {part.id === "horn" && <a className="sc-design-lightbox__download" href={proposal} target="_blank" rel="noreferrer">{copy.hornDownload}<Download size={17} aria-hidden="true" /><span>PDF</span></a>}

@@ -6,10 +6,11 @@ import { Navbar1 } from "./navbar";
 import FrequencyResponseCards from "./frequency-response-cards";
 import SystemSpecifications from "./system-specifications";
 import CloserLook from "./closer-look";
-import FrequencyPaths from "./frequency-paths";
+import { FrequencyIntroduction } from "./frequency-paths";
 import PagePreloader from "./media-preloader";
 import { HERO_IMAGE } from "./media-assets";
 import ObjectDesign from "./object-design";
+import RenderedObject from "./rendered-object";
 import SectionIndex from "./section-index";
 import { SiteEditor, useSitePreview } from "./site-editor";
 import { previewHref, useLanguage } from "./language";
@@ -114,14 +115,15 @@ function App() {
           </section>
         </div>
 
-        <ObjectDesign copy={copy} />
+        <RenderedObject copy={copy} />
 
         <section className="sc-architecture sc-shell" id="architecture" aria-labelledby="sc-architecture-title" data-section-reveal>
           <span className="sc-rail-label">{copy.architectureRail}</span>
           <div className="sc-architecture__body">
             <h2 id="sc-architecture-title">{copy.architectureTitle}</h2>
             <p className="sc-architecture__intro">{copy.architectureBody}</p>
-            <FrequencyPaths copy={copy} language={language} />
+            <FrequencyIntroduction language={language} />
+            <ObjectDesign copy={copy} />
           </div>
         </section>
 

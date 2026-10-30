@@ -20,3 +20,14 @@
 @media(max-width:1100px){.sc-paths__explanation{display:block}.sc-paths__row{grid-template-columns:minmax(0,1fr);gap:24px}.sc-paths__body{max-width:65ch}.sc-paths__figure svg{max-height:125px}}
 @media(max-width:760px){.sc-paths{margin-top:38px}.sc-paths__explanation{margin-bottom:28px}.sc-paths__row{padding:30px 0 34px}.sc-paths__copy h3{font-size:28px}.sc-paths__sound{margin-top:18px}.sc-paths__figure figcaption{font-size:10px}.sc-paths__note{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.sc-paths__wave{animation:none!important}}
+
+.sc-paths.sc-paths--single{margin-top:0}
+.sc-paths--single .sc-paths__row{display:block;padding:0}
+.sc-paths--single .sc-paths__copy h3{font-size:24px}
+.sc-paths--single .sc-paths__part{margin-top:9px;font-size:12px}
+.sc-paths--single .sc-paths__sound{margin-top:18px;font-size:15px}
+.sc-paths--single .sc-paths__body{font-size:14px;line-height:1.75}
+.sc-paths--single .sc-paths__figure{margin-top:22px}
+.sc-paths--single .sc-paths__figure svg{min-height:80px;max-height:125px}
+.sc-paths--single .sc-paths__figure figcaption{font-size:11px}
+.sc-paths--single .sc-paths__note{padding-top:14px;font-size:11px}

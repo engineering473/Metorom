@@ -4,7 +4,8 @@ import type { SiteCopy } from "./site-copy";
 import type { Language } from "./language";
 import "./frequency-paths.css";
 
-type FrequencyPathsProps = { copy: SiteCopy; language: Language };
+export type FrequencyRange = "high" | "mid" | "low";
+type FrequencyPathsProps = { copy: SiteCopy; language: Language; range?: FrequencyRange };
 
 function sinePath(cycles: number) {
   return Array.from({ length: 1281 }, (_, x) => {
@@ -15,7 +16,16 @@ function sinePath(cycles: number) {
 
 const waves = { high: sinePath(12), mid: sinePath(5), low: sinePath(2) };
 
-export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) {
+export function FrequencyIntroduction({ language }: { language: Language }) {
+  const japanese = language === "ja";
+  return <div className="sc-paths__explanation">
+    <p>{japanese
+      ? "周波数は、1秒間の振動の数です。単位はヘルツ（Hz）。同じ時間に波が多いほど音は高く、少ないほど低くなります。3つの波を見比べてください。"
+      : "Frequency is the number of vibrations each second, measured in hertz (Hz). More waves in the same time means a higher pitch; fewer means a lower pitch. Compare the three below."}</p>
+  </div>;
+}
+
+export default function FrequencyPaths({ copy, language, range }: FrequencyPathsProps) {
   const root = useRef<HTMLDivElement>(null);
   const id = useId();
   const reduceMotion = useReducedMotion();
@@ -49,13 +59,11 @@ export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) 
     },
   ];
 
-  return <div ref={root} className={`sc-paths${inView && !reduceMotion ? " is-playing" : ""}`}>
-    <div className="sc-paths__explanation">
-      <p>{japanese
-        ? "周波数は、1秒間の振動の数です。単位はヘルツ（Hz）。同じ時間に波が多いほど音は高く、少ないほど低くなります。3つの波を見比べてください。"
-        : "Frequency is the number of vibrations each second, measured in hertz (Hz). More waves in the same time means a higher pitch; fewer means a lower pitch. Compare the three below."}</p>
-    </div>
-    {paths.map((path) => <article key={path.key} className={`sc-paths__row sc-paths__row--${path.key}`} aria-labelledby={`${id}-${path.key}`}>
+  const visiblePaths = range ? paths.filter((path) => path.key === range) : paths;
+
+  return <div ref={root} className={`sc-paths${range ? " sc-paths--single" : ""}${inView && !reduceMotion ? " is-playing" : ""}`}>
+    {!range && <FrequencyIntroduction language={language} />}
+    {visiblePaths.map((path) => <article key={path.key} className={`sc-paths__row sc-paths__row--${path.key}`} aria-labelledby={`${id}-${path.key}`}>
       <div className="sc-paths__copy">
         <h3 id={`${id}-${path.key}`}>{path.title}</h3>
         <p className="sc-paths__part">{path.part}</p>
@@ -71,6 +79,8 @@ export default function FrequencyPaths({ copy, language }: FrequencyPathsProps) 
         <figcaption><span>{path.rhythm}</span><span>{japanese ? "時間 →" : "Time →"}</span></figcaption>
       </figure>
     </article>)}
-    <p className="sc-paths__note">{japanese ? "波は説明用の模式図です。同じ時間幅・振幅で比較しています。ドライバーの実測値や音量を示すものではありません。" : "Schematic waves, shown over the same time window and at equal amplitude. They illustrate pitch, not measured driver response or loudness."}</p>
+    <p className="sc-paths__note">{range
+      ? japanese ? "波は音の高さを説明する模式図です。ドライバーの実測値や音量を示すものではありません。" : "This schematic wave illustrates pitch, not measured driver response or loudness."
+      : japanese ? "波は説明用の模式図です。同じ時間幅・振幅で比較しています。ドライバーの実測値や音量を示すものではありません。" : "Schematic waves, shown over the same time window and at equal amplitude. They illustrate pitch, not measured driver response or loudness."}</p>
   </div>;
 }

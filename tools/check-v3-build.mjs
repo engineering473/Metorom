@@ -7,7 +7,7 @@ function walk(directory) {
 }
 const files = walk('dist').map(path => relative('dist', path).replaceAll('\\', '/'));
 const pages = ['index', 'contact', 'event', 'philosophy'];
-const inlinePages = { design: 'object', specifications: 'measurements' };
+const inlinePages = { design: 'architecture', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
 const expected = ['index.html', ...pages.map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...Object.keys(inlinePages).map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...legacyPages.map(page => `concepts/monochrome/sculptural-v2/${page}.html`)].sort();
 assert.deepEqual(files.filter(path => path.endsWith('.html')).sort(), expected, 'Only v3 pages and explicit redirects may be published');

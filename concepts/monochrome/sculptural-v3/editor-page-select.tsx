@@ -2,7 +2,7 @@ import { useLanguage } from "./language";
 
 const pages = [
   { id: "home", path: "./index.html", label: "Home" },
-  { id: "design", path: "./index.html?editor=design#object", label: "Speaker design (on home)" },
+  { id: "design", path: "./index.html?editor=design#architecture", label: "Speaker design (on home)" },
   { id: "specifications", path: "./index.html#measurements", label: "Specifications (on home)" },
   { id: "philosophy", path: "./philosophy.html", label: "Philosophy" },
   { id: "contact", path: "./contact.html", label: "Contact" },

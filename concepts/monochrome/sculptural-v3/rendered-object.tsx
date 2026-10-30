@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import type { SiteCopy } from "./site-copy";
 import { OBJECT_POSTER, VIDEO_SOURCES, usePreparedMediaSources } from "./media-assets";
 
@@ -43,7 +43,7 @@ function waitForVideo(video: HTMLVideoElement, event: "loadedmetadata" | "loaded
   });
 }
 
-export default function RenderedObject({ copy, design }: { copy: SiteCopy; design?: ReactNode }) {
+export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const films = usePreparedMediaSources(VIDEO_SOURCES);
   const [preloadMode] = useState<"metadata" | "auto">(() => window.matchMedia("(pointer: coarse)").matches ? "metadata" : "auto");
   const videos = useRef<Partial<Record<Film, HTMLVideoElement>>>({});
@@ -407,7 +407,6 @@ export default function RenderedObject({ copy, design }: { copy: SiteCopy; desig
           </div>
           {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
-        {design && <div className="sc-object__design">{design}</div>}
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 const root = import.meta.dirname;
 const site = 'concepts/monochrome/sculptural-v3';
 const pages = ['index', 'contact', 'event', 'philosophy'];
-const inlinePages = { design: 'object', specifications: 'measurements' };
+const inlinePages = { design: 'architecture', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
 // Preserve all studies in source; publish only the selected site and its assets.
 function selectedSiteAssets() {
