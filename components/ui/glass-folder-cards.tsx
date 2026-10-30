@@ -71,8 +71,11 @@ export type GlassFolderProps = {
   label?: string
   /** The second line. Defaults to the number of files, which rolls as you add. */
   meta?: string
-  /** `light` is milk glass, `dark` is smoked glass. */
+  /** Optional visible action cue on the front panel. */
   affordance?: React.ReactNode
+  /** Optional sheet between the back and front, used for an inline preview. */
+  preview?: React.ReactNode
+  /** `light` is milk glass, `dark` is smoked glass. */
   tone?: "light" | "dark"
   /** What the back panel holds. A preset, your own recipe, or `none` for a plain frosted back. */
   art?: FolderArt
@@ -538,6 +541,7 @@ export default function GlassFolder({
   label = "My Files",
   meta,
   affordance,
+  preview,
   tone = "light",
   art = "aurora",
   seed = 3,
@@ -748,6 +752,8 @@ export default function GlassFolder({
           <svg className="gf-rim gf-back-rim" viewBox={"0 0 " + W + " " + H} aria-hidden="true">
             <path d={BACK_PATH} />
           </svg>
+
+          {preview ? <div className="gf-preview">{preview}</div> : null}
 
           {/* the frosted front panel, hinged on its bottom edge */}
           <div

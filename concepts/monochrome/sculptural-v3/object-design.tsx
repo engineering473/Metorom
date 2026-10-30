@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import GlassFolder from "@/components/ui/glass-folder-cards";
 import ObjectDesignDialog, { type DesignPart, type PartId } from "./object-design-dialog";
 import { DESIGN_COPY_EN, DESIGN_COPY_JA } from "./design-copy";
@@ -49,7 +48,10 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const stage = folder.querySelector<HTMLElement>(".sc-object-design-folder__sticky");
     const items = [...folder.querySelectorAll<HTMLElement>(".sc-object-design-folder__item")];
-    const motion = items.map((element) => ({ element, value: Number(element.style.getPropertyValue("--sc-folder-fold")) || 0, target: 0 }));
+    const motion = items.map((element) => ({
+      element, value: Number(element.style.getPropertyValue("--sc-folder-fold")) || 0, target: 0,
+      peek: Number(element.style.getPropertyValue("--sc-folder-peek")) || 0, peekTarget: 0,
+    }));
     let visible = !("IntersectionObserver" in window);
     let frame = 0;
     let needsMeasure = true;
@@ -61,7 +63,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
         const enabled = mobile.matches && !reduced.matches;
         setDeckMode(enabled);
         if (!enabled || !stage) {
-          motion.forEach((entry) => { entry.target = 0; });
+          motion.forEach((entry) => { entry.target = 0; entry.peekTarget = 0; });
           setBrowsing(null);
         } else {
           // The fixed runway supplies progress independently of the folded art.
@@ -69,21 +71,27 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
           const travel = Math.max(1, folder.offsetHeight - stage.offsetHeight);
           const progress = Math.min(1, Math.max(0, (top - folder.getBoundingClientRect().top) / travel));
           const position = progress * motion.length;
+          const smooth = (value: number) => { const clamped = Math.min(1, Math.max(0, value)); return clamped * clamped * (3 - 2 * clamped); };
           motion.forEach((entry, index) => {
-            const turn = Math.min(1, Math.max(0, (position - index - .24) / .76));
-            entry.target = turn * turn * (3 - 2 * turn);
+            const phase = position - index;
+            entry.peekTarget = smooth(phase / .2) * (1 - smooth((phase - .5) / .15));
+            entry.target = smooth((phase - .64) / .36);
           });
           const active = Math.min(motion.length - 1, Math.floor(position + .12));
           setBrowsing(items[active].dataset.part as PartId);
         }
       }
-      const blend = 1 - Math.exp(-Math.min(previousTime ? time - previousTime : 16.7, 48) / 105);
+      const blend = 1 - Math.exp(-Math.min(previousTime ? time - previousTime : 16.7, 48) / 130);
       let settling = false;
       motion.forEach((entry) => {
         entry.value = reduced.matches || !visible || !mobile.matches ? entry.target : entry.value + (entry.target - entry.value) * blend;
         if (Math.abs(entry.target - entry.value) < .001) entry.value = entry.target;
         else settling = true;
+        entry.peek = reduced.matches || !visible || !mobile.matches ? entry.peekTarget : entry.peek + (entry.peekTarget - entry.peek) * blend;
+        if (Math.abs(entry.peekTarget - entry.peek) < .001) entry.peek = entry.peekTarget;
+        else settling = true;
         entry.element.style.setProperty("--sc-folder-fold", entry.value.toFixed(4));
+        entry.element.style.setProperty("--sc-folder-peek", entry.peek.toFixed(4));
       });
       previousTime = settling ? time : 0;
       if (settling) frame = window.requestAnimationFrame(update);
@@ -115,6 +123,12 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#object-design-${id}`);
   }, []);
 
+  const pressFolder = useCallback((id: PartId) => {
+    openerPart.current = id;
+    openerRef.current = folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${id}"] .gf-hit`) ?? null;
+    revealPart(id);
+  }, [revealPart]);
+
   const closeDetails = useCallback(() => {
     setSelected(null);
     if (window.location.hash.startsWith("#object-design-")) {
@@ -141,15 +155,17 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
       <div className="sc-object-design-folder__deck">
       {parts.map((entry) => {
         const frequency = entry.id === "horn" ? siteCopy.pathHighTitle : entry.id === "midrange" ? siteCopy.pathMidTitle : siteCopy.pathLowTitle;
-        return <div className="sc-object-design-folder__item" data-part={entry.id} data-browsing={(browsing ?? "horn") === entry.id || undefined} inert={deckMode && (browsing ?? "horn") !== entry.id} aria-hidden={deckMode && (browsing ?? "horn") !== entry.id || undefined} key={`${language}-${entry.id}`}>
+        const driver = entry.id === "horn" ? siteCopy.pathHighPart : entry.id === "midrange" ? siteCopy.pathMidPart : siteCopy.pathLowPart;
+        const sound = entry.id === "horn" ? siteCopy.pathHighSound : entry.id === "midrange" ? siteCopy.pathMidSound : siteCopy.pathLowSound;
+        return <div className="sc-object-design-folder__item" data-part={entry.id} data-browsing={(browsing ?? "horn") === entry.id || undefined} inert={deckMode && (browsing ?? "horn") !== entry.id} aria-hidden={deckMode && (browsing ?? "horn") !== entry.id || undefined} key={`${language}-${entry.id}`} onClick={(event) => {
+          if (event.target instanceof Element && !event.target.closest("button, a")) pressFolder(entry.id);
+        }}>
           <GlassFolder label={entry.title} meta={frequency} width={280} tone="dark" art="none" image={assets.render} action="none" appear={false}
-            affordance={<>{copy.folderAction}<ArrowUpRight size={16} aria-hidden="true" /></>}
+            preview={<><p className="sc-folder-preview__frequency">{frequency}</p><p className="sc-folder-preview__driver">{driver}</p><p className="sc-folder-preview__sound">{sound}</p></>}
             open={selected === entry.id}
             onOpenChange={(open) => {
               if (open) {
-                openerPart.current = entry.id;
-                openerRef.current = folderRef.current?.querySelector<HTMLButtonElement>(`[data-part="${entry.id}"] .gf-hit`) ?? null;
-                revealPart(entry.id);
+                pressFolder(entry.id);
               }
               else closeDetails();
             }}
