@@ -100,10 +100,10 @@ const LENS = {
   zoom: 0,
   dispersion: 11,
   blur: 0,
-  glow: 4.2,
-  whiteGlow: 0.24,
+  glow: 0,
+  whiteGlow: 0,
   novaSize: 12,
-  blueRing: 6,
+  blueRing: 0,
   ringRadius: 0.49,
   ringWidth: 0.014,
   shimmer: true,
@@ -116,7 +116,7 @@ const LENS = {
   rimFreq1: 2,
   rimFreq2: 1,
   blueColor: "#009dff",
-  rimLine: 1.4,
+  rimLine: 0,
   rimLinePos: 0.488,
   rimLineWidth: 0.003,
   vignette: 0,
@@ -275,23 +275,7 @@ vec3 discLens(vec2 center, float aspectCorrect, out float outA) {
     col = mix(bcol / btw, col, rimMask);
   }
 
-  col *= mix(0.91, 1.0, smoothstep(0.0, 0.38, shapeND));
-
-  float r2 = shapeND * shapeND * 0.25;
-  float gs = max(uNovaSize * uGlow * 0.003, 0.004);
-  float nova = exp(-r2 / gs) + exp(-r2 / (gs * 7.0)) * 0.18;
-  nova *= uWhiteGlow * (uGlow / 17.0) * 1.15;
-  col += vec3(nova);
-
-  float dC = shapeND * 0.5;
-  float tR = clamp(uRingRadius, 0.1, 0.49);
-  float rW = max(uRingWidth, 0.003);
-  float ring = exp(-pow((dC - tR) / rW, 2.0));
-  ring *= uBlueRing * (uGlow / 17.0) * 1.8;
-  if (uShimmer > 0.5) ring *= sin(angle * uShimmerFreq + uTime * uShimmerSpeed) * uShimmerDepth + (1.0 - uShimmerDepth);
-  float ringAura = exp(-pow((dC - tR) / (rW * 6.0), 2.0)) * 0.28 * uBlueRing * (uGlow / 17.0);
-  col += uBlueColor * (ring + ringAura);
-  col += vec3(exp(-pow((dC - uRimLinePos) / max(uRimLineWidth, 0.0001), 2.0)) * uRimLine);
+  // Refraction samples the original photograph without added light or grading.
 
   outA = smoothstep(1.0, 0.93, maskND);
   return col;
