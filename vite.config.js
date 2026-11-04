@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve, dirname } from 'node:path';
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 const root = import.meta.dirname;
@@ -16,6 +16,7 @@ function selectedSiteAssets() {
       'images/concepts/speaker-wireframe-poster.png', 'images/taste-v2/metorom-logo.webp',
       'images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp',
       'drawings/horn-design-proposal.pdf',
+      ...readdirSync(resolve(root,'public/images/gallery-speakers')).filter(name => name.endsWith('.webp')).map(name => `images/gallery-speakers/${name}`),
       ...['home','contact','event','philosophy','design'].map(page => `content/sculptural-v3-${page}.json`),
       ...['speaker-sub-explode-go','speaker-sub-explode-return','speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
     ];

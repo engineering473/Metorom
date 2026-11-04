@@ -18,6 +18,9 @@ for (const [page,anchor] of Object.entries(inlinePages)) {
   assert.ok(html.includes(`index.html#${anchor}`), 'Previous page URLs must link to their home sections');
 }
 assert.equal(files.filter(path => path.startsWith('videos/')).length, 12, 'All twelve interactive clips must ship');
+const speakerPhotos = files.filter(path => path.startsWith('images/gallery-speakers/') && path.endsWith('.webp'));
+assert.equal(speakerPhotos.length, 13, 'All thirteen supplied speaker photographs must ship');
+for (const photo of speakerPhotos) assert.ok(statSync(join('dist', photo)).size < 550000, `Carousel photo must remain optimized: ${photo}`);
 for (const clip of ['speaker-sub-explode-go', 'speaker-sub-explode-return']) assert.ok(statSync(`dist/videos/${clip}.mp4`).size > 0, 'Subwoofer open and return films must ship');
 assert.equal(files.filter(path => path.startsWith('content/')).length, 5, 'Only copy used by the v3 pages and inline design may ship');
 for (const asset of ['images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp', 'drawings/horn-design-proposal.pdf']) assert.ok(statSync(`dist/${asset}`).size > 0, `Design asset must ship: ${asset}`);
