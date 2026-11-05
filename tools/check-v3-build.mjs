@@ -6,6 +6,7 @@ function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(join(directory, entry.name)) : [join(directory, entry.name)]);
 }
 const files = walk('dist').map(path => relative('dist', path).replaceAll('\\', '/'));
+assert.equal(readFileSync('dist/CNAME', 'utf8').trim(), 'www.metorom.com', 'Every deployment must preserve the configured custom domain');
 const pages = ['index', 'contact', 'event', 'philosophy'];
 const inlinePages = { design: 'architecture', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
@@ -33,7 +34,9 @@ for (const asset of ['images/concepts/speaker-exploded-study-v3.webp', 'images/c
 assert.ok(!files.includes('images/spl.png') && !files.includes('images/directivity.png'), 'Removed measurement images must not ship');
 for (const file of files.filter(path => path.endsWith('.html'))) {
   const html = readFileSync(join('dist', file), 'utf8');
-  for (const match of html.matchAll(/(?:src|href)="\/Metorom\/([^"?#]+)"/g)) assert.ok(files.includes(match[1]), `Missing ${match[1]} referenced by ${file}`);
+  assert.ok(!html.includes('/Metorom/'), `Custom-domain pages must not use the old repository prefix: ${file}`);
+  for (const match of html.matchAll(/(?:src|href)="\/([^"?#]+)"/g)) assert.ok(files.includes(match[1]), `Missing ${match[1]} referenced by ${file}`);
+  if (pages.some(page => file === `concepts/monochrome/sculptural-v3/${page}.html`)) assert.match(html, /src="\/assets\/[^"?#]+\.js"/, `Site page must load its script from the custom-domain root: ${file}`);
 }
 for (const image of ['speaker-render-front-v3.webp', 'speaker-interactive-front-v3.webp']) assert.ok(statSync(`dist/images/concepts/${image}`).size < 100000, 'Prepared image must remain optimized');
 console.log('V3 build checks passed: 4 site pages, integrated design/specification redirects, 14 films, supplied design drawings, no published studies.');

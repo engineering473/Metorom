@@ -12,6 +12,7 @@ const legacyPages = ['index', 'contact', 'event', 'philosophy'];
 function selectedSiteAssets() {
   return { name: 'metorom-selected-site', closeBundle() {
     const files = [
+      'CNAME',
       'images/concepts/speaker-render-front-v3.webp', 'images/concepts/speaker-interactive-front-v3.webp',
       'images/taste-v2/metorom-logo.webp',
       'images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp',
@@ -39,4 +40,4 @@ function selectedSiteAssets() {
     }
   }};
 }
-export default defineConfig(({command})=>({base:'/Metorom/',publicDir:command==='serve'?'public':false,plugins:[react(),tailwindcss(),selectedSiteAssets()],resolve:{alias:{'@':root}},server:{port:5173},build:{rollupOptions:{input:{home:resolve(root,'index.html'),...Object.fromEntries(pages.map(page=>[`metorom-${page}`,resolve(root,`${site}/${page}.html`)]))}}}}));
+export default defineConfig(({command})=>({base:'/',publicDir:command==='serve'?'public':false,plugins:[react(),tailwindcss(),selectedSiteAssets()],resolve:{alias:{'@':root}},server:{port:5173},build:{rollupOptions:{input:{home:resolve(root,'index.html'),...Object.fromEntries(pages.map(page=>[`metorom-${page}`,resolve(root,`${site}/${page}.html`)]))}}}}));

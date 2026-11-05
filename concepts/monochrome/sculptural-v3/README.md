@@ -16,7 +16,7 @@ The loading screen uses the supplied Newton component. A shared queue prepares i
 
 React, TypeScript, Tailwind, Motion, the `@/` alias and shadcn's `components/ui` structure were already configured. The supplied loader is in `components/ui/loader.tsx` with its easing helper and `lib/utils.ts`.
 
-Use `npm run dev` for development, `npm run typecheck`, `npm run build`, and `node tools/check-v3-build.mjs` for validation. Preview the production output with `npm run preview`. The base URL remains `/Metorom/`.
+Use `npm run dev` for development, `npm run typecheck`, `npm run build`, and `node tools/check-v3-build.mjs` for validation. Preview the production output with `npm run preview`. The production base URL is `/` for the custom domain `www.metorom.com`; `public/CNAME` is copied into every build so publishing preserves the GitHub Pages domain setting.
 
 Published copy is isolated in `public/content/sculptural-v3-*.json`. Preview editors use separate v3 browser storage. The owner can open `?edit=1` directly; visitors no longer see an editor or study chooser link in the footer.
 
