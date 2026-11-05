@@ -1,6 +1,6 @@
 # Metorom v3
 
-The October 28–29, 2026 revision of the sculptural site. The previous version and every earlier study remain in source. The production build includes this site's Home, Philosophy, Contact and Event pages, the root redirect, and compatibility redirects. Design details and specifications are integrated into Home; their previous standalone URLs redirect to the matching sections.
+The October 28–29, 2026 revision of the sculptural site. The previous version and every earlier study remain in source. Home renders directly at `/`, with Philosophy, Contact and Event at `/philosophy/`, `/contact/` and `/event/`. The production build preserves the old v2 and v3 page URLs as compatibility redirects to these clean public paths, retaining query parameters and deep links. Design details and specifications are integrated into Home; their previous standalone URLs redirect to the matching sections.
 
 The visual direction uses deep blue (`#101d8f`), white, pale blue instrument surfaces and flat editorial transitions. The original floating capsule navbar and rounded gallery cards are preserved; other editorial sections use flat transitions. The original supplied product imagery remains intact.
 
@@ -13,6 +13,8 @@ The speaker section follows the natural video height instead of a viewport-heigh
 One six-row specification sheet covers the three-way system, 1 × LAB 12, 2 × Alpha 6A in parallel, 1 × BMS 4540ND with horn, 96 kHz FIR/parametric EQ and 798 × 600 × 340 mm dimensions (W × H × D). The long electronics tables, construction, spacing, latency and development details are removed. Square actions are solid blue on light surfaces and white on blue surfaces. Decorative divider lines are removed while the index rule and functional loading progress remain.
 
 The loading screen uses the supplied Newton component. A shared queue prepares images, fonts and all fourteen animation clips, then reuses Blob URLs for playback. Progress counts completed resource tasks. A Continue control appears after five seconds, and a twenty-second deadline releases a stalled connection. Hero and poster WebP copies together are about 110 KB; their original PNGs are preserved.
+
+The tweeter's revised exploded view uses the supplied `Tweeter-0355-0547.mp4`, split at its fully exploded source frame 96 (4 seconds). The opening and return clips share that endpoint, retain the source's 1920-square framing and 24 fps, and use versioned filenames to avoid stale cached media. The opening holds on its last frame until Close; the return still finishes with the existing reverse light fade.
 
 React, TypeScript, Tailwind, Motion, the `@/` alias and shadcn's `components/ui` structure were already configured. The supplied loader is in `components/ui/loader.tsx` with its easing helper and `lib/utils.ts`.
 

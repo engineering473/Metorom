@@ -53,7 +53,8 @@ export function useLanguage(): [Language, (language: Language) => void] {
 }
 
 export function previewHref(href: string): string {
-  if (new URLSearchParams(window.location.search).get("edit") !== "1" || href.startsWith("#")) return href;
-  const [path, hash] = href.split("#", 2);
+  const publicHref = href.replace(/^\.\/(index|contact|event|philosophy)\.html(?=[?#]|$)/, (_, page: string) => page === "index" ? "/" : `/${page}/`);
+  if (new URLSearchParams(window.location.search).get("edit") !== "1" || publicHref.startsWith("#")) return publicHref;
+  const [path, hash] = publicHref.split("#", 2);
   return `${path}${path.includes("?") ? "&" : "?"}edit=1${hash ? `#${hash}` : ""}`;
 }

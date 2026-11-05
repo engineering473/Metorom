@@ -1,12 +1,12 @@
 import { useLanguage } from "./language";
 
 const pages = [
-  { id: "home", path: "./index.html", label: "Home" },
-  { id: "design", path: "./index.html?editor=design#architecture", label: "Folder titles & design notes" },
-  { id: "specifications", path: "./index.html#measurements", label: "Specifications (on home)" },
-  { id: "philosophy", path: "./philosophy.html", label: "Philosophy" },
-  { id: "contact", path: "./contact.html", label: "Contact" },
-  { id: "event", path: "./event.html", label: "Listening event" },
+  { id: "home", path: "/", label: "Home" },
+  { id: "design", path: "/?editor=design#architecture", label: "Folder titles & design notes" },
+  { id: "specifications", path: "/#measurements", label: "Specifications (on home)" },
+  { id: "philosophy", path: "/philosophy/", label: "Philosophy" },
+  { id: "contact", path: "/contact/", label: "Contact" },
+  { id: "event", path: "/event/", label: "Listening event" },
 ];
 
 export default function EditorPageSelect({ page }: { page: string }) {
