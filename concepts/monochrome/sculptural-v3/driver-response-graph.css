@@ -55,14 +55,12 @@
 .sc-driver-response .frc-plot__tick {
   fill: var(--sc-driver-response-secondary);
   font-family: inherit;
-  font-size: 18px;
   font-weight: 500;
   letter-spacing: 0;
 }
-.sc-driver-response .frc-plot__unit { font-size: 17px; }
-.sc-driver-response .frc-plot__grid-line { stroke: var(--sc-driver-response-grid); }
-.sc-driver-response .frc-plot pattern circle { fill: var(--sc-driver-response-grid); }
-.sc-driver-response .frc-plot__series { filter: none; stroke-width: 2.4; }
+.sc-driver-response .frc-plot__grid-line { stroke: var(--sc-driver-response-grid); stroke-width: .65; stroke-dasharray: none; opacity: .3; }
+.sc-driver-response .frc-plot pattern circle { fill: var(--sc-driver-response-grid); opacity: .16; }
+.sc-driver-response .frc-plot__series { filter: none; stroke-width: 1.7; }
 .sc-driver-response .frc-plot__cursor line { stroke: var(--sc-driver-response-text); }
 .sc-driver-response .frc-plot__cursor circle { stroke: var(--sc-driver-response-tooltip); }
 .sc-driver-response .frc-plot__tooltip {
@@ -108,8 +106,6 @@
 .sc-object__driver-graph--mobile .sc-driver-response__header p { margin-top: 2px; font-size: 10px; line-height: 1.2; }
 .sc-object__driver-graph--mobile .sc-driver-response__header > span { padding-top: 0; font-size: 9px; }
 .sc-object__driver-graph--mobile .sc-driver-response__plot { height: 100px; margin-top: 3px; }
-.sc-object__driver-graph--mobile .frc-plot__tick { font-size: 24px; }
-.sc-object__driver-graph--mobile .frc-plot__unit { font-size: 21px; }
 .sc-object__driver-graph--mobile .sc-driver-response__note { margin-top: 3px; font-size: 9px; line-height: 1.2; letter-spacing: 0; }
 .sc-object__driver-graph--mobile .frc-plot__tooltip { top: 4%; padding: 6px 8px; border-radius: 6px; }
 @media (max-width: 380px) {

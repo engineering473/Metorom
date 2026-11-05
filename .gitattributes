@@ -1,0 +1,2 @@
+# Preserve the original REW export exactly, including its phase data and line endings.
+data/measurements/alpha-6a-1m-0deg.txt -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

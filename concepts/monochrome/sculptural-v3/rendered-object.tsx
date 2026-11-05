@@ -55,7 +55,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const touchGesture = useRef<{ driver: Driver; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
   const autoReturnDriver = useRef<Driver | null>(null);
   const explosionPhaseRef = useRef<ExplosionPhase | null>(null);
-  const explosionDriverRef = useRef<ExplosionDriver | null>(null);
+  const detailDriverRef = useRef<Driver | null>(null);
   const returnQueued = useRef(false);
   const lastPointerType = useRef("");
   const media = useRef<HTMLDivElement | null>(null);
@@ -144,7 +144,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     keyboardPreview.current = null;
     autoReturnDriver.current = null;
     returnQueued.current = false;
-    explosionDriverRef.current = null;
+    detailDriverRef.current = null;
     changeExplosionPhase(null);
     stopVideos();
     setActiveDriver(null);
@@ -211,7 +211,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
       if (controller.signal.aborted) return;
       // Keep the old frame on screen until its counterpart has finished seeking.
       visibleFilm.current = film;
-      if (isExplosionFilm(film)) setShowFullFrame(true);
+      if (isExplosionFilm(film) || detailDriverRef.current === "right") setShowFullFrame(true);
       setVisibleVideo(film);
       setIsLoading(false);
     } catch {
@@ -229,33 +229,38 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   }
 
   function startReturn() {
-    const driver = explosionDriverRef.current;
+    const driver = detailDriverRef.current;
     if (!driver) return;
     returnQueued.current = false;
     changeExplosionPhase("closing");
-    void playFilm(`${driver}-return`, { driver, direction: "return" }, 0);
+    if (driver === "right") void playFrom(driver, "reverse", 0);
+    else void playFilm(`${driver}-return`, { driver, direction: "return" }, 0);
   }
 
-  function playExplodedView(driver: ExplosionDriver) {
+  function openDriverDetails(driver: Driver) {
     if (explosionPhaseRef.current || showFullFrame) return;
+    if (driver === "right" && failedDrivers.has(driver)) return;
+    const previewProgress = driver === "right" ? progressFor(driver) : 0;
     if (focusFrame.current !== null) cancelAnimationFrame(focusFrame.current);
     returnFocus.current = hotspotControls.current[driver] ?? null;
     keyboardPreview.current = null;
     autoReturnDriver.current = null;
     returnQueued.current = false;
-    explosionDriverRef.current = driver;
+    detailDriverRef.current = driver;
     setResponseDriver(driver);
     changeExplosionPhase("opening");
-    // Start the supplied opening clip directly, without waiting for a preview.
-    void playFilm(`${driver}-explode`, { driver, direction: "explode" }, 0);
+    // Only the right driver uses a held light preview; the other drivers keep
+    // their supplied exploded films and matching return clips.
+    if (canExplode(driver)) void playFilm(`${driver}-explode`, { driver, direction: "explode" }, 0);
+    else void playFrom(driver, "forward", previewProgress);
   }
 
   function closeExplodedView() {
     const phase = explosionPhaseRef.current;
-    const driver = explosionDriverRef.current;
+    const driver = detailDriverRef.current;
     if (!phase || phase === "closing" || !driver) return;
     changeExplosionPhase("closing");
-    const go = videos.current[`${driver}-explode`];
+    const go = driver === "right" ? videos.current["right-forward"] : videos.current[`${driver}-explode`];
     if (phase === "open" || go?.ended) startReturn();
     // The two clips have different motion timing. Join their matching endpoints
     // if close is pressed midflight instead of cutting to different geometry.
@@ -263,8 +268,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   }
 
   function activate(driver: Driver) {
-    if (canExplode(driver)) playExplodedView(driver);
-    else playDriver(driver, true);
+    openDriverDetails(driver);
   }
 
   function playDriver(driver: Driver, autoReturn = false) {
@@ -298,7 +302,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     return {
       onClick: (event: MouseEvent<HTMLButtonElement>) => {
         // Assistive technology can activate a button without a pointer gesture.
-        if (event.detail === 0 || (canExplode(driver) && lastPointerType.current !== "touch")) activate(driver);
+        if (event.detail === 0 || lastPointerType.current !== "touch") activate(driver);
       },
       onPointerEnter: (event: PointerEvent<HTMLButtonElement>) => preview(driver, event.pointerType),
       onPointerLeave: (event: PointerEvent<HTMLButtonElement>) => {
@@ -333,11 +337,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
         if (!isPreviewKey(event)) return;
         event.preventDefault();
         if (!event.repeat) {
-          if (canExplode(driver)) playExplodedView(driver);
-          else {
-            keyboardPreview.current = driver;
-            playDriver(driver);
-          }
+          activate(driver);
         }
       },
       onKeyUp: (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -404,6 +404,10 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                     else changeExplosionPhase("open");
                   }
                   else if (current.direction === "return") void playFrom(current.driver, "reverse", 0);
+                  else if (current.driver === "right" && detailDriverRef.current === "right") {
+                    if (returnQueued.current) startReturn();
+                    else changeExplosionPhase("open");
+                  }
                   else if (autoReturnDriver.current === current.driver) leavePreview(current.driver);
                 }}
                 onError={() => {
@@ -415,7 +419,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
               />
             ))}
             {explosionPhase && <>
-              <button ref={closeControl} type="button" className="sc-object__close" aria-label={copy.objectCloseExplodeLabel} disabled={explosionPhase === "closing"} onClick={closeExplodedView}>
+              <button ref={closeControl} type="button" className="sc-object__close" aria-label={activeDriver === "right" ? copy.objectResetLabel : copy.objectCloseExplodeLabel} disabled={explosionPhase === "closing"} onClick={closeExplodedView}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
               </button>
               {isLoading && <span className="sc-object__loading-status" role="status">{copy.objectLoadingLabel}</span>}
@@ -436,7 +440,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
           </div>
           <div className="sc-object__stage-label">
             <span>{copy.objectBrand} / {copy.objectStageModel}</span>
-            <span aria-live="polite">{activeLabel ? `${explosionPhase ? copy.objectStageExploded : copy.objectStageFilm} / ${activeLabel}` : copy.objectStageStudy}</span>
+            <span aria-live="polite">{activeLabel ? `${explosionPhase && activeDriver !== "right" ? copy.objectStageExploded : copy.objectStageFilm} / ${activeLabel}` : copy.objectStageStudy}</span>
           </div>
           {playbackError && <p className="sc-object__fallback" role="status">{copy.objectFallback}</p>}
         </div>
