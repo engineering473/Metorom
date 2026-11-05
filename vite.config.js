@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve, dirname } from 'node:path';
-import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 const root = import.meta.dirname;
@@ -13,18 +13,13 @@ function selectedSiteAssets() {
   return { name: 'metorom-selected-site', closeBundle() {
     const files = [
       'images/concepts/speaker-render-front-v3.webp', 'images/concepts/speaker-interactive-front-v3.webp',
-      'images/concepts/speaker-wireframe-poster.png', 'images/taste-v2/metorom-logo.webp',
+      'images/taste-v2/metorom-logo.webp',
       'images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp',
       'drawings/horn-design-proposal.pdf',
       ...readdirSync(resolve(root,'public/images/gallery-speakers')).filter(name => name.endsWith('.webp')).map(name => `images/gallery-speakers/${name}`),
       ...['home','contact','event','philosophy','design'].map(page => `content/sculptural-v3-${page}.json`),
       ...['speaker-sub-explode-go','speaker-sub-explode-return','speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-tweeter-explode-go','speaker-tweeter-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
     ];
-    const content = JSON.parse(readFileSync(resolve(root,'public/content/sculptural-v3-home.json'),'utf8'));
-    for (const copy of [content.en,content.ja]) for(let slot=1;slot<=5;slot++) {
-      const source=copy?.[`galleryImage${slot}`];
-      if(typeof source==='string' && source.startsWith('/Metorom/images/')) files.push(source.slice('/Metorom/'.length));
-    }
     for(const file of new Set(files)) {
       const target=resolve(root,'dist',file);
       mkdirSync(dirname(target),{recursive:true});copyFileSync(resolve(root,'public',file),target);

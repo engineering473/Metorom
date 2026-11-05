@@ -3,7 +3,8 @@ import type { SiteCopy } from "./site-copy";
 import "@/components/ui/frequency-response-cards.css";
 
 type ResponsePoint = { hz: number; db: number };
-type ResponseSeries = { name: string; shortName: string; color: string; data: ResponsePoint[] };
+export type ResponseSeries = { name: string; shortName: string; color: string; data: ResponsePoint[] };
+export type ResponseDriver = "sub" | "mid" | "right" | "tweeter";
 
 const FREQUENCIES = Array.from({ length: 73 }, (_, index) => 20 * 1000 ** (index / 72));
 
@@ -42,6 +43,13 @@ const DRIVER_SERIES: ResponseSeries[] = DRIVER_PROFILES.map((profile, index) => 
   color: profile.color,
   data: makePoints(profile.anchors, index * 1.8 + 0.6, 0.57),
 }));
+
+/** Reuse the Measurements illustration; these are modeled curves, never measured data. */
+export function driverResponseSeries(driver: ResponseDriver, copy: SiteCopy): ResponseSeries {
+  const index = driver === "sub" ? 0 : driver === "tweeter" ? 2 : 1;
+  const name = [copy.chartDriverLowName, copy.chartDriverMidName, copy.chartDriverHighName][index];
+  return { ...DRIVER_SERIES[index], name };
+}
 
 const SYSTEM_SERIES: ResponseSeries[] = [{
   name: "Complete speaker",
@@ -92,7 +100,7 @@ type ResponsePlotProps = {
   filled?: boolean;
 };
 
-function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false }: ResponsePlotProps) {
+export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false }: ResponsePlotProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const rawId = useId().replace(/:/g, "");
   const gridId = `frc-grid-${rawId}`;

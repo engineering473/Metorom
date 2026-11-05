@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SiteCopy } from "./site-copy";
 import "./section-index.css";
 
-const chapterIds = ["architecture", "measurements", "listening", "conversation", "philosophy", "gallery"] as const;
+const chapterIds = ["architecture", "object", "measurements", "listening", "philosophy", "conversation"] as const;
 
 type IndexState = {
   visible: boolean;
@@ -13,11 +13,11 @@ type IndexState = {
 export default function SectionIndex({ copy }: { copy: SiteCopy }) {
   const chapters = [
     { id: "architecture", label: copy.indexOpen },
+    { id: "object", label: copy.objectTitle.replace(/\s+/g, " ").trim() },
     { id: "measurements", label: copy.indexMeasurements },
     { id: "listening", label: copy.indexListening },
-    { id: "conversation", label: copy.indexConversation },
     { id: "philosophy", label: copy.indexPhilosophy },
-    { id: "gallery", label: copy.indexGallery },
+    { id: "conversation", label: copy.indexConversation },
   ] as const;
   const [state, setState] = useState<IndexState>({ visible: false, active: "architecture", dark: false });
   const indexRef = useRef<HTMLElement>(null);
@@ -36,8 +36,12 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
       const indexBottom = indexBounds?.bottom ?? threshold;
       const indexCenter = (indexTop + indexBottom) / 2;
       const conversationBounds = conversation.getBoundingClientRect();
+      const objectCopyBounds = document.querySelector(".sc-object__copy")?.getBoundingClientRect();
+      const overlapsObjectCopy = objectCopyBounds && indexBounds
+        && objectCopyBounds.left < indexBounds.right && objectCopyBounds.right > indexBounds.left
+        && objectCopyBounds.top < indexBottom && objectCopyBounds.bottom > indexTop;
       const visible = first.getBoundingClientRect().top <= threshold
-        && last.getBoundingClientRect().bottom > indexBottom + 80;
+        && last.getBoundingClientRect().bottom > indexBottom + 80 && !overlapsObjectCopy;
       let active: string = chapters[0].id;
       for (const id of chapterIds) {
         if ((document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= threshold) active = id;

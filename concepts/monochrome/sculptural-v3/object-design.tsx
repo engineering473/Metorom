@@ -79,7 +79,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     <div className="sc-speaker-gallery" id="listening-design" ref={sectionRef}>
       <div className="sc-speaker-gallery__stage">
         {ready ? <Suspense fallback={placeholder}>
-          <LiquidGlassCarousel items={items} panelHeight={480} gap={24} background="#ffffff" entry
+          <LiquidGlassCarousel items={items} panelHeight={480} gap={24} background="#ffffff" entry showTitle={false}
             className="sc-speaker-gallery__carousel" style={{ color: "#101d8f" }}
             ariaLabel={ja ? "Metorom スピーカーの写真" : "Metorom speaker photographs"}
             labels={ja ? { previous: "前の写真", next: "次の写真", view: "写真を拡大", close: "写真を閉じる", help: "ドラッグで移動・タップで拡大", loading: "写真を読み込み中…", error: "写真を読み込めませんでした。前後の写真をお試しください。" } : { previous: "Previous photograph", next: "Next photograph", view: "View photograph", close: "Close photograph", help: "Drag to explore · tap to view", loading: "Loading photograph…", error: "This photograph could not load. Try the previous or next photograph." }} />

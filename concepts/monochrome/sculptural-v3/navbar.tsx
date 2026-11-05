@@ -24,8 +24,8 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
   const useOriginalLogo = brandName.trim().toLowerCase() === "metorom";
   const logoSource = `${import.meta.env.BASE_URL}images/taste-v2/metorom-logo.webp`;
   const sections = [
-    { label: label("navObject"), id: "object" },
     { label: label("navArchitecture"), id: "architecture" },
+    { label: label("navObject"), id: "object" },
     { label: label("navMeasurements"), id: "measurements" },
     { label: label("navListening"), id: "listening" },
   ];

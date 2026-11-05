@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import type { SiteCopy } from "./site-copy";
 import { OBJECT_POSTER, VIDEO_SOURCES, usePreparedMediaSources } from "./media-assets";
+import DriverResponseGraph from "./driver-response-graph";
 
 type Driver = "sub" | "mid" | "right" | "tweeter";
 type ExplosionDriver = "sub" | "mid" | "tweeter";
@@ -63,6 +64,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
   const returnFocus = useRef<HTMLButtonElement | null>(null);
   const focusFrame = useRef<number | null>(null);
   const [explosionPhase, setExplosionPhase] = useState<ExplosionPhase | null>(null);
+  const [responseDriver, setResponseDriver] = useState<Driver | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showFullFrame, setShowFullFrame] = useState(false);
   const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
@@ -88,7 +90,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     if (!showFullFrame) return;
     // Keep the complete movie and its close control below the floating header.
     // scroll-margin applies only when the expanded frame is partly obscured.
-    media.current?.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    media.current?.querySelector<HTMLElement>(".sc-object__visual")?.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     const frame = requestAnimationFrame(() => {
       if (explosionPhaseRef.current !== "closing") closeControl.current?.focus({ preventScroll: true });
     });
@@ -228,6 +230,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     autoReturnDriver.current = null;
     returnQueued.current = false;
     explosionDriverRef.current = driver;
+    setResponseDriver(driver);
     changeExplosionPhase("opening");
     // Start the supplied opening clip directly, without waiting for a preview.
     void playFilm(`${driver}-explode`, { driver, direction: "explode" }, 0);
@@ -340,6 +343,18 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     };
   }
 
+  // Retain the selected trace throughout the return film and its final hover
+  // fade. Hidden copies are inert; responsive CSS exposes only one graph.
+  const responseVisible = explosionPhase !== null;
+  function responseGraph(placement: "desktop" | "mobile") {
+    return <div className={`sc-object__driver-graph sc-object__driver-graph--${placement}${responseVisible ? " is-visible" : ""}`}
+      aria-hidden={!responseVisible} inert={!responseVisible}>
+      <div className="sc-object__driver-graph__inner">
+        {responseDriver && <DriverResponseGraph driver={responseDriver} copy={copy} className="sc-object__driver-response" />}
+      </div>
+    </div>;
+  }
+
   return (
     <section className="sc-object" id="object" aria-labelledby="sc-object-title">
       <div className="sc-object__sticky">
@@ -347,9 +362,11 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
           <p className="sc-overline">{copy.objectOverline}</p>
           <h2 id="sc-object-title">{copy.objectTitle}</h2>
           <p className="sc-object__intro">{copy.objectBody}</p>
+          {responseGraph("desktop")}
         </div>
         <div className="sc-object__stage">
           <div ref={media} className={`sc-object__media${showFullFrame ? " is-exploding" : ""}`} data-explosion-state={explosionPhase ?? undefined} data-explosion-driver={explosionPhase ? activeDriver ?? undefined : undefined} aria-busy={explosionPhase ? isLoading : undefined}>
+            <div className="sc-object__visual">
             <img className="sc-object__front" src={POSTER} alt={copy.objectPosterAlt} width="1920" height="1920" loading="lazy" decoding="async" />
             {(Object.entries(films) as [Film, string][]).map(([film, source]) => (
               <video
@@ -400,6 +417,8 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                 {...previewEvents(id)}
               ><span>{label}</span></button>
             ))}
+            </div>
+            {responseGraph("mobile")}
           </div>
           <div className="sc-object__stage-label">
             <span>{copy.objectBrand} / {copy.objectStageModel}</span>

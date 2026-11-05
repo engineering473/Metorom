@@ -34,6 +34,7 @@ export interface LiquidGlassCarouselProps {
   className?: string;
   style?: CSSProperties;
   ariaLabel?: string;
+  showTitle?: boolean;
   labels?: {
     previous: string; next: string; view: string; close: string; help: string;
     loading?: string; error?: string;
@@ -1503,6 +1504,7 @@ export function LiquidGlassCarousel({
   className,
   style,
   ariaLabel = "Speaker photographs",
+  showTitle = true,
   labels = {
     previous: "Previous photograph", next: "Next photograph",
     view: "Enlarge photograph", close: "Close enlarged photograph",
@@ -1715,9 +1717,9 @@ export function LiquidGlassCarousel({
             {failed ? fallback : <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />}
           </WebGLErrorBoundary>
           {loading && <p role="status" style={{ pointerEvents: "none", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, padding: "10px 16px", textAlign: "center", background, fontSize: 13 }}>{loadingMessage}</p>}
-          <p style={{ position: "absolute", top: "5%", left: "8%", right: "8%", margin: 0, textAlign: "center", fontSize: 13, pointerEvents: "none" }}>
+          {showTitle && <p style={{ position: "absolute", top: "5%", left: "8%", right: "8%", margin: 0, textAlign: "center", fontSize: 13, pointerEvents: "none" }}>
             {current?.title}
-          </p>
+          </p>}
           <div
             className="liquid-glass-carousel__controls"
             style={{ position: "absolute", bottom: "4%", left: "50%", transform: "translateX(-50%)", zIndex: 2 }}

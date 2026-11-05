@@ -1,4 +1,5 @@
 .sc-speaker-gallery { margin-top: 24px; min-width: 0; }
+.sc-intro .sc-speaker-gallery { margin-top: 48px; }
 .sc-speaker-gallery__stage { position: relative; height: 700px; }
 .sc-speaker-gallery__carousel { height: 100%; min-height: 0; font-family: inherit; }
 .sc-speaker-gallery__placeholder { display: flex; align-items: center; justify-content: center; height: 100%; background: #fff; }

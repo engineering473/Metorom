@@ -39,14 +39,56 @@
 .sc-object__media {
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
   width: min(100%, 640px, calc(100svh - 160px));
   max-width: 100%;
   justify-self: center;
+  overflow: hidden;
+  background: #000;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 16px;
+}
+
+.sc-object__visual {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
   background: #000;
   scroll-margin-top: 100px;
   scroll-margin-bottom: 16px;
+}
+
+.sc-object__driver-graph {
+  display: grid;
+  grid-template-rows: 0fr;
+  width: 100%;
+  max-width: 430px;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows .36s ease-out, opacity .36s ease-out, visibility 0s .36s;
+}
+
+.sc-object__driver-graph.is-visible {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.sc-object__driver-graph__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sc-object__driver-graph--desktop.is-visible {
+  margin-top: 28px;
+}
+
+.sc-object__driver-graph--mobile {
+  display: none;
 }
 
 .sc-object__media.is-exploding .sc-object__hotspot {
@@ -301,6 +343,25 @@
     scroll-margin-bottom: 16px;
   }
 
+  .sc-object__driver-graph--desktop {
+    display: none;
+  }
+
+  .sc-object__driver-graph--mobile {
+    display: grid;
+    max-width: none;
+    color: #f5f8f2;
+    background: #000;
+  }
+
+  .sc-object__driver-graph--mobile .sc-object__driver-graph__inner {
+    padding-inline: 4px;
+  }
+
+  .sc-object__driver-graph--mobile.is-visible .sc-object__driver-graph__inner {
+    padding-bottom: 16px;
+  }
+
   .sc-object__stage-label {
     right: 16px;
     bottom: 16px;
@@ -310,6 +371,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sc-object__driver-graph,
   .sc-object__film,
   .sc-object__hotspot,
   .sc-object__hotspot::before,
