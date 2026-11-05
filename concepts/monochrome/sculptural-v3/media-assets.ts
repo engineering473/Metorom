@@ -10,6 +10,8 @@ export const VIDEO_SOURCES = {
   "sub-return": `${base}videos/speaker-sub-explode-return.mp4`,
   "mid-explode": `${base}videos/speaker-mid-left-explode-go.mp4`,
   "mid-return": `${base}videos/speaker-mid-left-explode-return.mp4`,
+  "tweeter-explode": `${base}videos/speaker-tweeter-explode-go.mp4`,
+  "tweeter-return": `${base}videos/speaker-tweeter-explode-return.mp4`,
   "sub-forward": `${base}videos/speaker-sub.mp4`,
   "sub-reverse": `${base}videos/speaker-sub-reverse.mp4`,
   "mid-forward": `${base}videos/speaker-mid-left.mp4`,

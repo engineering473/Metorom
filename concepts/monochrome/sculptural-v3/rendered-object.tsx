@@ -3,14 +3,14 @@ import type { SiteCopy } from "./site-copy";
 import { OBJECT_POSTER, VIDEO_SOURCES, usePreparedMediaSources } from "./media-assets";
 
 type Driver = "sub" | "mid" | "right" | "tweeter";
-type ExplosionDriver = "sub" | "mid";
+type ExplosionDriver = "sub" | "mid" | "tweeter";
 type Direction = "forward" | "reverse";
 type ExplosionPhase = "opening" | "open" | "closing";
 type Film = `${Driver}-${Direction}` | `${ExplosionDriver}-${"explode" | "return"}`;
 type Playback = { driver: Driver; direction: Direction } | { driver: ExplosionDriver; direction: "explode" | "return" };
 
 function canExplode(driver: Driver): driver is ExplosionDriver {
-  return driver === "sub" || driver === "mid";
+  return driver === "sub" || driver === "mid" || driver === "tweeter";
 }
 
 function isExplosionFilm(film: Film) {
@@ -372,7 +372,11 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                     if (returnQueued.current) startReturn();
                     else changeExplosionPhase("open");
                   }
-                  else if (current.direction === "return") void playFrom(current.driver, "reverse", 0);
+                  else if (current.direction === "return") {
+                    // The supplied tweeter return already ends at the assembled poster.
+                    if (current.driver === "tweeter") reset();
+                    else void playFrom(current.driver, "reverse", 0);
+                  }
                   else if (autoReturnDriver.current === current.driver) leavePreview(current.driver);
                 }}
                 onError={() => {

@@ -18,7 +18,7 @@ function selectedSiteAssets() {
       'drawings/horn-design-proposal.pdf',
       ...readdirSync(resolve(root,'public/images/gallery-speakers')).filter(name => name.endsWith('.webp')).map(name => `images/gallery-speakers/${name}`),
       ...['home','contact','event','philosophy','design'].map(page => `content/sculptural-v3-${page}.json`),
-      ...['speaker-sub-explode-go','speaker-sub-explode-return','speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
+      ...['speaker-sub-explode-go','speaker-sub-explode-return','speaker-mid-left-explode-go','speaker-mid-left-explode-return','speaker-tweeter-explode-go','speaker-tweeter-explode-return','speaker-sub','speaker-sub-reverse','speaker-mid-left','speaker-mid-left-reverse','speaker-mid-right','speaker-mid-right-reverse','speaker-tweeter','speaker-tweeter-reverse'].map(name => `videos/${name}.mp4`),
     ];
     const content = JSON.parse(readFileSync(resolve(root,'public/content/sculptural-v3-home.json'),'utf8'));
     for (const copy of [content.en,content.ja]) for(let slot=1;slot<=5;slot++) {

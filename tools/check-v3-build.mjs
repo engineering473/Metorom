@@ -17,7 +17,7 @@ for (const [page,anchor] of Object.entries(inlinePages)) {
   assert.match(html, /location\.replace/, 'Design and specifications must be integrated into home');
   assert.ok(html.includes(`index.html#${anchor}`), 'Previous page URLs must link to their home sections');
 }
-assert.equal(files.filter(path => path.startsWith('videos/')).length, 12, 'All twelve interactive clips must ship');
+assert.equal(files.filter(path => path.startsWith('videos/')).length, 14, 'All fourteen interactive clips must ship');
 const speakerPhotos = files.filter(path => path.startsWith('images/gallery-speakers/') && path.endsWith('.webp'));
 const editedSpeakerPhotos = ['2852', '2862', '2889', '2928', '2936', '2999', '3008', '3021'].map(id => `images/gallery-speakers/dscf${id}-edited.webp`);
 assert.deepEqual(speakerPhotos.sort(), editedSpeakerPhotos.sort(), 'Only the eight replacement speaker photographs may ship');
@@ -25,7 +25,9 @@ for (const photo of speakerPhotos) {
   const size = statSync(join('dist', photo)).size;
   assert.ok(size > 0 && size < 550000, `Carousel photo must be present and optimized: ${photo}`);
 }
-for (const clip of ['speaker-sub-explode-go', 'speaker-sub-explode-return']) assert.ok(statSync(`dist/videos/${clip}.mp4`).size > 0, 'Subwoofer open and return films must ship');
+for (const driver of ['sub', 'mid-left', 'tweeter']) {
+  for (const direction of ['go', 'return']) assert.ok(statSync(`dist/videos/speaker-${driver}-explode-${direction}.mp4`).size > 0, `${driver} open and return films must ship`);
+}
 assert.equal(files.filter(path => path.startsWith('content/')).length, 5, 'Only copy used by the v3 pages and inline design may ship');
 for (const asset of ['images/concepts/speaker-exploded-study-v3.webp', 'images/concepts/horn-assembly-study-v3.webp', 'drawings/horn-design-proposal.pdf']) assert.ok(statSync(`dist/${asset}`).size > 0, `Design asset must ship: ${asset}`);
 assert.ok(!files.includes('images/spl.png') && !files.includes('images/directivity.png'), 'Removed measurement images must not ship');
@@ -34,4 +36,4 @@ for (const file of files.filter(path => path.endsWith('.html'))) {
   for (const match of html.matchAll(/(?:src|href)="\/Metorom\/([^"?#]+)"/g)) assert.ok(files.includes(match[1]), `Missing ${match[1]} referenced by ${file}`);
 }
 for (const image of ['speaker-render-front-v3.webp', 'speaker-interactive-front-v3.webp']) assert.ok(statSync(`dist/images/concepts/${image}`).size < 100000, 'Prepared image must remain optimized');
-console.log('V3 build checks passed: 4 site pages, integrated design/specification redirects, 12 films, supplied design drawings, no published studies.');
+console.log('V3 build checks passed: 4 site pages, integrated design/specification redirects, 14 films, supplied design drawings, no published studies.');
