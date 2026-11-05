@@ -72,7 +72,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   const placeholder = <div className="sc-speaker-gallery__placeholder" aria-hidden="true">
-    <img src={items[0].src} alt="" style={{ objectPosition: "100% 50%" }} width="1800" height="1200" loading="lazy" />
+    <img src={items[0].src} alt="" style={{ objectPosition: `${(items[0].focalPoint?.[0] ?? .5) * 100}% ${(items[0].focalPoint?.[1] ?? .5) * 100}%` }} width="1800" height="1200" loading="lazy" />
   </div>;
 
   return <>
