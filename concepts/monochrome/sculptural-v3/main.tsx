@@ -107,7 +107,7 @@ function App() {
           </div>
         </section>
 
-        <section className="sc-philosophy sc-shell" id="philosophy" aria-labelledby="sc-philosophy-title">
+        <section className="sc-philosophy sc-shell" id="philosophy" data-surface="dark" aria-labelledby="sc-philosophy-title">
           <span className="sc-rail-label">{copy.philosophyRail}</span>
           <div className="sc-philosophy__body">
             <h2 id="sc-philosophy-title">{copy.philosophyTitle}</h2>

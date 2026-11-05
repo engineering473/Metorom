@@ -21,11 +21,15 @@ body .sc-listening{background:#fff;border-top:0}
 body .sc-listening__facts{border:0;border-top:0;border-bottom:0;border-radius:0;padding:25px 0;background:transparent}
 body .sc-listening__facts dl div{border-color:var(--line)}
 body .sc-listening__facts dt,body .sc-listening__facts>p{color:var(--muted)}
-body .sc-conversation,body .sc-event-close{background:var(--sc-navy);color:#fff}
-body .sc-conversation p,body .sc-conversation .sc-rail-label,body .sc-event-close .sc-rail-label{color:#c4d1ee}
-body .sc-conversation .sc-outline-link,body .sc-event-close .sc-outline-link{border-color:#c4d1ee}
-body .sc-conversation .sc-outline-link:hover,body .sc-event-close .sc-outline-link:hover{color:var(--sc-navy);background:#fff}
-body .sc-philosophy{border-top:0;background:#fff}
+body .sc-event-close{background:var(--sc-navy);color:#fff}
+body .sc-event-close .sc-rail-label{color:#c4d1ee}
+body .sc-event-close .sc-outline-link{border-color:#c4d1ee}
+body .sc-event-close .sc-outline-link:hover{color:var(--sc-navy);background:#fff}
+body .sc-philosophy{--ink:#fff;--muted:#c4d1ee;border-top:0;background:var(--sc-navy);color:var(--ink)}
+body .sc-philosophy h2,body .sc-philosophy__statement{color:#fff}
+body .sc-philosophy__introduction,body .sc-philosophy__text,body .sc-philosophy .sc-rail-label{color:var(--muted)}
+body .sc-conversation{background:#fff;color:var(--ink)}
+body .sc-conversation p,body .sc-conversation .sc-rail-label{color:var(--muted)}
 body .sc-footer{background:#fff;color:var(--ink);border-top:0}
 body .sc-footer__wordmark{letter-spacing:-.04em}
 body .sc-footer>div{border-color:var(--line)}
@@ -79,8 +83,8 @@ body .sc-intro,body .sc-architecture,body .sc-measure,body .sc-listening,body .s
 /* Square actions contrast with the surface they sit on. */
 body .sc-outline-link,body .sc-contact-form__actions button,body .sc-mobile-menu__links>a.sc-mobile-menu__cta{border:0;background:var(--sc-accent);color:#fff}
 body .sc-outline-link:hover,body .sc-contact-form__actions button:hover{background:#071957;color:#fff}
-body .sc-conversation .sc-outline-link,body .sc-event-close .sc-outline-link{background:#fff;color:var(--sc-accent)}
-body .sc-conversation .sc-outline-link:hover,body .sc-event-close .sc-outline-link:hover{background:#e3ebff;color:#071957}
+body .sc-event-close .sc-outline-link{background:#fff;color:var(--sc-accent)}
+body .sc-event-close .sc-outline-link:hover{background:#e3ebff;color:#071957}
 
 /* The plots now use the complete card width. */
 body .frc-card{min-height:390px}
