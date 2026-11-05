@@ -372,11 +372,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
                     if (returnQueued.current) startReturn();
                     else changeExplosionPhase("open");
                   }
-                  else if (current.direction === "return") {
-                    // The supplied tweeter return already ends at the assembled poster.
-                    if (current.driver === "tweeter") reset();
-                    else void playFrom(current.driver, "reverse", 0);
-                  }
+                  else if (current.direction === "return") void playFrom(current.driver, "reverse", 0);
                   else if (autoReturnDriver.current === current.driver) leavePreview(current.driver);
                 }}
                 onError={() => {
