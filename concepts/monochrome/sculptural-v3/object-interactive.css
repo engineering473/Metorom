@@ -338,9 +338,20 @@
   }
 
   .sc-object__media {
+    --sc-object-graph-height: 188px;
+    --sc-object-top-space: 100px;
     width: 100%;
-    scroll-margin-top: 100px;
+    scroll-margin-top: var(--sc-object-top-space);
     scroll-margin-bottom: 16px;
+  }
+
+  .sc-object__visual {
+    align-self: center;
+    transition: width .36s ease-out;
+  }
+
+  .sc-object__media.is-exploding .sc-object__visual {
+    width: min(100%, calc(100svh - var(--sc-object-top-space) - var(--sc-object-graph-height) - 20px - env(safe-area-inset-bottom, 0px)));
   }
 
   .sc-object__driver-graph--desktop {
@@ -352,14 +363,18 @@
     max-width: none;
     color: #f5f8f2;
     background: #000;
+    transform: translateY(6px);
+    transition: grid-template-rows .36s ease-out, opacity .36s ease-out, transform .36s ease-out, visibility 0s .36s;
   }
 
   .sc-object__driver-graph--mobile .sc-object__driver-graph__inner {
-    padding-inline: 4px;
+    padding: 0 8px;
   }
 
+  .sc-object__driver-graph--mobile.is-visible { transform: none; }
+
   .sc-object__driver-graph--mobile.is-visible .sc-object__driver-graph__inner {
-    padding-bottom: 16px;
+    padding-block: 8px;
   }
 
   .sc-object__stage-label {
@@ -370,8 +385,24 @@
   }
 }
 
+@media (max-width: 760px) and (max-height: 500px) and (min-aspect-ratio: 6/5), (hover: none) and (pointer: coarse) and (max-width: 1024px) and (max-height: 500px) and (min-aspect-ratio: 6/5) {
+  .sc-object__media.is-exploding {
+    flex-direction: row;
+    align-items: center;
+  }
+  .sc-object__media.is-exploding .sc-object__visual {
+    width: min(48%, calc(100svh - var(--sc-object-top-space) - 20px - env(safe-area-inset-bottom, 0px)));
+  }
+  .sc-object__media.is-exploding .sc-object__driver-graph--mobile {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sc-object__driver-graph,
+  .sc-object__visual,
   .sc-object__film,
   .sc-object__hotspot,
   .sc-object__hotspot::before,

@@ -9,6 +9,7 @@ import type { SiteCopy } from "./site-copy";
 import "./object-design.css";
 
 const LiquidGlassCarousel = lazy(() => import("@/components/ui/liquid-glass-carousel"));
+const INITIAL_PHOTO_INDEX = 3;
 const assets = {
   render: `${import.meta.env.BASE_URL}images/concepts/speaker-interactive-front-v3.webp`,
   assembly: `${import.meta.env.BASE_URL}images/concepts/speaker-exploded-study-v3.webp`,
@@ -30,6 +31,7 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const initialDeepLink = useRef(selected !== null);
   const items = useMemo(() => speakerPhotos(language), [language]);
+  const initialPhoto = items[INITIAL_PHOTO_INDEX];
   const ja = language === "ja";
   const parts: DesignPart[] = [
     { id: "horn", title: copy.hornTitle, part: copy.hornPart, body: copy.hornFunction, detail: copy.hornDetail, material: copy.hornMaterial, drawing: assets.horn, drawingAlt: copy.hornDrawingAlt, caption: copy.hornDrawing },
@@ -72,14 +74,14 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
   }, []);
 
   const placeholder = <div className="sc-speaker-gallery__placeholder" aria-hidden="true">
-    <img src={items[0].src} alt="" style={{ objectPosition: `${(items[0].focalPoint?.[0] ?? .5) * 100}% ${(items[0].focalPoint?.[1] ?? .5) * 100}%` }} width="1800" height="1200" loading="lazy" />
+    <img src={initialPhoto.src} alt="" style={{ objectPosition: `${(initialPhoto.focalPoint?.[0] ?? .5) * 100}% ${(initialPhoto.focalPoint?.[1] ?? .5) * 100}%` }} width="1800" height="1200" loading="lazy" />
   </div>;
 
   return <>
     <div className="sc-speaker-gallery" id="listening-design" ref={sectionRef}>
       <div className="sc-speaker-gallery__stage">
         {ready ? <Suspense fallback={placeholder}>
-          <LiquidGlassCarousel items={items} panelHeight={480} gap={24} background="#ffffff" entry showTitle={false}
+          <LiquidGlassCarousel items={items} initialIndex={INITIAL_PHOTO_INDEX} panelHeight={480} gap={24} background="#ffffff" entry showTitle={false}
             className="sc-speaker-gallery__carousel" style={{ color: "#101d8f" }}
             ariaLabel={ja ? "Metorom スピーカーの写真" : "Metorom speaker photographs"}
             labels={ja ? { previous: "前の写真", next: "次の写真", view: "写真を拡大", close: "写真を閉じる", help: "ドラッグで移動・タップで拡大", loading: "写真を読み込み中…", error: "写真を読み込めませんでした。前後の写真をお試しください。" } : { previous: "Previous photograph", next: "Next photograph", view: "View photograph", close: "Close photograph", help: "Drag to explore · tap to view", loading: "Loading photograph…", error: "This photograph could not load. Try the previous or next photograph." }} />

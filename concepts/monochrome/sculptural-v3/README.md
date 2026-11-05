@@ -16,6 +16,8 @@ The loading screen uses the supplied Newton component. A shared queue prepares i
 
 The tweeter's revised exploded view uses the supplied `Tweeter-0355-0547.mp4`, split at its fully exploded source frame 96 (4 seconds). The opening and return clips share that endpoint, retain the source's 1920-square framing and 24 fps, and use versioned filenames to avoid stale cached media. The opening holds on its last frame until Close; the return still finishes with the existing reverse light fade.
 
+The carousel initially centers Forest light (DSCF2928), photo 04/08, with a matching lazy placeholder. Its eight-photo order is preserved. On phones the driver response fades into a compact 172px card within the black model frame. A shorter SVG geometry keeps the axes readable, while the video retains its complete square framing and shrinks when needed to fit the available screen height. Landscape places the card beside the video. Opening or rotating the phone aligns the whole frame beneath the header; desktop and Measurements retain their existing full-size plots.
+
 React, TypeScript, Tailwind, Motion, the `@/` alias and shadcn's `components/ui` structure were already configured. The supplied loader is in `components/ui/loader.tsx` with its easing helper and `lib/utils.ts`.
 
 Use `npm run dev` for development, `npm run typecheck`, `npm run build`, and `node tools/check-v3-build.mjs` for validation. Preview the production output with `npm run preview`. The production base URL is `/` for the custom domain `www.metorom.com`; `public/CNAME` is copied into every build so publishing preserves the GitHub Pages domain setting.

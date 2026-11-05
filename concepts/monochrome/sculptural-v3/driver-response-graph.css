@@ -89,18 +89,29 @@
   overflow-wrap: anywhere;
 }
 .sc-object__driver-graph--mobile .sc-driver-response {
-  --sc-driver-response-line: #c3d3ff;
-  --sc-driver-response-text: #f5f7ff;
-  --sc-driver-response-secondary: #b7c5de;
-  --sc-driver-response-rule: #344053;
-  --sc-driver-response-grid: #7083a4;
-  --sc-driver-response-tooltip: #101722;
+  --sc-driver-response-line: #101d8f;
+  --sc-driver-response-text: #172d54;
+  --sc-driver-response-secondary: #4b6080;
+  --sc-driver-response-rule: #c7d4ea;
+  --sc-driver-response-grid: #819bc2;
+  --sc-driver-response-tooltip: #fff;
   max-width: none;
-  padding: 16px 18px 18px;
-  background: #000;
+  height: 172px;
+  box-sizing: border-box;
+  border: 1px solid var(--sc-driver-response-rule);
+  border-radius: 12px;
+  padding: 10px 12px 9px;
+  background: #edf3ff;
 }
-.sc-object__driver-graph--mobile .sc-driver-response__plot { height: 196px; }
-.sc-object__driver-graph--mobile .sc-driver-response__header h3 { font-size: 17px; }
+.sc-object__driver-graph--mobile .sc-driver-response__header { flex-wrap: nowrap; gap: 8px; align-items: baseline; }
+.sc-object__driver-graph--mobile .sc-driver-response__header h3 { font-size: 14px; line-height: 1.2; white-space: nowrap; }
+.sc-object__driver-graph--mobile .sc-driver-response__header p { margin-top: 2px; font-size: 10px; line-height: 1.2; }
+.sc-object__driver-graph--mobile .sc-driver-response__header > span { padding-top: 0; font-size: 9px; }
+.sc-object__driver-graph--mobile .sc-driver-response__plot { height: 100px; margin-top: 3px; }
+.sc-object__driver-graph--mobile .frc-plot__tick { font-size: 24px; }
+.sc-object__driver-graph--mobile .frc-plot__unit { font-size: 21px; }
+.sc-object__driver-graph--mobile .sc-driver-response__note { margin-top: 3px; font-size: 9px; line-height: 1.2; letter-spacing: 0; }
+.sc-object__driver-graph--mobile .frc-plot__tooltip { top: 4%; padding: 6px 8px; border-radius: 6px; }
 @media (max-width: 380px) {
   .sc-driver-response__header { flex-wrap: wrap; gap: 6px 12px; }
   .sc-driver-response__header > span { padding-top: 0; }

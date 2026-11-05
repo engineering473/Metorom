@@ -25,6 +25,8 @@ export interface LiquidGlassCarouselItem {
 
 export interface LiquidGlassCarouselProps {
   items?: LiquidGlassCarouselItem[];
+  /** Zero-based photograph centered when the carousel first loads. */
+  initialIndex?: number;
   /** Target panel height in CSS pixels. Scaled down when the container is shorter. */
   panelHeight?: number;
   gap?: number;
@@ -381,6 +383,7 @@ function createCarousel(
   cursorElement: HTMLElement | null,
   options: {
     items: LiquidGlassCarouselItem[];
+    initialIndex: number;
     panelHeight: number;
     gap: number;
     background: string;
@@ -492,7 +495,7 @@ function createCarousel(
         s.fullTex.needsUpdate = true;
         recomputeTotal();
         if (!userInteracted) {
-          scroll = centerForIndex(0);
+          scroll = centerForIndex(options.initialIndex);
           target = scroll;
         }
         options.onLoadingChange(!at(sources, centerIndex(scroll)).tex);
@@ -580,7 +583,7 @@ function createCarousel(
     }
   }
 
-  let scroll = centerForIndex(0);
+  let scroll = centerForIndex(options.initialIndex);
   let target = scroll;
   let userInteracted = false;
   let velocity = 0;
@@ -1363,7 +1366,7 @@ function createCarousel(
   }
 
   function maybeStartEntry() {
-    if (!entryOn || entryStarted || !hasBeenVisible || !at(sources, 0).tex) return;
+    if (!entryOn || entryStarted || !hasBeenVisible || !at(sources, options.initialIndex).tex) return;
     entryStarted = true;
     playEntry();
   }
@@ -1417,7 +1420,7 @@ function createCarousel(
       }
     }
     if (!userInteracted) {
-      scroll = centerForIndex(0);
+      scroll = centerForIndex(options.initialIndex);
       target = scroll;
     }
   }
@@ -1497,6 +1500,7 @@ function pad(value: number) {
 /** Infinite photograph row with the supplied liquid-glass WebGL lens. */
 export function LiquidGlassCarousel({
   items = liquidGlassCarouselDefaultItems,
+  initialIndex = 0,
   panelHeight = 450,
   gap = 18,
   background = "#ffffff",
@@ -1513,11 +1517,12 @@ export function LiquidGlassCarousel({
   onActiveChange,
   onFocusChange,
 }: LiquidGlassCarouselProps) {
+  const firstIndex = Math.max(0, Math.min(items.length - 1, Number.isFinite(initialIndex) ? Math.trunc(initialIndex) : 0));
   const rootRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<LiquidGlassCarouselHandle | null>(null);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(firstIndex);
   const [focused, setFocused] = useState(false);
   const [entryDone, setEntryDone] = useState(!entry);
   const [failed, setFailed] = useState(false);
@@ -1549,7 +1554,7 @@ export function LiquidGlassCarousel({
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || items.length === 0 || failed) return;
-    setActive(0);
+    setActive(firstIndex);
     setFocused(false);
     setEntryDone(!entry);
     setEngineLoading(true);
@@ -1557,6 +1562,7 @@ export function LiquidGlassCarousel({
     try {
       engine = createCarousel(mount, cursorRef.current, {
         items,
+        initialIndex: firstIndex,
         panelHeight,
         gap,
         background,
@@ -1593,7 +1599,7 @@ export function LiquidGlassCarousel({
       engine?.destroy();
       engineRef.current = null;
     };
-  }, [items, panelHeight, gap, background, entry, failed]);
+  }, [items, firstIndex, panelHeight, gap, background, entry, failed]);
 
   const move = (direction: number) => {
     if (failed) {

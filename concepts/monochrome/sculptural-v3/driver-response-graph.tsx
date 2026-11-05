@@ -7,10 +7,11 @@ type DriverResponseGraphProps = {
   driver: ResponseDriver;
   copy: SiteCopy;
   className?: string;
+  compact?: boolean;
 };
 
 /** One selected driver's existing illustrative response, shared with Measurements. */
-export default function DriverResponseGraph({ driver, copy, className = "" }: DriverResponseGraphProps) {
+export default function DriverResponseGraph({ driver, copy, className = "", compact = false }: DriverResponseGraphProps) {
   const headingId = useId();
   const noteId = useId();
   const source = driverResponseSeries(driver, copy);
@@ -23,7 +24,7 @@ export default function DriverResponseGraph({ driver, copy, className = "" }: Dr
   const series = [{ ...source, color: "var(--sc-driver-response-line)" }];
 
   return (
-    <figure className={`sc-driver-response ${className}`.trim()} aria-labelledby={headingId} aria-describedby={noteId}>
+    <figure className={`sc-driver-response${compact ? " sc-driver-response--compact" : ""} ${className}`.trim()} aria-labelledby={headingId} aria-describedby={noteId}>
       <header className="sc-driver-response__header">
         <div>
           <h3 id={headingId}>{driverLabel}</h3>
@@ -40,6 +41,7 @@ export default function DriverResponseGraph({ driver, copy, className = "" }: Dr
           yTicks={[40, 60, 80]}
           label={`${driverLabel} / ${source.name}`}
           copy={copy}
+          compact={compact}
         />
       </div>
       <figcaption id={noteId} className="sc-driver-response__note">{copy.chartDataNote}</figcaption>

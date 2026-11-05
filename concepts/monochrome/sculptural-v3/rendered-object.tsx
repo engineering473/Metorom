@@ -88,13 +88,27 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
 
   useEffect(() => {
     if (!showFullFrame) return;
-    // Keep the complete movie and its close control below the floating header.
-    // scroll-margin applies only when the expanded frame is partly obscured.
-    media.current?.querySelector<HTMLElement>(".sc-object__visual")?.scrollIntoView({ block: "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    // Keep the complete mobile movie and graph clear of the floating header,
+    // including when a phone rotates while a driver is open.
+    let layoutFrame = 0;
+    const alignFrame = () => {
+      cancelAnimationFrame(layoutFrame);
+      layoutFrame = requestAnimationFrame(() => {
+        const mobile = window.matchMedia("(max-width: 760px), (hover: none) and (pointer: coarse) and (max-width: 1024px)").matches;
+        const target = mobile ? media.current : media.current?.querySelector<HTMLElement>(".sc-object__visual");
+        target?.scrollIntoView({ block: mobile ? "start" : "nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      });
+    };
+    alignFrame();
+    window.addEventListener("resize", alignFrame);
     const frame = requestAnimationFrame(() => {
       if (explosionPhaseRef.current !== "closing") closeControl.current?.focus({ preventScroll: true });
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(layoutFrame);
+      window.removeEventListener("resize", alignFrame);
+    };
   }, [showFullFrame]);
 
   useEffect(() => {
@@ -350,7 +364,7 @@ export default function RenderedObject({ copy }: { copy: SiteCopy }) {
     return <div className={`sc-object__driver-graph sc-object__driver-graph--${placement}${responseVisible ? " is-visible" : ""}`}
       aria-hidden={!responseVisible} inert={!responseVisible}>
       <div className="sc-object__driver-graph__inner">
-        {responseDriver && <DriverResponseGraph driver={responseDriver} copy={copy} className="sc-object__driver-response" />}
+        {responseDriver && <DriverResponseGraph driver={responseDriver} copy={copy} compact={placement === "mobile"} className="sc-object__driver-response" />}
       </div>
     </div>;
   }

@@ -72,17 +72,18 @@ const DRIVER_VARIANCE = Math.max(
 const SYSTEM_VARIANCE = maximumBandDeviation(SYSTEM_SERIES[0].data, 40, 16000);
 
 const PLOT = { left: 26, right: 574, top: 30, bottom: 264, width: 600, height: 300 };
+const COMPACT_PLOT = { ...PLOT, top: 24, bottom: 156, height: 192 };
 
 function logX(hz: number) {
   return PLOT.left + (Math.log10(hz / 20) / 3) * (PLOT.right - PLOT.left);
 }
 
-function yFor(db: number, minimum: number, maximum: number) {
-  return PLOT.bottom - ((db - minimum) / (maximum - minimum)) * (PLOT.bottom - PLOT.top);
+function yFor(db: number, minimum: number, maximum: number, plot = PLOT) {
+  return plot.bottom - ((db - minimum) / (maximum - minimum)) * (plot.bottom - plot.top);
 }
 
-function pathFor(points: ResponsePoint[], minimum: number, maximum: number) {
-  return points.map(({ hz, db }, index) => `${index ? "L" : "M"}${logX(hz).toFixed(1)},${yFor(db, minimum, maximum).toFixed(1)}`).join(" ");
+function pathFor(points: ResponsePoint[], minimum: number, maximum: number, plot = PLOT) {
+  return points.map(({ hz, db }, index) => `${index ? "L" : "M"}${logX(hz).toFixed(1)},${yFor(db, minimum, maximum, plot).toFixed(1)}`).join(" ");
 }
 
 function formatFrequency(hz: number, copy: SiteCopy) {
@@ -98,9 +99,11 @@ type ResponsePlotProps = {
   label: string;
   copy: SiteCopy;
   filled?: boolean;
+  compact?: boolean;
 };
 
-export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false }: ResponsePlotProps) {
+export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false, compact = false }: ResponsePlotProps) {
+  const plot = compact ? COMPACT_PLOT : PLOT;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const rawId = useId().replace(/:/g, "");
   const gridId = `frc-grid-${rawId}`;
@@ -122,21 +125,21 @@ export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled =
   };
 
   return (
-    <div className="frc-plot" role="img" tabIndex={0} aria-label={`${label}. ${copy.chartPlotInstructions}`} onPointerMove={setIndexFromPointer} onPointerLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(plottedIndex)} onBlur={() => setActiveIndex(null)} onKeyDown={handleKeyDown}>
-      <svg viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true">
+    <div className={`frc-plot${compact ? " frc-plot--compact" : ""}`} role="img" tabIndex={0} aria-label={`${label}. ${copy.chartPlotInstructions}`} onPointerMove={setIndexFromPointer} onPointerLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(plottedIndex)} onBlur={() => setActiveIndex(null)} onKeyDown={handleKeyDown}>
+      <svg viewBox={`0 0 ${plot.width} ${plot.height}`} preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <pattern id={gridId} width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#8397bc" opacity=".35" /></pattern>
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6b8fd4" stopOpacity=".25" /><stop offset="100%" stopColor="#6b8fd4" stopOpacity="0" /></linearGradient>
-          <clipPath id={clipId}><rect x={PLOT.left} y={PLOT.top} width={PLOT.right - PLOT.left} height={PLOT.bottom - PLOT.top} /></clipPath>
+          <clipPath id={clipId}><rect x={plot.left} y={plot.top} width={plot.right - plot.left} height={plot.bottom - plot.top} /></clipPath>
         </defs>
-        <rect width="600" height="300" fill={`url(#${gridId})`} opacity=".68" />
-        {[20, 100, 1000, 10000, 20000].map((hz) => <line key={hz} x1={logX(hz)} x2={logX(hz)} y1={PLOT.top} y2={PLOT.bottom} className="frc-plot__grid-line" />)}
-        {filled && <path d={`${pathFor(series[0].data, yMin, yMax)} L${PLOT.right},${PLOT.bottom} L${PLOT.left},${PLOT.bottom} Z`} fill={`url(#${fillId})`} clipPath={`url(#${clipId})`} />}
-        {series.map((item) => <path key={item.shortName} d={pathFor(item.data, yMin, yMax)} className="frc-plot__series" pathLength={1} stroke={item.color} strokeWidth={filled ? 3.1 : 2.5} clipPath={`url(#${clipId})`} />)}
-        {activeIndex !== null && <g className="frc-plot__cursor"><line x1={logX(activeHz)} x2={logX(activeHz)} y1={PLOT.top} y2={PLOT.bottom} /><circle cx={logX(activeHz)} cy={yFor(series[0].data[activeIndex].db, yMin, yMax)} r="4.5" fill={series[0].color} /></g>}
-        <text x="27" y="18" className="frc-plot__unit">{copy.chartUnit}</text>
-        {yTicks.map((db) => <text key={db} x="2" y={yFor(db, yMin, yMax) + 3} className="frc-plot__tick">{db}</text>)}
-        {[[20, copy.chartTick20], [100, copy.chartTick100], [1000, copy.chartTick1000], [10000, copy.chartTick10000], [20000, copy.chartTick20000]].map(([hz, text]) => <text key={hz} x={logX(Number(hz))} y="287" textAnchor={Number(hz) === 20 ? "start" : Number(hz) === 20000 ? "end" : "middle"} className="frc-plot__tick">{text}</text>)}
+        <rect width={plot.width} height={plot.height} fill={`url(#${gridId})`} opacity=".68" />
+        {[20, 100, 1000, 10000, 20000].map((hz) => <line key={hz} x1={logX(hz)} x2={logX(hz)} y1={plot.top} y2={plot.bottom} className="frc-plot__grid-line" />)}
+        {filled && <path d={`${pathFor(series[0].data, yMin, yMax, plot)} L${plot.right},${plot.bottom} L${plot.left},${plot.bottom} Z`} fill={`url(#${fillId})`} clipPath={`url(#${clipId})`} />}
+        {series.map((item) => <path key={item.shortName} d={pathFor(item.data, yMin, yMax, plot)} className="frc-plot__series" pathLength={1} stroke={item.color} strokeWidth={filled ? 3.1 : 2.5} clipPath={`url(#${clipId})`} />)}
+        {activeIndex !== null && <g className="frc-plot__cursor"><line x1={logX(activeHz)} x2={logX(activeHz)} y1={plot.top} y2={plot.bottom} /><circle cx={logX(activeHz)} cy={yFor(series[0].data[activeIndex].db, yMin, yMax, plot)} r="4.5" fill={series[0].color} /></g>}
+        <text x="27" y={compact ? 16 : 18} className="frc-plot__unit">{copy.chartUnit}</text>
+        {yTicks.map((db) => <text key={db} x="2" y={yFor(db, yMin, yMax, plot) + 3} className="frc-plot__tick">{db}</text>)}
+        {[[20, copy.chartTick20], [100, copy.chartTick100], [1000, copy.chartTick1000], [10000, copy.chartTick10000], [20000, copy.chartTick20000]].map(([hz, text]) => <text key={hz} x={logX(Number(hz))} y={plot.height - 13} textAnchor={Number(hz) === 20 ? "start" : Number(hz) === 20000 ? "end" : "middle"} className="frc-plot__tick">{text}</text>)}
       </svg>
       {activeIndex !== null && <div className="frc-plot__tooltip" style={{ left: `${Math.max(13, Math.min(74, (logX(activeHz) / PLOT.width) * 100))}%` }}><strong>{formatFrequency(activeHz, copy)}</strong>{series.map((item) => <span key={item.shortName}><i style={{ background: item.color }} />{item.name}<b>{item.data[activeIndex].db.toFixed(1)} {copy.chartDecibelUnit}</b></span>)}</div>}
     </div>
