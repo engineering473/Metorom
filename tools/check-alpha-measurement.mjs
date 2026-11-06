@@ -23,7 +23,7 @@ const rows = source.toString('utf8').split(/\r?\n/)
 const previousGlobals = new Map(['window', 'document', 'localStorage'].map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
 const storage = { getItem: () => null, setItem() {} };
 Object.defineProperties(globalThis, {
-  window: { configurable: true, writable: true, value: { location: { search: '' }, localStorage: storage } },
+  window: { configurable: true, writable: true, value: { location: { search: '?lang=en' }, localStorage: storage } },
   document: { configurable: true, writable: true, value: { documentElement: { lang: 'en' } } },
   localStorage: { configurable: true, writable: true, value: storage },
 });
@@ -42,7 +42,7 @@ try {
     appType: 'custom',
   });
   const { ALPHA_6A_MEASUREMENT: metadata, ALPHA_6A_MEASUREMENT_POINTS: points } = await server.ssrLoadModule('/data/measurements/alpha-6a-1m-0deg.ts');
-  const { driverResponseSeries, responseValueAt } = await server.ssrLoadModule('/concepts/monochrome/sculptural-v3/frequency-response-cards.tsx');
+  const { driverResponseSeries, driverResponseSpread, responseSpread, responseValueAt } = await server.ssrLoadModule('/concepts/monochrome/sculptural-v3/frequency-response-cards.tsx');
   const { DEFAULT_COPY: copy } = await server.ssrLoadModule('/concepts/monochrome/sculptural-v3/site-copy.ts');
 
   assert.equal(createHash('sha256').update(source).digest('hex'), metadata.sourceSha256, 'The archived REW source must retain its original bytes');
@@ -87,10 +87,30 @@ try {
   assert.equal(right.measured, true);
   assert.strictEqual(left.data, points, 'Left view must reuse the original recording without processing');
   assert.strictEqual(right.data, points, 'Right view must reuse the original recording without processing');
+  const measuredSpread = driverResponseSpread('mid', left);
+  assert.equal(measuredSpread.minimumDb, 48.073, 'Spread must include the low-level recorded band edge');
+  assert.equal(measuredSpread.maximumDb, 62.674, 'Spread must include the actual recorded maximum');
+  assert.equal(measuredSpread.minimumHz, metadata.minimumHz);
+  assert.equal(measuredSpread.maximumHz, metadata.maximumHz);
+  assert.ok(Math.abs(measuredSpread.midpointDb - 55.3735) < 1e-10);
+  assert.ok(Math.abs(measuredSpread.deviationDb - 7.3005) < 1e-10);
+  assert.ok(Math.abs(measuredSpread.peakToPeakDb - 14.601) < 1e-10);
+  assert.deepEqual(driverResponseSpread('right', right), measuredSpread, 'Both views must report the same recording spread');
+  for (const point of rows) {
+    assert.ok(Math.abs(point.db - measuredSpread.midpointDb) <= measuredSpread.deviationDb + 1e-10, 'Every original sample must lie within the exact min/max envelope');
+  }
+  assert.equal(responseSpread([], 200, 5000), null);
+  assert.equal(responseSpread(points, 6000, 20000), null, 'A spread must not invent a band outside the recording');
+  assert.deepEqual(responseSpread(points, 20, 20000), measuredSpread, 'Requested wider bands must clamp to recorded data');
   for (const driver of ['sub', 'tweeter']) {
     const other = driverResponseSeries(driver, copy);
     assert.equal(Boolean(other.measured), false, `${driver} must remain labeled illustrative`);
     assert.notStrictEqual(other.data, points, `${driver} must not use the Alpha 6A recording`);
+    const band = driver === 'sub' ? [60, 150] : [2500, 15000];
+    const spread = driverResponseSpread(driver, other);
+    const values = [responseValueAt(other.data, band[0]), responseValueAt(other.data, band[1]), ...other.data.filter(point => point.hz >= band[0] && point.hz <= band[1]).map(point => point.db)];
+    assert.equal(spread.minimumDb, Math.min(...values), 'Model spread must include the drawn line at both band edges');
+    assert.equal(spread.maximumDb, Math.max(...values));
   }
 
   const { default: DriverResponseGraph } = await server.ssrLoadModule('/concepts/monochrome/sculptural-v3/driver-response-graph.tsx');
@@ -101,6 +121,10 @@ try {
     assert.ok(html.includes('1 m · 0°'), `${driver} graph must show the supplied measurement position`);
     assert.ok(html.includes('preserveAspectRatio="xMidYMid meet"'), `${driver} graph must avoid stretching text`);
     assert.ok(!html.includes(copy.chartDataNote), `${driver} recording must not be labeled illustrative`);
+    assert.ok(html.includes('Spread ±7.3 dB'), `${driver} must show the measured full-band spread`);
+    assert.ok(html.includes('Midpoint 55.4 dB'), `${driver} must show the reference for the symmetric spread`);
+    assert.ok(html.includes('48.073–62.674 dB'), `${driver} accessible description must identify the exact recorded limits`);
+    assert.ok(html.includes('frc-plot__spread'), `${driver} must draw the min/max envelope`);
   }
 
 } finally {
@@ -115,4 +139,4 @@ try {
 }
 
 for (const [name, descriptor] of previousGlobals) assert.deepEqual(Object.getOwnPropertyDescriptor(globalThis, name), descriptor, `${name} must be restored after SSR verification`);
-console.log('Alpha 6A checks passed: original SHA, all 13,108 exact samples, finite/monotonic data, bounded log-frequency lookup, shared L/R recording, illustrative LF/HF labels, measured card metadata, and restored SSR globals.');
+console.log('Alpha 6A checks passed: original SHA, all 13,108 exact samples, bounded lookup, shared L/R recording, exact 48.073–62.674 dB envelope (±7.3005 dB about 55.3735 dB), model band-edge calculations, visible spread/reference labels, and restored SSR globals.');

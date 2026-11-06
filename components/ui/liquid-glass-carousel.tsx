@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   useEffect,
   useId,
   useRef,
@@ -40,9 +41,12 @@ export interface LiquidGlassCarouselProps {
   labels?: {
     previous: string; next: string; view: string; close: string; help: string;
     loading?: string; error?: string;
+    previewHelp?: string;
   };
   onActiveChange?: (index: number) => void;
   onFocusChange?: (focused: boolean) => void;
+  /** Continue past the unused scroll track when leaving an open photograph. */
+  onPreviewScroll?: (delta: number) => void;
   /** Native page progress through one complete turn, starting at initialIndex. */
   scrollProgress?: number;
   /** User arrows / horizontal dragging request a matching page position. */
@@ -362,6 +366,7 @@ export type LiquidGlassCarouselHandle = {
   next: () => void;
   previous: () => void;
   setScrollProgress: (progress: number) => void;
+  setPreviewOpen: (open: boolean) => void;
   destroy: () => void;
 };
 
@@ -398,6 +403,7 @@ function createCarousel(
     scrollProgress?: number;
     onActiveChange: (index: number) => void;
     onFocusChange: (open: boolean) => void;
+    onPreviewOpen?: () => void;
     onEntryDone: (done: boolean) => void;
     onLoadingChange: (loading: boolean) => void;
     onReadyChange: (ready: boolean) => void;
@@ -417,6 +423,7 @@ function createCarousel(
   let visible = false;
   let hasBeenVisible = false;
   let entryStarted = false;
+  let previewOpen = false;
   const scrollDriven = options.scrollProgress !== undefined;
   let controlledProgress = Math.max(0, Math.min(1, options.scrollProgress ?? 0));
   let prepared = false;
@@ -1129,6 +1136,11 @@ function createCarousel(
   }
 
   function openFocus() {
+    if (options.onPreviewOpen) {
+      pendingFocus = null;
+      options.onPreviewOpen();
+      return;
+    }
     if (focusState.active || !centeredPanel) return;
     const src = sources[centeredPanel.srcIndex];
     if (!src?.tex) return;
@@ -1370,7 +1382,7 @@ function createCarousel(
 
   function tick() {
     if (!running) return;
-    if (!visible || document.hidden) {
+    if (!visible || document.hidden || previewOpen) {
       raf = 0;
       return;
     }
@@ -1591,6 +1603,10 @@ function createCarousel(
     next: () => step(1),
     previous: () => step(-1),
     setScrollProgress,
+    setPreviewOpen: (open) => {
+      previewOpen = open;
+      if (!open) startLoop();
+    },
     destroy,
   };
 }
@@ -1618,6 +1634,7 @@ export function LiquidGlassCarousel({
   },
   onActiveChange,
   onFocusChange,
+  onPreviewScroll,
   scrollProgress,
   onScrollProgressChange,
   onReadyChange,
@@ -1630,6 +1647,10 @@ export function LiquidGlassCarousel({
   const engineRef = useRef<LiquidGlassCarouselHandle | null>(null);
   const [active, setActive] = useState(firstIndex);
   const [focused, setFocused] = useState(false);
+  const focusedRef = useRef(false);
+  const galleryActiveRef = useRef(firstIndex);
+  const previewGesture = useRef<{ x: number; y: number; id: number; horizontal: boolean } | null>(null);
+  const suppressPreviewClick = useRef(false);
   const [entryDone, setEntryDone] = useState(!entry);
   const [failed, setFailed] = useState(false);
   const [engineLoading, setEngineLoading] = useState(true);
@@ -1671,6 +1692,8 @@ export function LiquidGlassCarousel({
     const mount = mountRef.current;
     if (!mount || items.length === 0 || failed) return;
     setActive(firstIndex);
+    galleryActiveRef.current = firstIndex;
+    focusedRef.current = false;
     setFocused(false);
     setEntryDone(!entry);
     setEngineLoading(true);
@@ -1687,10 +1710,19 @@ export function LiquidGlassCarousel({
         entry,
         scrollProgress: scrollProgressRef.current,
         onActiveChange: (index) => {
-          setActive(index);
+          galleryActiveRef.current = index;
+          if (!focusedRef.current) setActive(index);
           onActiveChangeRef.current?.(index);
         },
+        onPreviewOpen: () => {
+          focusedRef.current = true;
+          setFocused(true);
+          engineRef.current?.setPreviewOpen(true);
+          onFocusChangeRef.current?.(true);
+          rootRef.current?.focus({ preventScroll: true });
+        },
         onFocusChange: (open) => {
+          focusedRef.current = open;
           setFocused(open);
           onFocusChangeRef.current?.(open);
         },
@@ -1720,6 +1752,7 @@ export function LiquidGlassCarousel({
             if (source) setSourceErrors((previous) => new Set(previous).add(source));
           } else {
             setFailed(true);
+            focusedRef.current = false;
             setFocused(false);
             onFocusChangeRef.current?.(false);
           }
@@ -1802,11 +1835,16 @@ export function LiquidGlassCarousel({
     if (!failed || focused || scrollProgress === undefined || items.length === 0) return;
     const progress = Math.max(0, Math.min(1, Number.isFinite(scrollProgress) ? scrollProgress : 0));
     const next = (firstIndex + Math.round(progress * items.length)) % items.length;
+    galleryActiveRef.current = next;
     setActive(next);
     onActiveChangeRef.current?.(next);
   }, [failed, focused, scrollProgress, firstIndex, items.length]);
 
   const move = (direction: number) => {
+    if (focusedRef.current) {
+      setActive(index => (index + direction + items.length) % items.length);
+      return;
+    }
     if (failed) {
       if (scrollProgress !== undefined) {
         const index = Math.round(scrollProgress * items.length) + direction;
@@ -1815,6 +1853,7 @@ export function LiquidGlassCarousel({
       }
       setActive((index) => {
         const next = (index + direction + items.length) % items.length;
+        galleryActiveRef.current = next;
         onActiveChangeRef.current?.(next);
         return next;
       });
@@ -1824,28 +1863,84 @@ export function LiquidGlassCarousel({
     else engineRef.current?.previous();
   };
   const toggleFocus = () => {
+    if (focusedRef.current) { closeFocus(); return; }
     if (sourceFailed || loading || unavailable) return;
-    if (failed) {
-      setFocused((open) => {
-        onFocusChangeRef.current?.(!open);
-        return !open;
-      });
-    } else if (focused) engineRef.current?.closeFocus();
-    else engineRef.current?.openFocus();
+    focusedRef.current = true;
+    setFocused(true);
+    engineRef.current?.setPreviewOpen(true);
+    onFocusChangeRef.current?.(true);
   };
-  const closeFocus = () => {
-    if (failed) {
-      setFocused(false);
-      onFocusChangeRef.current?.(false);
-    } else engineRef.current?.closeFocus();
+  function closeFocus() {
+    if (!focusedRef.current) return;
+    focusedRef.current = false;
+    setFocused(false);
+    setActive(galleryActiveRef.current);
+    engineRef.current?.setPreviewOpen(false);
+    onFocusChangeRef.current?.(false);
+  }
+  useEffect(() => {
+    if (!focused) return;
+    const startY = window.scrollY;
+    const leaveWithScroll = (delta: number) => {
+      if (!focusedRef.current) return;
+      closeFocus();
+      if (onPreviewScroll) onPreviewScroll(delta);
+      else window.scrollBy({ top: delta, behavior: "instant" });
+    };
+    const wheel = (event: WheelEvent) => {
+      if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      leaveWithScroll(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1));
+    };
+    // Native touch, keyboard and scrollbar scrolling share the same exit.
+    const scroll = () => {
+      const delta = window.scrollY - startY;
+      if (Math.abs(delta) > 1) leaveWithScroll(delta);
+    };
+    const outside = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) closeFocus();
+    };
+    window.addEventListener("wheel", wheel, { passive: false });
+    window.addEventListener("scroll", scroll, { passive: true });
+    window.addEventListener("pointerdown", outside);
+    return () => {
+      window.removeEventListener("wheel", wheel);
+      window.removeEventListener("scroll", scroll);
+      window.removeEventListener("pointerdown", outside);
+    };
+  }, [focused, onPreviewScroll]);
+  const previewPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 && event.pointerType === "mouse") return;
+    suppressPreviewClick.current = false;
+    previewGesture.current = { x: event.clientX, y: event.clientY, id: event.pointerId, horizontal: false };
+  };
+  const previewPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = previewGesture.current;
+    if (!gesture || gesture.id !== event.pointerId) return;
+    const dx = event.clientX - gesture.x;
+    const dy = event.clientY - gesture.y;
+    if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      gesture.horizontal = true;
+      event.preventDefault();
+      try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* released by native scrolling */ }
+    }
+  };
+  const previewPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = previewGesture.current;
+    previewGesture.current = null;
+    if (!gesture || gesture.id !== event.pointerId) return;
+    const dx = event.clientX - gesture.x;
+    const dy = event.clientY - gesture.y;
+    if (gesture.horizontal) suppressPreviewClick.current = true;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.25) move(dx < 0 ? 1 : -1);
   };
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     // Native buttons keep their Enter/Space behavior.
     const isRoot = event.target === event.currentTarget;
-    if (event.key === "ArrowRight" && !focused) {
+    if (event.key === "ArrowRight") {
       event.preventDefault();
       move(1);
-    } else if (event.key === "ArrowLeft" && !focused) {
+    } else if (event.key === "ArrowLeft") {
       event.preventDefault();
       move(-1);
     } else if (event.key === "Escape") {
@@ -1921,6 +2016,9 @@ export function LiquidGlassCarousel({
         .liquid-glass-carousel__control { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; border: 0; border-radius: 0; background: transparent; }
         .liquid-glass-carousel__control:not(:disabled):hover { opacity: .6; }
         .liquid-glass-carousel__controls { display: flex; align-items: center; gap: 18px; }
+        .liquid-glass-carousel__preview { position: absolute; inset: 0; z-index: 1; touch-action: pan-y; cursor: default; }
+        .liquid-glass-carousel__preview img { position: absolute; left: 50%; top: 47%; max-width: 90%; max-height: 78%; width: auto; height: auto; transform: translate(-50%, -50%); user-select: none; -webkit-user-drag: none; transition: opacity .24s cubic-bezier(.16,1,.3,1); }
+        @media (prefers-reduced-motion: reduce) { .liquid-glass-carousel__preview img { transition-duration: .1s; } }
         @media (max-width: 540px) { .liquid-glass-carousel__controls { gap: 9px; } }
       `}</style>
       <span id={labelId} className="sr-only">{ariaLabel}</span>
@@ -1931,9 +2029,25 @@ export function LiquidGlassCarousel({
         <p style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center" }}>No photographs to display.</p>
       ) : (
         <>
-          <WebGLErrorBoundary fallback={fallback} onError={() => setFailed(true)}>
-            {failed ? fallback : <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />}
-          </WebGLErrorBoundary>
+          <div inert={focused} aria-hidden={focused} style={{ position: "absolute", inset: 0, visibility: focused ? "hidden" : undefined }}>
+            <WebGLErrorBoundary fallback={fallback} onError={() => setFailed(true)}>
+              {failed ? fallback : <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />}
+            </WebGLErrorBoundary>
+          </div>
+          {focused && <div className="liquid-glass-carousel__preview" style={{ background }} role="group" aria-label={labels.view}
+            onPointerDown={previewPointerDown} onPointerMove={previewPointerMove} onPointerUp={previewPointerUp}
+            onPointerCancel={() => { previewGesture.current = null; }}
+            onClick={() => {
+              if (suppressPreviewClick.current) { suppressPreviewClick.current = false; return; }
+              closeFocus();
+            }}>
+            {items.map((item, index) => !sourceErrors.has(item.src) && <img key={item.src} src={item.src} alt={item.title}
+              draggable={false} decoding="async" aria-hidden={index !== active} data-preview-active={index === active}
+              onClick={event => event.stopPropagation()}
+              onError={() => setSourceErrors(previous => new Set(previous).add(item.src))}
+              style={{ opacity: index === active ? 1 : 0, pointerEvents: index === active ? "auto" : "none" }} />)}
+            {sourceFailed && <p role="status" style={{ position: "absolute", top: "45%", left: "10%", right: "10%", margin: 0, textAlign: "center", fontSize: 13 }}>{errorMessage}</p>}
+          </div>}
           {!failed && sourceFailed && <p role="status" style={{ pointerEvents: "none", position: "absolute", top: "50%", left: "10%", right: "10%", margin: 0, padding: "10px 16px", textAlign: "center", transform: "translateY(-50%)", background, fontSize: 13 }}>{errorMessage}</p>}
           {loading && <p role="status" style={{ pointerEvents: "none", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, padding: "10px 16px", textAlign: "center", background, fontSize: 13 }}>{loadingMessage}</p>}
           {showTitle && <p style={{ position: "absolute", top: "5%", left: "8%", right: "8%", margin: 0, textAlign: "center", fontSize: 13, pointerEvents: "none" }}>
@@ -1943,18 +2057,18 @@ export function LiquidGlassCarousel({
             className="liquid-glass-carousel__controls"
             style={{ position: "absolute", bottom: "4%", left: "50%", transform: "translateX(-50%)", zIndex: 2 }}
           >
-            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.previous} disabled={focused || unavailable || items.length < 2 || (scrollProgress !== undefined && scrollProgress <= 0)} onClick={() => move(-1)}>
+            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.previous} disabled={unavailable || items.length < 2 || (!focused && scrollProgress !== undefined && scrollProgress <= 0)} onClick={() => move(-1)}>
               <ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" />
             </button>
             <span aria-hidden="true" style={{ fontSize: 12, minWidth: 48, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>{pad(active + 1)} / {pad(items.length)}</span>
-            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.next} disabled={focused || unavailable || items.length < 2 || (scrollProgress !== undefined && scrollProgress >= 1)} onClick={() => move(1)}>
+            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.next} disabled={unavailable || items.length < 2 || (!focused && scrollProgress !== undefined && scrollProgress >= 1)} onClick={() => move(1)}>
               <ArrowRight size={18} strokeWidth={1.5} aria-hidden="true" />
             </button>
-            <button type="button" className="liquid-glass-carousel__control" aria-label={focused ? labels.close : labels.view} aria-pressed={focused} disabled={unavailable || loading || sourceFailed} onClick={toggleFocus}>
+            <button type="button" className="liquid-glass-carousel__control" aria-label={focused ? labels.close : labels.view} aria-pressed={focused} disabled={!focused && (unavailable || loading || sourceFailed)} onClick={toggleFocus}>
               {focused ? <X size={17} strokeWidth={1.5} aria-hidden="true" /> : <Maximize2 size={16} strokeWidth={1.5} aria-hidden="true" />}
             </button>
           </div>
-          <p aria-hidden="true" style={{ position: "absolute", bottom: "1%", left: "6%", right: "6%", margin: 0, textAlign: "center", fontSize: 11, pointerEvents: "none" }}>{focused ? labels.close : labels.help}</p>
+          <p aria-hidden="true" style={{ position: "absolute", zIndex: 2, bottom: "1%", left: "6%", right: "6%", margin: 0, textAlign: "center", fontSize: 11, pointerEvents: "none" }}>{focused ? labels.previewHelp ?? labels.close : labels.help}</p>
           <div ref={cursorRef} aria-hidden="true" style={{ pointerEvents: "none", position: "absolute", left: 0, top: 0, zIndex: 3, fontSize: 12, color: "inherit" }}>{labels.view}</div>
         </>
       )}

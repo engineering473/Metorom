@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { driverResponseSeries, ResponsePlot, type ResponseDriver } from "./frequency-response-cards";
+import { driverResponseSeries, driverResponseSpread, responseSpreadDescription, ResponsePlot, type ResponseDriver } from "./frequency-response-cards";
 import { useLanguage } from "./language";
 import type { SiteCopy } from "./site-copy";
 import "./driver-response-graph.css";
@@ -37,6 +37,8 @@ export default function DriverResponseGraph({ driver, copy, className = "", comp
     tweeter: copy.objectTweeterLabel,
   }[driver];
   const series = [{ ...source, color: "var(--sc-driver-response-line)" }];
+  const spread = driverResponseSpread(driver, source);
+  const spreadDescription = spread ? responseSpreadDescription(spread, measured, japanese) : "";
 
   return (
     <figure className={`sc-driver-response${compact ? " sc-driver-response--compact" : ""} ${className}`.trim()} aria-labelledby={headingId} aria-describedby={noteId}>
@@ -45,7 +47,10 @@ export default function DriverResponseGraph({ driver, copy, className = "", comp
           <h3 id={headingId}>{driverLabel}</h3>
           <p>{source.name}{measured ? " · 1 m · 0°" : ""}</p>
         </div>
-        <span>{range}</span>
+        <span className="sc-driver-response__range" title={spreadDescription}>
+          <span>{range}</span>
+          {spread && <strong>{japanese ? "変動幅" : "Spread"} ±{spread.deviationDb.toFixed(1)} {copy.chartDecibelUnit}</strong>}
+        </span>
       </header>
       <div className="sc-driver-response__plot">
         <ResponsePlot
@@ -59,9 +64,12 @@ export default function DriverResponseGraph({ driver, copy, className = "", comp
           label={`${driverLabel} / ${source.name}`}
           copy={copy}
           compact={compact}
+          spread={spread}
         />
       </div>
-      <figcaption id={noteId} className="sc-driver-response__note" title={description}>{note}</figcaption>
+      <figcaption id={noteId} className="sc-driver-response__note" title={[description, spreadDescription].filter(Boolean).join(" ")}>
+        {note}{spread && <span> · {japanese ? "中間値 " : "Midpoint "}{spread.midpointDb.toFixed(1)} {copy.chartDecibelUnit}</span>}
+      </figcaption>
     </figure>
   );
 }

@@ -185,7 +185,7 @@ export type SiteCopy = Record<CopyKey, string>;
 export const DEFAULT_COPY_JA: SiteCopy = {
   brandName: "METOROM",
   navObject: "スピーカー", navArchitecture: "構造", navMeasurements: "測定", navListening: "試聴", navConversation: "お問い合わせ",
-  navWrite: "お問い合わせ", navStartConversation: "お問い合わせ", navSkip: "本文へ移動", navPageAria: "ページナビゲーション", navMobileAria: "モバイルナビゲーション", navOpenMenu: "メニューを開く", navCloseMenu: "メニューを閉じる", navBrandAria: "Metoromのトップへ戻る", navLanguageLabel: "EN", navLanguageAria: "英語に切り替える",
+  navWrite: "お問い合わせ", navStartConversation: "お問い合わせ", navSkip: "本文へ移動", navPageAria: "ページナビゲーション", navMobileAria: "モバイルナビゲーション", navOpenMenu: "メニューを開く", navCloseMenu: "メニューを閉じる", navBrandAria: "Metoromのトップへ戻る", navLanguageLabel: "English", navLanguageAria: "英語に切り替える",
   indexLabel: "目次", indexRange: "01 — 06", indexOpen: "開かれた構造", indexMeasurements: "測定", indexListening: "試聴", indexConversation: "お問い合わせ", indexPhilosophy: "設計思想", indexGallery: "ギャラリー",
   objectBrand: "METOROM",
   pathHighSound: "シンバルのきらめき、細かな音の輪郭。", pathHighRhythm: "同じ時間に、多くの振動",

@@ -1,0 +1,10 @@
+.sc-footer__wordmark .text-cursor-proximity { display: inline; }
+.sc-footer__wordmark .text-cursor-proximity__word { display: inline-block; white-space: nowrap; }
+.sc-footer__wordmark .text-cursor-proximity__letter {
+  display: inline-block;
+  transform-origin: center 60%;
+  transition: transform .18s cubic-bezier(.16, 1, .3, 1), color .18s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-footer__wordmark .text-cursor-proximity__letter { transition: none; }
+}

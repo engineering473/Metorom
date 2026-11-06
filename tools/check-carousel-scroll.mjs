@@ -5,7 +5,10 @@ import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/anton/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-const base = process.argv[2] || 'http://127.0.0.1:5178/';
+const fixtureUrl = new URL(process.argv[2] || 'http://127.0.0.1:5178/');
+// This fixture exercises the English accessible control names explicitly.
+fixtureUrl.searchParams.set('lang', 'en');
+const base = fixtureUrl.href;
 const output = resolve(import.meta.dirname, '../.impeccable/review/carousel');
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: 'msedge', headless: true });

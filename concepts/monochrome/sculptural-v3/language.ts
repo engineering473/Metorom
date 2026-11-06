@@ -11,7 +11,7 @@ function initialLanguage(): Language {
     try { localStorage.setItem(STORAGE_KEY, requested); } catch { /* The requested language still works in this tab. */ }
     return requested;
   }
-  try { return localStorage.getItem(STORAGE_KEY) === "ja" ? "ja" : "en"; } catch { return "en"; }
+  try { return localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "ja"; } catch { return "ja"; }
 }
 
 let currentLanguage: Language = initialLanguage();
@@ -37,7 +37,7 @@ export function useLanguage(): [Language, (language: Language) => void] {
     const update = () => setLanguage(currentLanguage);
     const syncStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;
-      currentLanguage = event.newValue === "ja" ? "ja" : "en";
+      currentLanguage = event.newValue === "en" ? "en" : "ja";
       document.documentElement.lang = currentLanguage;
       update();
     };

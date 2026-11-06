@@ -1,5 +1,13 @@
 import { ArrowUpRight } from "lucide-react";
+import { useRef } from "react";
+import TextCursorProximity, { type ProximityStyles } from "@/components/ui/text-cursor-proximity";
 import { previewHref } from "./language";
+import "./footer-proximity.css";
+
+const wordmarkStyles: ProximityStyles = {
+  transform: { from: "scale(1)", to: "scale(1.18)" },
+  color: { from: "#101d8f", to: "#004225" },
+};
 
 type SharedFooterCopy = {
   brandName: string;
@@ -15,11 +23,14 @@ type FooterProps =
 
 export default function SiteFooter(props: FooterProps) {
   const { copy } = props;
+  const footerRef = useRef<HTMLElement>(null);
   const editUrl = new URL(window.location.href);
   editUrl.searchParams.set("edit", "1");
 
-  return <footer className="sc-footer">
-    <a href={props.backToStudy ? previewHref("./index.html") : "#top"} className="sc-footer__wordmark" aria-label={props.backToStudy ? props.copy.footerBackAria : props.copy.footerTopAria}>{copy.brandName}</a>
+  return <footer className="sc-footer" ref={footerRef}>
+    <a href={props.backToStudy ? previewHref("./index.html") : "#top"} className="sc-footer__wordmark" aria-label={props.backToStudy ? props.copy.footerBackAria : props.copy.footerTopAria}>
+      <TextCursorProximity label={copy.brandName} styles={wordmarkStyles} containerRef={footerRef} falloff="gaussian" radius={170} />
+    </a>
     <div>
       <span>{copy.footerTag}</span>
       <nav className="sc-footer__links" aria-label={copy.footerNavigationAria}>

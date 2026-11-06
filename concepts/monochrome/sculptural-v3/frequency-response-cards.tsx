@@ -7,6 +7,11 @@ import "@/components/ui/frequency-response-cards.css";
 type ResponsePoint = { hz: number; db: number };
 export type ResponseSeries = { name: string; shortName: string; color: string; data: ResponsePoint[]; measured?: boolean };
 export type ResponseDriver = "sub" | "mid" | "right" | "tweeter";
+export type ResponseSpread = {
+  minimumHz: number; maximumHz: number;
+  minimumDb: number; maximumDb: number;
+  midpointDb: number; deviationDb: number; peakToPeakDb: number;
+};
 
 const FREQUENCIES = Array.from({ length: 73 }, (_, index) => 20 * 1000 ** (index / 72));
 const DRIVER_PROFILES = [
@@ -45,12 +50,6 @@ export function driverResponseSeries(driver: ResponseDriver, copy: SiteCopy): Re
   return { ...DRIVER_SERIES[index], name: [copy.chartDriverLowName, copy.chartDriverMidName, copy.chartDriverHighName][index] };
 }
 const SYSTEM_SERIES: ResponseSeries[] = [{ name: "Complete speaker", shortName: "SYSTEM", color: "#101d8f", data: makePoints(SYSTEM_ANCHORS, .8, .47) }];
-function maximumBandDeviation(data: ResponsePoint[], minimumHz: number, maximumHz: number) {
-  const values = data.filter(point => point.hz >= minimumHz && point.hz <= maximumHz).map(point => point.db);
-  const mean = values.reduce((total, value) => total + value, 0) / values.length;
-  return Math.max(...values.map(value => Math.abs(value - mean)));
-}
-const SYSTEM_VARIANCE = maximumBandDeviation(SYSTEM_SERIES[0].data, 40, 16000);
 
 /** Interpolate on the drawn log-frequency line, without extending the measured band. */
 export function responseValueAt(points: ResponsePoint[], hz: number): number | null {
@@ -67,6 +66,47 @@ export function responseValueAt(points: ResponsePoint[], hz: number): number | n
   const left = points[low - 1];
   return left.db + (right.db - left.db) * Math.log(hz / left.hz) / Math.log(right.hz / left.hz);
 }
+
+/** The drawn response's min/max envelope, not statistical variance or uncertainty.
+ * Include interpolated band edges for models; native measured samples stay exact.
+ */
+export function responseSpread(data: ResponsePoint[], minimumHz: number, maximumHz: number): ResponseSpread | null {
+  if (!data.length || !Number.isFinite(minimumHz) || !Number.isFinite(maximumHz)) return null;
+  const lower = Math.max(minimumHz, data[0].hz);
+  const upper = Math.min(maximumHz, data[data.length - 1].hz);
+  if (lower > upper) return null;
+  const first = responseValueAt(data, lower);
+  const last = responseValueAt(data, upper);
+  if (first === null || last === null) return null;
+  let minimumDb = Math.min(first, last);
+  let maximumDb = Math.max(first, last);
+  for (const point of data) {
+    if (point.hz < lower || point.hz > upper) continue;
+    minimumDb = Math.min(minimumDb, point.db);
+    maximumDb = Math.max(maximumDb, point.db);
+  }
+  return {
+    minimumHz: lower, maximumHz: upper, minimumDb, maximumDb,
+    midpointDb: (minimumDb + maximumDb) / 2,
+    deviationDb: (maximumDb - minimumDb) / 2,
+    peakToPeakDb: maximumDb - minimumDb,
+  };
+}
+
+export function driverResponseSpread(driver: ResponseDriver, series: ResponseSeries): ResponseSpread | null {
+  const band = series.measured
+    ? [ALPHA_6A_MEASUREMENT.minimumHz, ALPHA_6A_MEASUREMENT.maximumHz]
+    : driver === "sub" ? [60, 150] : [2500, 15000];
+  return responseSpread(series.data, band[0], band[1]);
+}
+
+export function responseSpreadDescription(spread: ResponseSpread, measured: boolean, japanese: boolean): string {
+  const limits = `${spread.minimumDb.toFixed(3)}–${spread.maximumDb.toFixed(3)} dB`;
+  return japanese
+    ? `${measured ? "実測" : "説明用モデル"}の最大値と最小値の幅：${limits}。中間値${spread.midpointDb.toFixed(4)} dBに対して±${spread.deviationDb.toFixed(4)} dB、ピーク間${spread.peakToPeakDb.toFixed(3)} dB。${spread.minimumHz.toFixed(3)}–${spread.maximumHz.toFixed(3)} Hz。統計的分散や測定誤差ではありません。`
+    : `${measured ? "Measured" : "Illustrative model"} min/max spread: ${limits}; ±${spread.deviationDb.toFixed(4)} dB about the ${spread.midpointDb.toFixed(4)} dB midpoint, ${spread.peakToPeakDb.toFixed(3)} dB peak-to-peak, over ${spread.minimumHz.toFixed(3)}–${spread.maximumHz.toFixed(3)} Hz. This is not statistical variance or measurement uncertainty.`;
+}
+
 function formatFrequency(hz: number, copy: SiteCopy) {
   return hz >= 1000 ? Number((hz / 1000).toFixed(hz >= 10000 ? 0 : 2)) + " " + copy.chartKilohertzUnit : Math.round(hz) + " " + copy.chartHertzUnit;
 }
@@ -82,9 +122,10 @@ type ResponsePlotProps = {
   compact?: boolean;
   xMin?: number;
   xMax?: number;
+  spread?: ResponseSpread | null;
 };
 
-export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false, compact = false, xMin = 20, xMax = 20000 }: ResponsePlotProps) {
+export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled = false, compact = false, xMin = 20, xMax = 20000, spread }: ResponsePlotProps) {
   const [language] = useLanguage();
   const root = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 600, height: compact ? 100 : 240 });
@@ -139,10 +180,11 @@ export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled =
   const instructions = series.some(item => item.measured)
     ? language === "ja" ? "約200 Hzから5 kHzまでの実測値です。左右の矢印キーで値を確認できます。" : "Measured response from approximately 200 hertz to 5 kilohertz. Focus and use left or right arrow keys to inspect values."
     : copy.chartPlotInstructions;
+  const spreadDescription = spread ? responseSpreadDescription(spread, series.some(item => item.measured), language === "ja") : "";
 
   return (
     <div ref={root} className={"frc-plot" + (compact ? " frc-plot--compact" : "")} role="img" tabIndex={0}
-      aria-label={label + ". " + instructions}
+      aria-label={label + ". " + instructions + (spreadDescription ? " " + spreadDescription : "")}
       onPointerMove={inspectPointer} onPointerLeave={() => setActiveHz(null)}
       onFocus={() => setActiveHz(Math.sqrt(xMin * xMax))} onBlur={() => setActiveHz(null)} onKeyDown={handleKeyDown}>
       <svg viewBox={"0 0 " + size.width + " " + size.height} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -152,6 +194,10 @@ export function ResponsePlot({ series, yMin, yMax, yTicks, label, copy, filled =
         </defs>
         {yTicks.map(db => <line key={"y" + db} x1={plot.left} x2={plot.right} y1={yFor(db)} y2={yFor(db)} className="frc-plot__grid-line" style={{ opacity: .18, strokeDasharray: "none", strokeWidth: 1 }} />)}
         {xTicks.map(hz => <line key={"x" + hz} x1={logX(hz)} x2={logX(hz)} y1={plot.top} y2={plot.bottom} className="frc-plot__grid-line" style={{ opacity: .09, strokeDasharray: "none", strokeWidth: 1 }} />)}
+        {spread && <g className="frc-plot__spread" clipPath={"url(#" + clipId + ")"}>
+          <rect x={logX(spread.minimumHz)} y={yFor(spread.maximumDb)} width={logX(spread.maximumHz) - logX(spread.minimumHz)} height={yFor(spread.minimumDb) - yFor(spread.maximumDb)} fill={series[0]?.color} fillOpacity=".055" />
+          <line x1={logX(spread.minimumHz)} x2={logX(spread.maximumHz)} y1={yFor(spread.midpointDb)} y2={yFor(spread.midpointDb)} stroke={series[0]?.color} strokeOpacity=".42" strokeWidth="1" strokeDasharray="4 4" />
+        </g>}
         {filled && paths[0] && <path d={paths[0].path + " L" + plot.right + "," + plot.bottom + " L" + plot.left + "," + plot.bottom + " Z"} fill={"url(#" + fillId + ")"} clipPath={"url(#" + clipId + ")"} />}
         {paths.map(item => <path key={item.shortName} d={item.path} className="frc-plot__series" pathLength={1} stroke={item.color} style={{ strokeWidth: compact ? 1.5 : 1.8, filter: "none" }} clipPath={"url(#" + clipId + ")"} />)}
         {activeHz !== null && <g className="frc-plot__cursor">
@@ -179,6 +225,10 @@ function ResponseCard({ kind, copy }: { kind: "drivers" | "system"; copy: SiteCo
     ? [driverResponseSeries("mid", copy)]
     : SYSTEM_SERIES.map(item => ({ ...item, name: copy.chartSystemSeriesName }));
   const range = measured ? "200 Hz — 5 kHz" : copy.chartRange;
+  const spread = measured
+    ? driverResponseSpread("mid", series[0])
+    : responseSpread(series[0].data, 40, 16000);
+  const spreadDescription = spread ? responseSpreadDescription(spread, measured, ja) : "";
   const label = measured
     ? ja ? "Alpha 6Aの実測応答。距離1 m、0度。右の記録を左右で共用。" : "Alpha 6A measured response at 1 metre, 0 degrees. One right-driver capture shared by both sides."
     : copy.chartSystemAria;
@@ -191,10 +241,14 @@ function ResponseCard({ kind, copy }: { kind: "drivers" | "system"; copy: SiteCo
       <div className="frc-card__chart"><ResponsePlot series={series}
         xMin={measured ? ALPHA_6A_MEASUREMENT.minimumHz : undefined} xMax={measured ? ALPHA_6A_MEASUREMENT.maximumHz : undefined}
         yMin={measured ? 45 : 72} yMax={measured ? 65 : 88} yTicks={measured ? [45, 50, 55, 60, 65] : [74, 80, 86]}
-        label={label} copy={copy} filled={!measured} /></div>
+        label={label} copy={copy} filled={!measured} spread={spread} /></div>
       <footer className="frc-card__footer">
         <span>{measured ? ja ? "右ドライバーの実測 · 左右に共用" : "MEASURED RIGHT DRIVER · SHARED L/R" : copy.chartDataNote}</span>
-        {measured ? <span>{ja ? "REW · スムージングなし" : "REW · UNSMOOTHED"}</span> : <span className="frc-card__variance" title={copy.chartSystemVarianceTitle}>{copy.chartVarianceLabel} <strong>± {SYSTEM_VARIANCE.toFixed(1)} {copy.chartDecibelUnit} <small>{copy.chartSystemBand}</small></strong></span>}
+        {spread && <span className="frc-card__variance" title={spreadDescription} aria-label={spreadDescription}>
+          {measured ? ja ? "実測の変動幅" : "Measured spread" : ja ? "モデルの変動幅" : "Modeled spread"}
+          <strong>± {spread.deviationDb.toFixed(1)} {copy.chartDecibelUnit} <small>{measured ? "200 Hz–5 kHz" : copy.chartSystemBand}</small></strong>
+          <small>{ja ? "中間値 " : "Midpoint "}{spread.midpointDb.toFixed(1)} {copy.chartDecibelUnit} · {ja ? "ピーク間 " : "p-p "}{spread.peakToPeakDb.toFixed(1)} {copy.chartDecibelUnit}</small>
+        </span>}
       </footer>
     </article>
   );

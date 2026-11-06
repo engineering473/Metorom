@@ -158,6 +158,15 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
     focusedRef.current = focused;
     if (!focused) scheduleRef.current?.();
   }, []);
+  const continueFromPreview = useCallback((delta: number) => {
+    if (reducedMotion) { window.scrollBy({ top: delta, behavior: "instant" }); return; }
+    const geometry = measureScroll();
+    if (!geometry) return;
+    // A preview is an alternative way to browse the photographs, so it does
+    // not require completing an unseen carousel turn before leaving.
+    const boundary = delta > 0 ? geometry.start + geometry.distance : geometry.start;
+    window.scrollTo({ top: boundary + delta, behavior: "instant" });
+  }, [measureScroll, reducedMotion]);
   const handleReadyChange = useCallback((ready: boolean) => setCarouselReady(ready), []);
   const handleLoadProgress = useCallback((progress: GalleryProgress) => {
     setLoadProgress(previous => previous.completed === progress.completed && previous.total === progress.total && previous.failed === progress.failed ? previous : progress);
@@ -202,11 +211,11 @@ export default function ObjectDesign({ copy: siteCopy }: { copy: SiteCopy }) {
                 className="sc-speaker-gallery__carousel" style={{ color: "#101d8f", minHeight: 0 }}
                 scrollProgress={reducedMotion ? undefined : scrollProgress}
                 onScrollProgressChange={reducedMotion ? undefined : navigateScroll}
-                onFocusChange={handleFocusChange} onReadyChange={handleReadyChange} onLoadProgress={handleLoadProgress}
+                onFocusChange={handleFocusChange} onPreviewScroll={continueFromPreview} onReadyChange={handleReadyChange} onLoadProgress={handleLoadProgress}
                 ariaLabel={ja ? "Metorom スピーカーの写真" : "Metorom speaker photographs"}
                 labels={ja
-                  ? { previous: "前の写真", next: "次の写真", view: "写真を拡大", close: "写真を閉じる", help: reducedMotion ? "ドラッグで移動・タップで拡大" : "スクロールで移動・タップで拡大", loading: "写真を読み込み中…", error: "写真を読み込めませんでした。前後の写真をお試しください。" }
-                  : { previous: "Previous photograph", next: "Next photograph", view: "View photograph", close: "Close photograph", help: reducedMotion ? "Drag to explore · tap to view" : "Scroll to explore · tap to view", loading: "Loading photograph…", error: "This photograph could not load. Try the previous or next photograph." }} />
+                  ? { previous: "前の写真", next: "次の写真", view: "写真を拡大", close: "写真を閉じる", help: reducedMotion ? "ドラッグで移動・タップで拡大" : "スクロールで移動・タップで拡大", previewHelp: "左右にスワイプ・写真の外側で閉じる", loading: "写真を読み込み中…", error: "写真を読み込めませんでした。前後の写真をお試しください。" }
+                  : { previous: "Previous photograph", next: "Next photograph", view: "View photograph", close: "Close photograph", help: reducedMotion ? "Drag to explore · tap to view" : "Scroll to explore · tap to view", previewHelp: "Swipe to browse · tap outside to close", loading: "Loading photograph…", error: "This photograph could not load. Try the previous or next photograph." }} />
             </Suspense>
           </GalleryModuleBoundary> : placeholder}
         </div>
