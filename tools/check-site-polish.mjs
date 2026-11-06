@@ -158,8 +158,10 @@ try {
       await page.locator('.sc-object__hotspot--right').click();
       const graph = page.locator(`.sc-object__driver-graph--${spec.mobile ? 'mobile' : 'desktop'}.is-visible .sc-driver-response`);
       await graph.waitFor({ state: 'visible', timeout: 10000 });
-      assert.match(await graph.innerText(), /±7\.3 dB/);
       await page.waitForFunction(() => document.querySelector('.sc-object__media')?.dataset.explosionState === 'open', null, { timeout: 10000 });
+      const driverSpread = graph.locator('.sc-driver-response__range strong');
+      await driverSpread.waitFor({ state: 'visible', timeout: 10000 });
+      assert.match(await driverSpread.innerText(), /±7\.3 dB/);
       await page.waitForTimeout(500);
       result.driverBounds = await graph.evaluate(element => {
         const rect = element.getBoundingClientRect();
