@@ -43,6 +43,12 @@ export interface LiquidGlassCarouselProps {
   };
   onActiveChange?: (index: number) => void;
   onFocusChange?: (focused: boolean) => void;
+  /** Native page progress through one complete turn, starting at initialIndex. */
+  scrollProgress?: number;
+  /** User arrows / horizontal dragging request a matching page position. */
+  onScrollProgressChange?: (progress: number) => void;
+  onReadyChange?: (ready: boolean) => void;
+  onLoadProgress?: (progress: { completed: number; total: number; failed: number }) => void;
 }
 
 const PORTRAIT_ASPECT = 3 / 4;
@@ -355,6 +361,7 @@ export type LiquidGlassCarouselHandle = {
   openFocus: () => void;
   next: () => void;
   previous: () => void;
+  setScrollProgress: (progress: number) => void;
   destroy: () => void;
 };
 
@@ -388,10 +395,15 @@ function createCarousel(
     gap: number;
     background: string;
     entry: boolean;
+    scrollProgress?: number;
     onActiveChange: (index: number) => void;
     onFocusChange: (open: boolean) => void;
     onEntryDone: (done: boolean) => void;
     onLoadingChange: (loading: boolean) => void;
+    onReadyChange: (ready: boolean) => void;
+    onLoadProgress: (progress: { completed: number; total: number; failed: number }) => void;
+    onImageLoaded: (imageIndex: number) => void;
+    onScrollProgressChange: (progress: number) => void;
     onFailure: (imageIndex?: number) => void;
   },
 ): LiquidGlassCarouselHandle | null {
@@ -405,6 +417,13 @@ function createCarousel(
   let visible = false;
   let hasBeenVisible = false;
   let entryStarted = false;
+  const scrollDriven = options.scrollProgress !== undefined;
+  let controlledProgress = Math.max(0, Math.min(1, options.scrollProgress ?? 0));
+  let prepared = false;
+  let programsWarmed = false;
+  const settled = new Set<number>();
+  const imageFailures = new Set<number>();
+  const imageTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
   let W = Math.max(1, mount.clientWidth);
   let H = Math.max(1, mount.clientHeight);
@@ -456,60 +475,92 @@ function createCarousel(
 
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin("anonymous");
-  const sources: Source[] = items.map((img, imageIndex) => {
-    const s: Source = {
-      tex: null,
-      fullTex: null,
-      aspect: img.aspect || PORTRAIT_ASPECT,
-      imageAspect: img.aspect || PORTRAIT_ASPECT,
-      locked: img.aspect != null,
-    };
-    loader.load(
-      img.src,
-      (tex) => {
-        if (disposed) {
+  const sources: Source[] = items.map(img => ({
+    tex: null,
+    fullTex: null,
+    aspect: img.aspect || PORTRAIT_ASPECT,
+    imageAspect: img.aspect || PORTRAIT_ASPECT,
+    locked: img.aspect != null,
+  }));
+
+  function settleImage(imageIndex: number, failed: boolean) {
+    if (disposed || settled.has(imageIndex)) return false;
+    settled.add(imageIndex);
+    const timer = imageTimers.get(imageIndex);
+    if (timer) clearTimeout(timer);
+    imageTimers.delete(imageIndex);
+    if (failed) {
+      imageFailures.add(imageIndex);
+      if (imageIndex === options.initialIndex && entryOn && !entryStarted) {
+        entryStarted = true;
+        entryActive = false;
+        entrySettled = false;
+        pEntry.fill(1);
+        growArr.fill(1);
+        focusState.lensFx = 1;
+        options.onEntryDone(true);
+      }
+      options.onFailure(imageIndex);
+    } else options.onImageLoaded(imageIndex);
+    options.onLoadProgress({ completed: settled.size, total: items.length, failed: imageFailures.size });
+    startLoop();
+    return true;
+  }
+
+  function loadSources() {
+    options.onReadyChange(false);
+    options.onLoadProgress({ completed: 0, total: items.length, failed: 0 });
+    // Request the selected photo and its immediate neighbours first.
+    const order = Array.from({ length: items.length }, (_, index) => index).sort((a, b) => {
+      const distance = (index: number) => Math.min((index - options.initialIndex + items.length) % items.length, (options.initialIndex - index + items.length) % items.length);
+      return distance(a) - distance(b);
+    });
+    for (const imageIndex of order) {
+      const img = items[imageIndex];
+      const source = sources[imageIndex];
+      imageTimers.set(imageIndex, setTimeout(() => settleImage(imageIndex, true), 15000));
+      loader.load(img.src, async tex => {
+        if (disposed || settled.has(imageIndex)) { tex.dispose(); return; }
+        try {
+          const image = tex.image as HTMLImageElement;
+          if (typeof image.decode === "function") await image.decode();
+          if (disposed || settled.has(imageIndex)) { tex.dispose(); return; }
+          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.generateMipmaps = true;
+          tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          tex.colorSpace = THREE.SRGBColorSpace;
+          if (!source.locked && image) source.aspect = image.width / image.height;
+          const imageAspect = image.width / image.height;
+          source.imageAspect = imageAspect;
+          const repeatX = Math.min(1, source.aspect / imageAspect);
+          const repeatY = Math.min(1, imageAspect / source.aspect);
+          const focal = img.focalPoint ?? [0.5, 0.5];
+          tex.repeat.set(repeatX, repeatY);
+          tex.offset.set((1 - repeatX) * Math.max(0, Math.min(1, focal[0])), (1 - repeatY) * (1 - Math.max(0, Math.min(1, focal[1]))));
+          // Upload before completion so a photo's first frame is never blank.
+          renderer.initTexture(tex);
+          source.tex = tex;
+          source.fullTex = tex.clone();
+          source.fullTex.needsUpdate = true;
+          recomputeTotal();
+          if (scrollDriven) {
+            target = controlledTarget();
+            scroll = target;
+          } else if (!userInteracted) {
+            scroll = centerForIndex(options.initialIndex);
+            target = scroll;
+          }
+          options.onLoadingChange(!at(sources, centerIndex(scroll)).tex);
+          settleImage(imageIndex, false);
+          maybeStartEntry();
+        } catch {
           tex.dispose();
-          return;
+          settleImage(imageIndex, true);
         }
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.generateMipmaps = true;
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        tex.colorSpace = THREE.SRGBColorSpace;
-        if (!s.locked && tex.image) {
-          s.aspect = tex.image.width / tex.image.height;
-        }
-        // Cover-fit without stretching, keeping the photograph's selected focal point.
-        const imageAspect = tex.image.width / tex.image.height;
-        s.imageAspect = imageAspect;
-        const repeatX = Math.min(1, s.aspect / imageAspect);
-        const repeatY = Math.min(1, imageAspect / s.aspect);
-        const focal = img.focalPoint ?? [0.5, 0.5];
-        tex.repeat.set(repeatX, repeatY);
-        tex.offset.set(
-          (1 - repeatX) * Math.max(0, Math.min(1, focal[0])),
-          (1 - repeatY) * (1 - Math.max(0, Math.min(1, focal[1]))),
-        );
-        s.tex = tex;
-        s.fullTex = tex.clone();
-        s.fullTex.needsUpdate = true;
-        recomputeTotal();
-        if (!userInteracted) {
-          scroll = centerForIndex(options.initialIndex);
-          target = scroll;
-        }
-        options.onLoadingChange(!at(sources, centerIndex(scroll)).tex);
-        maybeStartEntry();
-      },
-      undefined,
-      () => {
-        if (disposed) return;
-        s.aspect = s.aspect || PORTRAIT_ASPECT;
-        options.onFailure(imageIndex);
-      },
-    );
-    return s;
-  });
+      }, undefined, () => settleImage(imageIndex, true));
+    }
+  }
 
   function slotWidth(srcIndex: number) {
     return at(sources, srcIndex).aspect * PANEL_H + GAP;
@@ -533,6 +584,23 @@ function createCarousel(
     const loop = Math.floor(idx / N);
     const s = ((idx % N) + N) % N;
     return at(offsets, s) + slotWidth(s) / 2 - GAP / 2 + loop * totalWidth;
+  }
+
+  function controlledTarget() {
+    return centerForIndex(options.initialIndex) + controlledProgress * totalWidth;
+  }
+
+  function setScrollProgress(progress: number) {
+    controlledProgress = Math.max(0, Math.min(1, Number.isFinite(progress) ? progress : 0));
+    if (!scrollDriven) return;
+    userInteracted = true;
+    velocity = 0;
+    if (!focusState.active) target = controlledTarget();
+  }
+
+  function requestScrollProgress(progress: number) {
+    setScrollProgress(progress);
+    options.onScrollProgressChange(controlledProgress);
   }
 
   function nearestIndex(value: number) {
@@ -583,7 +651,7 @@ function createCarousel(
     }
   }
 
-  let scroll = centerForIndex(options.initialIndex);
+  let scroll = scrollDriven ? controlledTarget() : centerForIndex(options.initialIndex);
   let target = scroll;
   let userInteracted = false;
   let velocity = 0;
@@ -914,7 +982,7 @@ function createCarousel(
   }
 
   function inputLocked() {
-    return focusState.active || entryActive || entrySettled;
+    return !prepared || focusState.active || entryActive || entrySettled;
   }
 
   function onWheel(e: WheelEvent) {
@@ -924,7 +992,8 @@ function createCarousel(
     e.preventDefault();
     userInteracted = true;
     pendingFocus = null;
-    target += (e.shiftKey ? e.deltaY : e.deltaX) * WHEEL;
+    if (scrollDriven) requestScrollProgress(controlledProgress + (e.shiftKey ? e.deltaY : e.deltaX) * WHEEL / totalWidth);
+    else target += (e.shiftKey ? e.deltaY : e.deltaX) * WHEEL;
     lastInput = performance.now();
     snapped = false;
   }
@@ -977,7 +1046,8 @@ function createCarousel(
       const dx = p.x - dragLastX;
       dragLastX = p.x;
       dragDist += Math.abs(dx);
-      target -= dx * sens;
+      if (scrollDriven) requestScrollProgress(controlledProgress - dx * sens / totalWidth);
+      else target -= dx * sens;
       dragVel = dragVel * 0.6 + -dx * sens * 0.4;
       dragMoveT = performance.now();
       lastInput = dragMoveT;
@@ -1009,7 +1079,7 @@ function createCarousel(
       }
       dragPointerId = null;
     }
-    velocity = reduced || performance.now() - dragMoveT > FLICK_IDLE_MS ? 0 : dragVel;
+    velocity = scrollDriven || reduced || performance.now() - dragMoveT > FLICK_IDLE_MS ? 0 : dragVel;
     dragVel = 0;
     lastInput = performance.now();
     snapped = false;
@@ -1047,7 +1117,12 @@ function createCarousel(
     }
     userInteracted = true;
     velocity = 0;
-    target = centerForIndex(nearestIndex(scroll + hit.centerX));
+    if (scrollDriven) {
+      let index = nearestIndex(scroll + hit.centerX);
+      while (index < options.initialIndex) index += sources.length;
+      while (index > options.initialIndex + sources.length) index -= sources.length;
+      requestScrollProgress((centerForIndex(index) - centerForIndex(options.initialIndex)) / totalWidth);
+    } else target = centerForIndex(nearestIndex(scroll + hit.centerX));
     snapped = true;
     pendingFocus = { srcIndex: hit.srcIndex };
     setView(false);
@@ -1145,6 +1220,7 @@ function createCarousel(
         focusState.active = false;
         focusState.closing = false;
         focusState.srcIndex = -1;
+        if (scrollDriven) target = controlledTarget();
         updateCursor();
       },
     });
@@ -1275,7 +1351,10 @@ function createCarousel(
     userInteracted = true;
     velocity = 0;
     pendingFocus = null;
-    target = centerForIndex(nearestIndex(target) + direction);
+    if (scrollDriven) {
+      const index = Math.max(options.initialIndex, Math.min(options.initialIndex + sources.length, nearestIndex(target) + direction));
+      requestScrollProgress((centerForIndex(index) - centerForIndex(options.initialIndex)) / totalWidth);
+    } else target = centerForIndex(nearestIndex(target) + direction);
     snapped = true;
     lastInput = performance.now();
   }
@@ -1295,7 +1374,7 @@ function createCarousel(
       raf = 0;
       return;
     }
-    if (!dragging) {
+    if (!scrollDriven && !dragging) {
       target += velocity;
       velocity *= FRICTION;
       if (Math.abs(velocity) < 0.05) velocity = 0;
@@ -1314,7 +1393,7 @@ function createCarousel(
         : snapped && !pendingFocus
           ? SNAP_EASE
           : EASE;
-    scroll += (target - scroll) * (reduced ? 1 : follow);
+    scroll += (target - scroll) * (scrollDriven || reduced ? 1 : follow);
 
     const ci = centerIndex(scroll);
     if (ci !== lastCenter) {
@@ -1353,10 +1432,26 @@ function createCarousel(
       lensUniforms[key].value = lensFxFull[key] * fx;
     }
 
-    renderer.setRenderTarget(rt);
-    renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-    renderer.render(lensScene, lensCam);
+    try {
+      if (settled.size === items.length && !programsWarmed) {
+        renderer.compile(scene, camera);
+        renderer.compile(lensScene, lensCam);
+        programsWarmed = true;
+      }
+      renderer.setRenderTarget(rt);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(lensScene, lensCam);
+      if (!prepared && programsWarmed && !entryActive && !entrySettled) {
+        prepared = true;
+        options.onReadyChange(true);
+      }
+    } catch {
+      running = false;
+      raf = 0;
+      options.onFailure();
+      return;
+    }
     raf = requestAnimationFrame(tick);
   }
 
@@ -1419,7 +1514,10 @@ function createCarousel(
         drop.forEach((_, index) => { drop[index] = index === focusState.poolIdx ? 0 : 1; });
       }
     }
-    if (!userInteracted) {
+    if (scrollDriven && !focusState.active) {
+      scroll = controlledTarget();
+      target = scroll;
+    } else if (!scrollDriven && !userInteracted) {
       scroll = centerForIndex(options.initialIndex);
       target = scroll;
     }
@@ -1447,10 +1545,13 @@ function createCarousel(
     if (!disposed) options.onFailure();
   };
   el.addEventListener("webglcontextlost", onContextLost);
+  loadSources();
 
   function destroy() {
     disposed = true;
     running = false;
+    imageTimers.forEach(timer => clearTimeout(timer));
+    imageTimers.clear();
     cancelAnimationFrame(raf);
     resizeObserver.disconnect();
     intersection.disconnect();
@@ -1489,6 +1590,7 @@ function createCarousel(
     openFocus,
     next: () => step(1),
     previous: () => step(-1),
+    setScrollProgress,
     destroy,
   };
 }
@@ -1516,6 +1618,10 @@ export function LiquidGlassCarousel({
   },
   onActiveChange,
   onFocusChange,
+  scrollProgress,
+  onScrollProgressChange,
+  onReadyChange,
+  onLoadProgress,
 }: LiquidGlassCarouselProps) {
   const firstIndex = Math.max(0, Math.min(items.length - 1, Number.isFinite(initialIndex) ? Math.trunc(initialIndex) : 0));
   const rootRef = useRef<HTMLDivElement>(null);
@@ -1527,6 +1633,7 @@ export function LiquidGlassCarousel({
   const [entryDone, setEntryDone] = useState(!entry);
   const [failed, setFailed] = useState(false);
   const [engineLoading, setEngineLoading] = useState(true);
+  const [prepared, setPrepared] = useState(false);
   const [sourceErrors, setSourceErrors] = useState<ReadonlySet<string>>(() => new Set());
   const [fallbackLoaded, setFallbackLoaded] = useState<ReadonlySet<string>>(() => new Set());
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -1534,8 +1641,17 @@ export function LiquidGlassCarousel({
   const current = items[active] ?? items[0];
   const onActiveChangeRef = useRef(onActiveChange);
   const onFocusChangeRef = useRef(onFocusChange);
+  const onScrollProgressChangeRef = useRef(onScrollProgressChange);
+  const onReadyChangeRef = useRef(onReadyChange);
+  const onLoadProgressRef = useRef(onLoadProgress);
+  const scrollProgressRef = useRef(scrollProgress);
   onActiveChangeRef.current = onActiveChange;
   onFocusChangeRef.current = onFocusChange;
+  onScrollProgressChangeRef.current = onScrollProgressChange;
+  onReadyChangeRef.current = onReadyChange;
+  onLoadProgressRef.current = onLoadProgress;
+  scrollProgressRef.current = scrollProgress;
+  const scrollDriven = scrollProgress !== undefined;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -1558,6 +1674,8 @@ export function LiquidGlassCarousel({
     setFocused(false);
     setEntryDone(!entry);
     setEngineLoading(true);
+    setPrepared(false);
+    onReadyChangeRef.current?.(false);
     let engine: LiquidGlassCarouselHandle | null = null;
     try {
       engine = createCarousel(mount, cursorRef.current, {
@@ -1567,6 +1685,7 @@ export function LiquidGlassCarousel({
         gap,
         background,
         entry,
+        scrollProgress: scrollProgressRef.current,
         onActiveChange: (index) => {
           setActive(index);
           onActiveChangeRef.current?.(index);
@@ -1577,13 +1696,32 @@ export function LiquidGlassCarousel({
         },
         onEntryDone: setEntryDone,
         onLoadingChange: setEngineLoading,
+        onReadyChange: (ready) => {
+          setPrepared(ready);
+          onReadyChangeRef.current?.(ready);
+        },
+        onLoadProgress: (progress) => onLoadProgressRef.current?.(progress),
+        onImageLoaded: (imageIndex) => {
+          const source = items[imageIndex]?.src;
+          if (source) {
+            setFallbackLoaded(previous => new Set(previous).add(source));
+            setSourceErrors(previous => {
+              if (!previous.has(source)) return previous;
+              const next = new Set(previous);
+              next.delete(source);
+              return next;
+            });
+          }
+        },
+        onScrollProgressChange: (progress) => onScrollProgressChangeRef.current?.(progress),
         onFailure: (imageIndex) => {
-          setFailed(true);
-          setFocused(false);
-          onFocusChangeRef.current?.(false);
           if (imageIndex !== undefined) {
             const source = items[imageIndex]?.src;
             if (source) setSourceErrors((previous) => new Set(previous).add(source));
+          } else {
+            setFailed(true);
+            setFocused(false);
+            onFocusChangeRef.current?.(false);
           }
         },
       });
@@ -1599,10 +1737,82 @@ export function LiquidGlassCarousel({
       engine?.destroy();
       engineRef.current = null;
     };
-  }, [items, firstIndex, panelHeight, gap, background, entry, failed]);
+  }, [items, firstIndex, panelHeight, gap, background, entry, failed, scrollDriven]);
+
+  useEffect(() => {
+    if (scrollProgress !== undefined) engineRef.current?.setScrollProgress(scrollProgress);
+  }, [scrollProgress, failed, scrollDriven]);
+
+  useEffect(() => {
+    if (!failed || items.length === 0) return;
+    let cancelled = false;
+    const cleanups: (() => void)[] = [];
+    // The non-WebGL path prepares the complete turn too, so scrolling never
+    // trades a finished photograph for a new download at every step.
+    for (const item of items) {
+      const image = new Image();
+      image.decoding = "async";
+      let settled = false;
+      const finish = (error: boolean) => {
+        if (cancelled || settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        if (error) setSourceErrors(previous => new Set(previous).add(item.src));
+        else {
+          setFallbackLoaded(previous => new Set(previous).add(item.src));
+          setSourceErrors(previous => {
+            if (!previous.has(item.src)) return previous;
+            const next = new Set(previous);
+            next.delete(item.src);
+            return next;
+          });
+        }
+      };
+      const timer = window.setTimeout(() => finish(true), 15000);
+      image.onload = () => {
+        const decoded = typeof image.decode === "function" ? image.decode() : Promise.resolve();
+        void decoded.then(() => finish(false), () => finish(true));
+      };
+      image.onerror = () => finish(true);
+      image.src = item.src;
+      cleanups.push(() => {
+        window.clearTimeout(timer);
+        image.onload = null;
+        image.onerror = null;
+      });
+    }
+    return () => {
+      cancelled = true;
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [failed, items]);
+
+  useEffect(() => {
+    if (!failed) return;
+    const sourceList = new Set(items.map(item => item.src));
+    const completed = new Set([...fallbackLoaded, ...sourceErrors].filter(source => sourceList.has(source))).size;
+    const failureCount = [...sourceErrors].filter(source => sourceList.has(source)).length;
+    const ready = completed === items.length;
+    setPrepared(ready);
+    onReadyChangeRef.current?.(ready);
+    onLoadProgressRef.current?.({ completed, total: items.length, failed: failureCount });
+  }, [failed, fallbackLoaded, sourceErrors, items]);
+
+  useEffect(() => {
+    if (!failed || focused || scrollProgress === undefined || items.length === 0) return;
+    const progress = Math.max(0, Math.min(1, Number.isFinite(scrollProgress) ? scrollProgress : 0));
+    const next = (firstIndex + Math.round(progress * items.length)) % items.length;
+    setActive(next);
+    onActiveChangeRef.current?.(next);
+  }, [failed, focused, scrollProgress, firstIndex, items.length]);
 
   const move = (direction: number) => {
     if (failed) {
+      if (scrollProgress !== undefined) {
+        const index = Math.round(scrollProgress * items.length) + direction;
+        onScrollProgressChangeRef.current?.(Math.max(0, Math.min(1, index / items.length)));
+        return;
+      }
       setActive((index) => {
         const next = (index + direction + items.length) % items.length;
         onActiveChangeRef.current?.(next);
@@ -1646,7 +1856,7 @@ export function LiquidGlassCarousel({
       toggleFocus();
     }
   };
-  const unavailable = !entryDone && !failed;
+  const unavailable = !prepared || (!entryDone && !failed);
   const focal = current?.focalPoint ?? [0.5, 0.5];
   const sourceFailed = !!current && sourceErrors.has(current.src);
   const loading = !!current && !sourceFailed && (failed ? !fallbackLoaded.has(current.src) : engineLoading);
@@ -1674,7 +1884,9 @@ export function LiquidGlassCarousel({
         src={current.src}
         alt={current.title}
         decoding="async"
-        onLoad={() => setFallbackLoaded((previous) => new Set(previous).add(current.src))}
+        onLoad={(event) => {
+          void event.currentTarget.decode().catch(() => {}).then(() => setFallbackLoaded((previous) => new Set(previous).add(current.src)));
+        }}
         onError={() => {
           setSourceErrors((previous) => new Set(previous).add(current.src));
           setFocused(false);
@@ -1698,7 +1910,7 @@ export function LiquidGlassCarousel({
       role="region"
       aria-roledescription="carousel"
       aria-labelledby={labelId}
-      aria-busy={loading}
+      aria-busy={!prepared || loading}
       onKeyDown={onKeyDown}
     >
       <style>{`
@@ -1722,6 +1934,7 @@ export function LiquidGlassCarousel({
           <WebGLErrorBoundary fallback={fallback} onError={() => setFailed(true)}>
             {failed ? fallback : <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />}
           </WebGLErrorBoundary>
+          {!failed && sourceFailed && <p role="status" style={{ pointerEvents: "none", position: "absolute", top: "50%", left: "10%", right: "10%", margin: 0, padding: "10px 16px", textAlign: "center", transform: "translateY(-50%)", background, fontSize: 13 }}>{errorMessage}</p>}
           {loading && <p role="status" style={{ pointerEvents: "none", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, padding: "10px 16px", textAlign: "center", background, fontSize: 13 }}>{loadingMessage}</p>}
           {showTitle && <p style={{ position: "absolute", top: "5%", left: "8%", right: "8%", margin: 0, textAlign: "center", fontSize: 13, pointerEvents: "none" }}>
             {current?.title}
@@ -1730,11 +1943,11 @@ export function LiquidGlassCarousel({
             className="liquid-glass-carousel__controls"
             style={{ position: "absolute", bottom: "4%", left: "50%", transform: "translateX(-50%)", zIndex: 2 }}
           >
-            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.previous} disabled={focused || unavailable || items.length < 2} onClick={() => move(-1)}>
+            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.previous} disabled={focused || unavailable || items.length < 2 || (scrollProgress !== undefined && scrollProgress <= 0)} onClick={() => move(-1)}>
               <ArrowLeft size={18} strokeWidth={1.5} aria-hidden="true" />
             </button>
             <span aria-hidden="true" style={{ fontSize: 12, minWidth: 48, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>{pad(active + 1)} / {pad(items.length)}</span>
-            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.next} disabled={focused || unavailable || items.length < 2} onClick={() => move(1)}>
+            <button type="button" className="liquid-glass-carousel__control" aria-label={labels.next} disabled={focused || unavailable || items.length < 2 || (scrollProgress !== undefined && scrollProgress >= 1)} onClick={() => move(1)}>
               <ArrowRight size={18} strokeWidth={1.5} aria-hidden="true" />
             </button>
             <button type="button" className="liquid-glass-carousel__control" aria-label={focused ? labels.close : labels.view} aria-pressed={focused} disabled={unavailable || loading || sourceFailed} onClick={toggleFocus}>

@@ -34,12 +34,12 @@ export default function SectionIndex({ copy }: { copy: SiteCopy }) {
       const indexTop = indexBounds?.top ?? threshold;
       const indexBottom = indexBounds?.bottom ?? threshold;
       const indexCenter = (indexTop + indexBottom) / 2;
-      const objectCopyBounds = document.querySelector(".sc-object__copy")?.getBoundingClientRect();
-      const overlapsObjectCopy = objectCopyBounds && indexBounds
-        && objectCopyBounds.left < indexBounds.right && objectCopyBounds.right > indexBounds.left
-        && objectCopyBounds.top < indexBottom && objectCopyBounds.bottom > indexTop;
+      const occupiedBounds = [".sc-object__copy", ".sc-speaker-gallery__stage"].map(selector => document.querySelector(selector)?.getBoundingClientRect());
+      const overlapsContent = indexBounds && occupiedBounds.some(bounds => bounds
+        && bounds.left < indexBounds.right && bounds.right > indexBounds.left
+        && bounds.top < indexBottom && bounds.bottom > indexTop);
       const visible = first.getBoundingClientRect().top <= threshold
-        && last.getBoundingClientRect().bottom > indexBottom + 80 && !overlapsObjectCopy;
+        && last.getBoundingClientRect().bottom > indexBottom + 80 && !overlapsContent;
       let active: string = chapters[0].id;
       for (const id of chapterIds) {
         if ((document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= threshold) active = id;
