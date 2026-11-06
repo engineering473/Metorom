@@ -1,9 +1,9 @@
 import { useLanguage } from "./language";
 
 const pages = [
-  { id: "home", path: "/", label: "Home" },
-  { id: "design", path: "/?editor=design#architecture", label: "Folder titles & design notes" },
-  { id: "specifications", path: "/#measurements", label: "Specifications (on home)" },
+  { id: "home", path: "/product/", label: "Home" },
+  { id: "design", path: "/product/?editor=design#architecture", label: "Folder titles & design notes" },
+  { id: "specifications", path: "/product/#measurements", label: "Specifications (on home)" },
   { id: "philosophy", path: "/philosophy/", label: "Philosophy" },
   { id: "contact", path: "/contact/", label: "Contact" },
   { id: "event", path: "/event/", label: "Listening event" },

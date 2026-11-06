@@ -7,23 +7,23 @@ function walk(directory) {
 }
 const files = walk('dist').map(path => relative('dist', path).replaceAll('\\', '/'));
 assert.equal(readFileSync('dist/CNAME', 'utf8').trim(), 'www.metorom.com', 'Every deployment must preserve the configured custom domain');
-const pages = ['index', 'contact', 'event', 'philosophy'];
+const pages = ['index', 'product', 'contact', 'event', 'philosophy'];
 const inlinePages = { design: 'architecture', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
 const cleanPages = ['index.html', ...pages.filter(page => page !== 'index').map(page => `${page}/index.html`)];
-const expected = [...cleanPages, ...pages.map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...Object.keys(inlinePages).map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...legacyPages.map(page => `concepts/monochrome/sculptural-v2/${page}.html`)].sort();
+const expected = [...cleanPages, ...legacyPages.map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...Object.keys(inlinePages).map(page => `concepts/monochrome/sculptural-v3/${page}.html`), ...legacyPages.map(page => `concepts/monochrome/sculptural-v2/${page}.html`)].sort();
 assert.deepEqual(files.filter(path => path.endsWith('.html')).sort(), expected, 'Only v3 pages and explicit redirects may be published');
 for (const version of ['sculptural-v2', 'sculptural-v3']) for (const page of legacyPages) {
   const html = readFileSync(`dist/concepts/monochrome/${version}/${page}.html`, 'utf8');
-  const destination = page === 'index' ? '/' : `/${page}/`;
+  const destination = page === 'index' ? '/product/' : `/${page}/`;
   assert.match(html, /location\.replace/, 'Old URLs must redirect rather than serve the archived site');
   assert.ok(html.includes(`url=${destination}"`), 'Old URLs must redirect directly to clean public paths');
   assert.ok(html.includes('next.search=location.search') && html.includes('next.hash=location.hash'), 'Legacy redirects must preserve language, editor parameters and deep links');
 }
 for (const [page,anchor] of Object.entries(inlinePages)) {
   const html = readFileSync(`dist/concepts/monochrome/sculptural-v3/${page}.html`, 'utf8');
-  assert.match(html, /location\.replace/, 'Design and specifications must be integrated into home');
-  assert.ok(html.includes(`/#${anchor}`), 'Previous page URLs must link to their home sections');
+  assert.match(html, /location\.replace/, 'Design and specifications must be integrated into the product page');
+  assert.ok(html.includes(`/product/#${anchor}`), 'Previous page URLs must link to their product sections');
 }
 assert.equal(files.filter(path => path.startsWith('videos/')).length, 14, 'All fourteen interactive clips must ship');
 const speakerPhotos = files.filter(path => path.startsWith('images/gallery-speakers/') && path.endsWith('.webp'));
@@ -50,4 +50,4 @@ for (const file of files.filter(path => path.endsWith('.html'))) {
   }
 }
 for (const image of ['speaker-render-front-v3.webp', 'speaker-interactive-front-v3.webp']) assert.ok(statSync(`dist/images/concepts/${image}`).size < 100000, 'Prepared image must remain optimized');
-console.log('V3 build checks passed: 4 clean public pages, preserved legacy redirects, 14 films including the split tweeter clip, supplied design drawings, no published studies.');
+console.log('V3 build checks passed: 5 clean public pages, preserved product redirects, 14 films including the split tweeter clip, supplied design drawings, no published studies.');

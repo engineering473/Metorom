@@ -24,6 +24,8 @@
     }
   },
   "include": [
+    "landing/**/*.tsx",
+    "landing/**/*.ts",
     "components/**/*.tsx",
     "concepts/colour/taste-v2/**/*.tsx",
     "concepts/monochrome/sculptural-v2/**/*.tsx",

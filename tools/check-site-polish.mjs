@@ -5,7 +5,9 @@ import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/anton/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-const base = process.argv[2] || 'http://127.0.0.1:5182/';
+const fixtureUrl = new URL(process.argv[2] || 'http://127.0.0.1:5182/product/');
+if (fixtureUrl.pathname === '/' || fixtureUrl.pathname === '/index.html') fixtureUrl.pathname = '/product/';
+const base = fixtureUrl.href;
 const output = resolve(import.meta.dirname, '../.impeccable/review/site-polish');
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -203,7 +205,7 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.lang), 'ja', 'Blocked storage retains Japanese default');
   results.push({ name: 'blocked-storage', passed: true });
   for (const route of ['contact', 'event', 'philosophy']) {
-    await page.goto(base + route + '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(new URL(`/${route}/`, base).href, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.documentElement.lang === 'ja');
     const toggle = page.locator('.sc-language-toggle:visible, .sc-mobile-language:visible').first();
     assert.equal(await toggle.innerText(), 'English');

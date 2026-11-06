@@ -5,10 +5,10 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 const root = import.meta.dirname;
 const site = 'concepts/monochrome/sculptural-v3';
-const pages = ['index', 'contact', 'event', 'philosophy'];
+const pages = ['index', 'product', 'contact', 'event', 'philosophy'];
 const inlinePages = { design: 'architecture', specifications: 'measurements' };
 const legacyPages = ['index', 'contact', 'event', 'philosophy'];
-const publicPath = page => page === 'index' ? '/' : `/${page}/`;
+const publicPath = page => page === 'index' ? '/product/' : `/${page}/`;
 
 function writeRedirect(path, destination) {
   const target = resolve(root, 'dist', path);
@@ -34,7 +34,7 @@ function selectedSiteAssets() {
     }
     writeFileSync(resolve(root,'dist/.nojekyll'),'');
     for(const [page,anchor] of Object.entries(inlinePages)) {
-      writeRedirect(`${site}/${page}.html`, `/#${anchor}`);
+      writeRedirect(`${site}/${page}.html`, `/product/#${anchor}`);
     }
     for(const page of legacyPages) {
       writeRedirect(`${site}/${page}.html`, publicPath(page));

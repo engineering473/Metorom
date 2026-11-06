@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/anton/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-const fixtureUrl = new URL(process.argv[2] || 'http://127.0.0.1:5178/');
+const fixtureUrl = new URL(process.argv[2] || 'http://127.0.0.1:5178/product/');
+if (fixtureUrl.pathname === '/' || fixtureUrl.pathname === '/index.html') fixtureUrl.pathname = '/product/';
 // This fixture exercises the English accessible control names explicitly.
 fixtureUrl.searchParams.set('lang', 'en');
 const base = fixtureUrl.href;

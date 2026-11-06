@@ -7,9 +7,10 @@ import { previewHref, useLanguage } from "./language";
 import { DEFAULT_COPY, DEFAULT_COPY_JA, type CopyKey, type SiteCopy } from "./site-copy";
 import "@/components/ui/navbar-1.css";
 
-type Navbar1Props = { contact?: boolean; copy?: Partial<SiteCopy> };
+type Navbar1Props = { contact?: boolean; landing?: boolean; copy?: Partial<SiteCopy> };
+type NavigationSection = { label: string; id: string; href?: string };
 
-export function Navbar1({ contact = false, copy }: Navbar1Props) {
+export function Navbar1({ contact = false, landing = false, copy }: Navbar1Props) {
   const [language, setLanguage] = useLanguage();
   const savedPreviewCopy = useMemo(() => {
     if (new URLSearchParams(window.location.search).get("edit") !== "1") return {} as Record<string, unknown>;
@@ -23,7 +24,12 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
   const brandName = label("brandName");
   const useOriginalLogo = brandName.trim().toLowerCase() === "metorom";
   const logoSource = `${import.meta.env.BASE_URL}images/taste-v2/metorom-logo.webp`;
-  const sections = [
+  const sections: NavigationSection[] = landing ? [
+    { label: language === "ja" ? "コンセプト" : "Concept", id: "concept" },
+    { label: language === "ja" ? "大切にすること" : "Values", id: "values" },
+    { label: language === "ja" ? "ビジョン" : "Vision", id: "vision" },
+    { label: language === "ja" ? "プロダクト" : "Product", id: "product", href: "/product/" },
+  ] : [
     { label: label("navArchitecture"), id: "architecture" },
     { label: label("navObject"), id: "object" },
     { label: label("navMeasurements"), id: "measurements" },
@@ -148,8 +154,8 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
             </svg>
             <motion.a
               className="sc-brand flex items-center"
-              href={contact ? previewHref("./index.html") : "#top"}
-              aria-label={label("navBrandAria")}
+              href={landing ? "#top" : previewHref("/")}
+              aria-label={language === "ja" ? `${brandName} ホーム` : `${brandName} home`}
               initial={reduceMotion ? false : { scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               whileHover={reduceMotion ? undefined : { rotate: -1 }}
@@ -164,7 +170,7 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
               {sections.map((item, index) => (
                 <motion.a
                   key={item.id}
-                  href={prefix ? previewHref(`${prefix}#${item.id}`) : `#${item.id}`}
+                  href={item.href ? previewHref(item.href) : prefix ? previewHref(`${prefix}#${item.id}`) : `#${item.id}`}
                   className="text-sm text-gray-900 font-medium"
                   initial={reduceMotion ? false : { opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -224,7 +230,7 @@ export function Navbar1({ contact = false, copy }: Navbar1Props) {
                 <motion.a
                   key={item.id}
                   ref={index === 0 ? firstMobileLink : undefined}
-                  href={prefix ? previewHref(`${prefix}#${item.id}`) : `#${item.id}`}
+                  href={item.href ? previewHref(item.href) : prefix ? previewHref(`${prefix}#${item.id}`) : `#${item.id}`}
                   onClick={closeMenu}
                   initial={reduceMotion ? false : { opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
