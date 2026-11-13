@@ -12,7 +12,7 @@
 .icsa-action:hover { text-decoration: underline; text-underline-offset: 5px; }
 .icsa-dark a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 6px var(--icsa-color); }
 .icsa-light .icsa-action { pointer-events: none; }
-.icsa-foot { position: absolute; bottom: 34px; left: max(3.7vw, 24px); right: max(3.7vw, 24px); display: flex; align-items: center; justify-content: space-between; gap: 24px; font-size: 11px; font-weight: 500; }
+.icsa-foot { position: absolute; bottom: 34px; left: max(3.7vw, 24px); right: max(3.7vw, 24px); display: flex; align-items: center; justify-content: space-between; gap: 24px; font-size: 12px; font-weight: 500; }
 .icsa-scroll { display: inline-flex; align-items: center; gap: 20px; min-height: 44px; pointer-events: auto; }
 .icsa-light .icsa-scroll { pointer-events: none; }
 .icsa-cs { display: flex; align-items: center; min-height: 90svh; padding: clamp(110px, 12vw, 180px) max(3.7vw, 24px); background: var(--icsa-color); color: #fff; transition: background 1.6s cubic-bezier(.2, .8, .2, 1), color 1.6s cubic-bezier(.2, .8, .2, 1); }
@@ -26,7 +26,7 @@ html:lang(ja) .icsa-title { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.
   html:lang(ja) .icsa-title { font-size: clamp(2.2rem, 8.4vw, 3.5rem); line-height: 1.4; }
   .icsa-description { max-width: 33ch; margin-top: 26px; font-size: 14px; line-height: 1.9; }
   .icsa-action { margin-top: 20px; font-size: 12px; gap: 26px; }
-  .icsa-foot { left: 22px; right: 22px; bottom: 22px; flex-direction: column; gap: 10px; font-size: 10px; }
+  .icsa-foot { left: 22px; right: 22px; bottom: 22px; flex-direction: column; gap: 10px; font-size: 12px; }
   .icsa-cs { padding: 100px 22px; min-height: 85svh; }
 }
 @media (max-height: 640px) {

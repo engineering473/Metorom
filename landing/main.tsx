@@ -11,9 +11,6 @@ import "@/concepts/monochrome/sculptural-v3/styles.css";
 import "@/concepts/monochrome/sculptural-v3/blue-theme.css";
 import "./landing.css";
 
-const PHOTO = `${import.meta.env.BASE_URL}images/gallery-speakers/dscf3008-edited.webp`;
-const PRODUCT = `${import.meta.env.BASE_URL}images/concepts/speaker-render-front-v3.webp`;
-
 function Landing() {
   const [language] = useLanguage();
   const c = LANDING_COPY[language];
@@ -69,19 +66,17 @@ function Landing() {
         <div className="mt-vision__close"><h3>{c.visionCloseTitle}</h3><p>{c.visionCloseBody}</p></div>
       </section>
 
-      <section className="mt-japan" id="japan" aria-labelledby="japan-title">
-        <figure className="mt-japan__image"><img src={PHOTO} alt={language === "ja" ? "木々と水辺に佇むMetoromのスピーカー" : "Metorom loudspeakers beside a quiet lake and trees"} width="1600" height="1067" loading="lazy" decoding="async" /><figcaption>{c.footerTag}</figcaption></figure>
-        <div className="mt-japan__content mt-section">
-          <div className="mt-section-heading"><h2 id="japan-title">{c.japanTitle}</h2><div><p>{c.japanIntro}</p><span className="mt-caption">{c.japanLabel}</span></div></div>
-          <div className="mt-japan__points">{c.japanPoints.map(point => <article key={point.number}><h3>{point.title}</h3><p>{point.body}</p></article>)}</div>
-        </div>
+      <section className="mt-japan mt-section" id="japan" aria-labelledby="japan-title">
+        <div className="mt-section-heading"><h2 id="japan-title">{c.japanTitle}</h2><div><p>{c.japanIntro}</p><span className="mt-caption">{c.japanLabel}</span></div></div>
+        <div className="mt-japan__points">{c.japanPoints.map(point => <article key={point.number}><span className="mt-japan__number">{point.number}</span><h3>{point.title}</h3><p>{point.body}</p></article>)}</div>
       </section>
 
       <section className="mt-product mt-section" id="product-preview" aria-labelledby="product-title">
-        <div className="mt-product__copy"><h2 id="product-title">{c.productTitle}</h2><p>{c.productBody}</p><span className="mt-caption">{c.productLabel}</span>
+        <span className="mt-caption mt-product__label">{c.productLabel}</span>
+        <h2 id="product-title">{c.productTitle}</h2>
+        <div className="mt-product__copy"><p>{c.productBody}</p>
           <div className="mt-product__actions"><a className="sc-outline-link" href={productHref}>{c.productLink}<ArrowUpRight size={17} aria-hidden="true" /></a><a className="mt-contact-link" href={contactHref}>{c.contactLink}<ArrowUpRight size={16} aria-hidden="true" /></a></div>
         </div>
-        <a className="mt-product__image" href={productHref} aria-label={c.productLink}><img src={PRODUCT} alt="Ground Sound I" width="1200" height="1600" loading="lazy" decoding="async" /></a>
       </section>
     </main>
     <SiteFooter copy={{ ...sharedCopy, footerTag: c.footerTag, footerBack: c.productLink, footerBackAria: c.productLink }} backToStudy />

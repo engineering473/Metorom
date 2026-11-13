@@ -32,11 +32,7 @@ All landing narrative and metadata live in `landing/copy.ts` as typed Japanese a
 
 ## Assets and dependencies
 
-The landing reuses these existing user-supplied assets unchanged:
-
-- `public/images/gallery-speakers/dscf3008-edited.webp`: lakeside loudspeaker photograph in the Japan section.
-- `public/images/concepts/speaker-render-front-v3.webp`: Ground Sound I render in the closing product invitation.
-- `public/images/taste-v2/metorom-logo.webp`: existing shared navbar logo.
+The landing is deliberately image-free: it presents Metorom's philosophy through type alone. The only raster it loads is the existing shared navbar logo (`public/images/taste-v2/metorom-logo.webp`). The product photography and renders live on `/product/`.
 
 No new raster imagery, generated imagery or stock photography was added. Decorative circle, module and wave studies use CSS. Existing product assets and media remain in place.
 
