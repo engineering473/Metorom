@@ -19,3 +19,6 @@
 /* The bar keeps only the conversation button; the logo still leads home. */
 .sc-desktop-nav,.sc-mobile-menu__links>a:not(.sc-mobile-menu__cta){display:none!important}
 .sc-nav-cta{margin-left:auto}
+/* The progress line around the bar glides to the scroll position instead of stepping to it. */
+.sc-progress-outline__active{transition:stroke-dasharray .4s cubic-bezier(.22,.8,.3,1),opacity .3s ease}
+@media(prefers-reduced-motion:reduce){.sc-progress-outline__active{transition:none}}
