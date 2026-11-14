@@ -1,0 +1,21 @@
+/* The product page, brought in line with the homepage: no small captions, the same headline and text styles, a cut-out render, and a blue closing section. */
+.sc-hero__meta,.sc-hero__render figcaption,.sc-overline,.sc-object__stage-label,.liquid-glass-carousel__controls p,.sc-section-index,.sc-hero__statement>.sc-outline-link{display:none!important}
+.sc-rail-label{visibility:hidden!important}
+.sc-hero h1,.sc-intro h2,.sc-object h2,.sc-measure h2,.sc-listening h2,.sc-conversation h2{font-size:clamp(2.1rem,4.2vw,4.5rem)!important;line-height:1.02!important;font-weight:600!important;letter-spacing:-.028em!important;text-transform:uppercase}
+.sc-hero__statement>p,.sc-intro__text p,.sc-object__intro,.sc-measure__lead p,.sc-listening__body p,.sc-conversation p{font-size:clamp(.95rem,1.15vw,1.3rem)!important;line-height:1.55!important}
+.sc-intro__statement{font-size:clamp(1.15rem,1.7vw,1.9rem)!important;line-height:1.4!important}
+.sc-hero__statement>p{max-width:30em!important}
+.sc-hero__render{width:min(34vw,60svh)!important;aspect-ratio:auto!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.sc-hero__render img{width:100%!important;height:auto!important;object-fit:contain!important;transform:none!important}
+.sc-conversation{background:#101d8f!important;color:#fff!important}
+.sc-conversation h2,.sc-conversation p{color:#fff!important}
+.sc-conversation .sc-outline-link{background:#fff!important;color:#101d8f!important}
+.sc-conversation .sc-outline-link:hover{background:#e3ebff!important}
+@media(max-width:760px){
+  .sc-rail-label{display:none!important}
+  .sc-hero h1,.sc-intro h2,.sc-object h2,.sc-measure h2,.sc-listening h2,.sc-conversation h2{font-size:clamp(1.9rem,8.2vw,3.2rem)!important}
+  .sc-hero__render{width:min(78vw,420px)!important;margin:0 auto 60px!important}
+}
+/* The bar keeps only the conversation button; the logo still leads home. */
+.sc-desktop-nav,.sc-mobile-menu__links>a:not(.sc-mobile-menu__cta){display:none!important}
+.sc-nav-cta{margin-left:auto}
