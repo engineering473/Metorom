@@ -22,3 +22,7 @@
 /* The progress line around the bar glides to the scroll position instead of stepping to it. */
 .sc-progress-outline__active{transition:stroke-dasharray .14s linear,opacity .3s ease}
 @media(prefers-reduced-motion:reduce){.sc-progress-outline__active{transition:none}}
+
+/* The footer is the wordmark alone. */
+.sc-footer__links{display:none!important}
+.sc-footer>div{display:none!important}
