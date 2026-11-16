@@ -31,3 +31,7 @@
 .sc-preloader__brand{display:none!important}
 .sc-preloader__readout{justify-content:flex-end!important}
 .sc-preloader__readout>span[role="status"]{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+
+/* The pictures now follow the speaker animation. */
+.sc-intro--pictures{padding-top:clamp(20px,3vw,48px)!important}
+.sc-intro--pictures .sc-speaker-gallery{margin-top:0!important}
