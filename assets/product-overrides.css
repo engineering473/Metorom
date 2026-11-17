@@ -35,3 +35,6 @@
 /* The pictures now follow the speaker animation. */
 .sc-intro--pictures{padding-top:clamp(20px,3vw,48px)!important}
 .sc-intro--pictures .sc-speaker-gallery{margin-top:0!important}
+
+/* One graph: the combined response, full width. */
+.frc-grid{grid-template-columns:minmax(0,1fr)!important}
